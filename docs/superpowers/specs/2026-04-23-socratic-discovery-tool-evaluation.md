@@ -60,9 +60,18 @@ Operator-driven termination is right in principle. In practice, LLMs are happy t
 
 These are shown to the operator, not enforced. They exist to fight rubber-stamping, not to impose determinism.
 
-### 4.4 "Automate what I do manually" must pay for itself
+### 4.4 "Automate what I do manually" must pay for itself — and the tool must distinguish constraints from choices
 
 In the emergent model, the operator is engaged every step (nudging, answering, pruning). That is not automation — that is partnership. The bet is that *steering at every step is cheaper than authoring chunks from scratch*. This is likely true, but the MVP must demonstrate it rather than assume it. Concretely: a successful session should leave the operator feeling they typed less than they would have typing into /superpowers directly to reach the same breakdown.
+
+**Constraints vs. choices — a discovery from the validation process itself.** While composing the medium- and high-thoroughness test prompts, the operator noticed that adding implementation-level specifics *hurt* the discovery process. For example, writing "agents call each other via HTTPS" into the prompt silently excluded in-process function calls, shared-memory IPC, message buses (SNS/SQS, Kafka, Redis streams), gRPC, Unix sockets, and "actually these don't need to be separate processes at all." Each specific implementation detail in a prompt is either a **constraint** (externally imposed: "security mandates HTTPS," "we're on Azure already") or a **choice** (made by the operator while typing, without testing whether it was the right choice). Constraints compress the design space correctly; choices compress it arbitrarily.
+
+This has two implications for the Socratic tool:
+
+1. **The verb is not just "deepen vague prompts" — it's also "widen over-committed ones."** The same Socratic mechanism should challenge specifics that look like premature commitments, asking the operator to classify each detail as a constraint or a choice. Details confirmed as constraints stay; details revealed as choices get reopened.
+2. **Over-specification during discovery is actively harmful.** The Test 1 Path A results illustrate this: a 15-word intent-only prompt ("I want to deploy agents that are available for my entire team and the agents can communicate with each other") produced a 1,667-line implementation plan locked into Azure Container Apps + A2A-over-HTTPS + Entra ID + Service Bus + Next.js + Postgres + Bicep IaC. Many of these architectural commitments may be correct, but they were not tested as constraints-vs-choices during discovery. The Socratic tool's job is to ensure each commitment earns its place before downstream executors build on top of it.
+
+The operator's meta-observation: they self-Socratic-challenged while *writing* the test prompts and caught the premature commitments before running the tests. This is evidence that the Socratic approach works — the operator just did it manually. The tool automates this for cases where the operator doesn't catch it.
 
 ### 4.5 No grounding in concrete historical cases
 

@@ -3,7 +3,11 @@
 **Date:** 2026-04-23
 **Purpose:** Empirical validation set for the decision memo at `2026-04-23-socratic-discovery-tool-evaluation.md` §7. One root idea, three problem statements at low / medium / high thoroughness, run through /superpowers alone and through the Socratic discovery tool, then compared.
 
-**Design principle:** the three prompts share a single root idea ("deploy shared, communicating agents for an engineering team") at increasing specificity. This lets the test measure something richer than any individual prompt: whether the Socratic tool surfaces *different* concerns as the input gets more specific, or whether it just asks generic questions regardless. A good tool should surface baseline ambiguities on the low-thoroughness prompt, finer-grained architectural pitfalls on the medium one, and higher-order concerns (versioning, failure modes, coupling) on the high one. A bad tool will ask similar questions on all three.
+**Design principle (original):** the three prompts share a single root idea ("deploy shared, communicating agents for an engineering team") at increasing specificity. This lets the test measure something richer than any individual prompt: whether the Socratic tool surfaces *different* concerns as the input gets more specific, or whether it just asks generic questions regardless. A good tool should surface baseline ambiguities on the low-thoroughness prompt, finer-grained architectural pitfalls on the medium one, and higher-order concerns (versioning, failure modes, coupling) on the high one. A bad tool will ask similar questions on all three.
+
+**Revision (2026-04-24): Tests 2 and 3 retired.** While composing the medium- and high-thoroughness prompts, the operator discovered that adding implementation-level specifics *actively harmed* the discovery process. Each specific (e.g., "agents call each other via HTTPS") silently closed off design-space alternatives (in-process calls, message buses, gRPC, shared memory) without testing whether those specifics were constraints (externally imposed) or choices (made while typing). This is exactly the premature-commitment pattern the Socratic tool is meant to catch — and the operator caught it *by self-Socratic-challenging while writing the test prompts*. Running Tests 2 and 3 would have tested whether /superpowers follows over-specified instructions correctly, not whether it does good discovery. That's a different question.
+
+**Only Test 1 (low thoroughness) remains active.** The pass criterion has been adjusted from "2 of 3 tests" to single-test operator judgment. This is acceptable for a go/no-go decision for one operator; it would not be acceptable for declaring the tool shippable to others. See `2026-04-23-socratic-discovery-tool-evaluation.md` §4.4 for the full "constraints vs. choices" analysis.
 
 The prompts below are pasted verbatim into both tools. Our hypotheses about what a good pass would surface live in a separate section per prompt, so they do not leak into the tools under test.
 
@@ -33,7 +37,12 @@ The prompts below are pasted verbatim into both tools. Our hypotheses about what
 
 ---
 
-## Test 2 — Medium thoroughness
+## Test 2 — Medium thoroughness (RETIRED)
+
+**Status:** Retired 2026-04-24. See "Revision" note at the top of this document.
+
+<details>
+<summary>Original test (preserved for reference)</summary>
 
 **Thoroughness:** moderate. Adds team size, concrete agent examples, a rough communication shape, and stack context. Still leaves most architectural decisions open.
 
@@ -51,10 +60,16 @@ The prompts below are pasted verbatim into both tools. Our hypotheses about what
 - Onboarding model — who can author a new agent, what is the review / deploy pipeline
 - Failure modes: one agent down, cyclic handoffs, agents given wildly expensive tasks
 - What part of this *shouldn't* the team build themselves vs. adopt an existing framework (AutoGen, LangGraph, Claude Agent SDK, plain Claude Code subagents)?
+</details>
 
 ---
 
-## Test 3 — High thoroughness
+## Test 3 — High thoroughness (RETIRED)
+
+**Status:** Retired 2026-04-24. See "Revision" note at the top of this document.
+
+<details>
+<summary>Original test (preserved for reference)</summary>
 
 **Thoroughness:** high. Stack, scale, protocol, auth, persistence model, deploy target, observability, budget, and timeline are all named. The test is whether the tool can still add value — or just adds noise — when the prompt looks tight.
 
@@ -73,6 +88,7 @@ The prompts below are pasted verbatim into both tools. Our hypotheses about what
 - Registry consistency and bootstrapping — what if the registry is down when an agent starts?
 - 3-week MVP scope realism — which of the named requirements are actually MVP vs. V1?
 - Do existing tools (Claude Agent SDK, LangGraph, Temporal, Step Functions) make most of this unnecessary, or is there a reason to build custom?
+</details>
 
 ---
 
@@ -116,11 +132,13 @@ Score each prompt on three axes, 1–5:
 
 ## Pass criterion
 
-Path B wins a test when it beats Path A by +1 or more on **both** Coverage *and* Correctness of Frame.
+**Updated 2026-04-24 (Tests 2 and 3 retired; N=1).**
 
-The validation passes for the memo's §7 go-decision when Path B wins in **at least 2 of the 3 tests**.
+Path B wins when it beats Path A by +1 or more on **both** Coverage *and* Correctness of Frame on Test 1.
 
-Operator cost does not enter this judgment. It will inform later MVP tuning: if Path B wins all three tests but costs 5× the operator effort, that shapes the next iteration of the tool (e.g., "the Socratic challenge is doing the work, but too many turns are spent on the gardener-mode next-node-selection; reduce that"). It does not block go.
+With only one test, the validation is operator judgment rather than a statistical tally. This is acceptable for a go/no-go decision for this one operator on this one idea. It would not be acceptable for declaring the tool shippable to others — that requires additional prompts across different problem domains.
+
+Operator cost does not enter this judgment. It will inform later MVP tuning: if Path B wins but costs 5× the operator effort, that shapes the next iteration of the tool (e.g., "the Socratic challenge is doing the work, but too many turns are spent on gardener-mode next-node-selection; reduce that"). It does not block go.
 
 ## Known limitations of this validation
 
@@ -129,6 +147,25 @@ Operator cost does not enter this judgment. It will inform later MVP tuning: if 
 - **Plan-quality judgment is subjective.** The validation is an argument-closer for this one operator, not a paper. Accept this upfront.
 - **The tool doesn't exist yet.** Path B can only run after the MVP is built. Path A should be run now — it gives us a recorded baseline to beat, rather than asking the MVP to beat a remembered one.
 
+## Path A results (Test 1)
+
+**Run date:** 2026-04-24
+**Prompt used:** Test 1 (low thoroughness) — verbatim as specified above.
+**Tool used:** /superpowers (brainstorming → writing-plans flow)
+**Results location:** External repo at `/test-1/docs/plans/`
+
+**Output summary:** From the 15-word intent-only prompt, /superpowers produced:
+- A design doc (`2026-04-24-team-agent-platform-design.md`) committing to Azure Container Apps, Claude Agent SDK, A2A protocol, Entra ID auth, Service Bus, Postgres, Next.js portal, and OpenTelemetry.
+- A 1,667-line implementation plan (`2026-04-24-team-agent-platform.md`) with 10 phases spanning repo scaffold through IaC + evals.
+
+**Preliminary observations (to be formally scored after Path B):**
+- The output is comprehensive and implementation-ready — /superpowers is good at producing buildable plans from a design.
+- However, many architectural commitments (A2A-over-HTTPS, per-service Container Apps, Service Bus for async, Entra ID for auth) appear as *choices* that were not pressure-tested against alternatives. Were these surfaced as questions during brainstorming, or were they adopted after the operator answered one or two clarifying questions?
+- The Q&A transcript was not separately saved (protocol gap). This makes Coverage scoring harder — we can see what was decided but not what was asked. For Path B, the transcript must be recorded.
+- The plan's level of detail (specific Python imports, exact Bicep modules, CI YAML) suggests the tool jumped from discovery to implementation quickly. A Socratic pass would have spent more turns at the problem-framing layer before committing to this level of specificity.
+
+**Key question for Path B comparison:** Would a Socratic discovery pass have challenged the Azure/A2A/Container Apps stack before /superpowers locked it in? If yes, would the resulting plan look materially different?
+
 ## Next step
 
-Run **Path A for all three prompts now**, saving results under `docs/superpowers/specs/path-a-results/`. This is possible today with no new tools. The results will ground the MVP-scoping brainstorm that follows the go decision — so that when we design the tool, we are designing against a specific deficit rather than an abstract argument.
+Path A baseline is recorded. Path B runs after the Socratic discovery MVP is built. When running Path B, follow the clean-room protocol strictly — the operator has now seen the Path A output and must suppress that knowledge during the Path B run.
