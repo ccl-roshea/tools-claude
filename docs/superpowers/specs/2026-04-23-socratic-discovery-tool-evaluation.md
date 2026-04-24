@@ -1,8 +1,8 @@
-# Decision Memo: Recursive Socratic Discovery Tool
+# Decision Memo: Socratic Discovery + Chunking Tool
 
-**Date:** 2026-04-23
-**Status:** Discovery + exploration complete. Go/no-go decision requested.
-**Recommendation:** Weak-go, conditional on the MVP addressing four named gaps and validating against at least three real historical problems before being declared useful.
+**Date:** 2026-04-23 (updated 2026-04-24)
+**Status:** Go. Validated against Path A baseline. Proceed to MVP scoping.
+**Recommendation:** Go, scoped to idea discovery + chunking only. Planning and execution delegated to existing tools (/superpowers). See §9 for conditions.
 
 ---
 
@@ -18,7 +18,10 @@ Three substantive reframes emerged over the course of the discussion:
 2. **Layers are a vocabulary, not a traversal order.** IDEA / LAYERS / ARCH / STACK / FEATURES is a way of naming abstraction levels, not a mandatory BFS sequence. Traversal is emergent — the loop hops between layers based on whatever the current node surfaces as the next most valuable thing to examine. This dissolves the intra-layer-coupling objection without introducing new rigidity.
 3. **The core value is Socratic pressure-testing of user framing, not decomposition.** Existing tools (including /superpowers:brainstorming) treat the user's stated problem as mostly given and ask clarifying questions downstream of it. The gap is at the root: users often cannot articulate what they actually want, and discovering that *before* implementation — rather than during MVP-and-scrap cycles — is where most of the value is. The recursive / graph / layered structure is the scaffolding that makes this sustained pressure-testing tractable across a non-trivial problem.
 
-The evolved framing: **a dialogue loop that Socratically pressure-tests the user's framing at each step, hops between abstraction layers based on in-the-moment metacognition, terminates on operator judgment (with LLM pushback allowed), and emits a structured artifact that downstream tools like /superpowers can consume.**
+4. **The tool is discovery + chunking only — not planning, not execution.** Path A validation (see §11) proved that /superpowers is good at planning and execution once given a well-framed problem; building competing planning capability would be redundant. The gap is upstream: pressure-testing the framing and breaking too-large problems into executor-sized chunks. The tool's scope is deliberately narrow: Socratic discovery, constraints-vs-choices classification, chunking with dependency annotation, and handoff. Everything downstream (/superpowers for planning, /superpowers:executing-plans or subagent-driven-development for execution) already exists and works.
+5. **Over-specification during discovery is actively harmful.** While composing test prompts at medium and high thoroughness, the operator noticed that adding implementation-level specifics (e.g., "agents call each other via HTTPS") silently closed off the design space. This led to retiring Tests 2 and 3 and sharpening the tool's bidirectional verb: *deepen* vague prompts AND *widen* over-committed ones. See §4.4 for the full "constraints vs. choices" analysis.
+
+The evolved framing: **a dialogue loop that Socratically pressure-tests the user's framing, distinguishes constraints from choices, chunks too-large problems into executor-sized pieces with dependencies, and emits a structured artifact that downstream tools like /superpowers can consume. It does not plan. It does not execute. It does the part that is currently missing.**
 
 ## 3. Where the idea holds up
 
@@ -73,9 +76,11 @@ This has two implications for the Socratic tool:
 
 The operator's meta-observation: they self-Socratic-challenged while *writing* the test prompts and caught the premature commitments before running the tests. This is evidence that the Socratic approach works — the operator just did it manually. The tool automates this for cases where the operator doesn't catch it.
 
-### 4.5 No grounding in concrete historical cases
+### 4.5 ~~No grounding in concrete historical cases~~ — resolved by Path A validation
 
-Throughout discovery, the conversation stayed at the level of mental models rather than specific real problems where /superpowers missed something and this tool would have caught it. Every concern and every counter is conceptually sound, but none is empirically validated. **This is a go/no-go risk the MVP must resolve early**, not a conceptual flaw.
+~~Throughout discovery, the conversation stayed at the level of mental models rather than specific real problems where /superpowers missed something and this tool would have caught it.~~
+
+**Updated 2026-04-24:** Path A validation (§11) provides the missing empirical grounding. A 15-word intent-only prompt run through /superpowers produced a comprehensive but shallow result: 6 clarifying questions covering 3 of 8 expected discovery items (Coverage: 2/5), followed by an immediate jump to a specific Azure architecture. The communication model — the user's literal ask — was never explored as a question; it was presented as a recommendation (A2A-over-HTTPS). This is the concrete case the memo was missing: the tool surfaces items that /superpowers does not, and the gap is at the discovery layer specifically.
 
 ## 5. Unresolved gaps (to be addressed in MVP scoping brainstorm)
 
@@ -89,26 +94,49 @@ These do not block go/no-go but are the questions the MVP spec must answer:
 - **Persistence granularity.** Does every turn get committed, or only decisions? How does a resumed session reconstruct context?
 - **Soft-signal implementation.** Are these computed post-hoc from a turn log, or tracked as first-class state?
 
-## 6. Suggested MVP scope (if go)
+## 6. MVP scope
 
-A single skill (not a full plugin), invocable as `/socratic-discover` or similar. Approximately 1–2 weeks of careful work.
+A single skill (not a full plugin), invocable as `/discover` or similar. Approximately 1–2 weeks of careful work.
 
-- **Input:** a user-stated problem at any level of vagueness
-- **Output:** a committed markdown artifact with headings as abstraction layers, bullets as sub-nodes, Socratic Q&A inline per node, and explicit cross-edge annotations
-- **Interaction:** multi-turn dialogue loop; operator terminates with "this is fleshed out enough" (LLM may push back once), or LLM proposes termination (operator may push back)
-- **Modes:** Socratic-challenge mode (adversarial questioning on a focused node) and gardener-emergent mode (deciding what to examine next). Mode transitions explicit in the prompt.
+### What the tool does
+
+1. **Socratic discovery** — pressure-test the user's framing at the root. Challenge assumptions. Surface hidden ambiguities. Distinguish constraints (externally imposed) from choices (made while typing). Widen over-committed prompts. Deepen vague ones.
+2. **Chunking** — if the resulting problem is too large for a single /superpowers session, decompose it into sub-problems scoped for one executor each, with dependencies noted between chunks.
+3. **Handoff** — emit a structured artifact (markdown) that /superpowers or other executors can consume directly. Each chunk should be self-contained enough to paste into a fresh session.
+
+### Interaction model
+
+- **Input:** a user-stated problem at any level of vagueness or specificity
+- **Output:** a committed markdown artifact with headings as chunks, Socratic Q&A inline per chunk, constraints-vs-choices classifications, dependency annotations between chunks, and a recommended execution order
+- **Dialogue:** multi-turn loop; operator terminates with "this is fleshed out enough" (LLM may push back once), or LLM proposes termination (operator may push back)
+- **Modes:** Socratic-challenge mode (adversarial questioning on a focused area) and gardener mode (deciding what to examine next). Mode transitions explicit in the prompt.
 - **Anti-sycophancy:** at least two of the techniques listed in §4.2, selected based on prototyping
 - **Soft signals:** revisit count and turns-since-artifact-update shown to operator
-- **Explicitly out of scope for MVP:** per-node executor dispatch, automated plan generation, live orchestrated execution, graph visualization, cross-session resume
+
+### What the tool does NOT do
+
+- **No planning.** /superpowers:brainstorming and /superpowers:writing-plans handle this. The tool's output feeds into them.
+- **No execution.** /superpowers:executing-plans and subagent-driven-development handle this.
+- **No recursive exploration at every node.** The original pitch proposed running DISCOVERY → EXPLORE → DESIGN → PLAN → EXECUTE at every graph node. The MVP runs discovery + chunking at the root only. If a chunk is itself too large, the operator can re-invoke the tool on that chunk — but this is operator-driven, not automatic recursion.
+- **No per-node executor dispatch.** This is the long-term strategic win (§3) but is premature for MVP. The artifact can note *recommended* executor per chunk as a human-readable annotation, but there is no automated dispatch.
+- **No graph visualization, cross-session resume, or graph-editing UI.**
 
 ## 7. MVP validation plan (non-negotiable)
 
-Before declaring the MVP useful:
+### Path A baseline (completed)
 
-1. Pick 3 real problems the operator has previously run through /superpowers (or similar) and felt the output missed details.
-2. Run each through the new tool from scratch — problem statement only, no guidance.
-3. For each, compare: what got surfaced, what got missed, how much operator typing was required, and how the resulting artifact feeds a subsequent /superpowers session versus the original /superpowers-only run.
-4. A pass is *"at least 2 of 3 cases produced an artifact that led to a materially better downstream plan, with comparable-or-less operator effort."*
+Test 1 Path A has been run — see §11 and `2026-04-23-socratic-discovery-test-cases.md`. The baseline is recorded: /superpowers alone on a low-thoroughness prompt scores Coverage 2/5. The Q&A transcript is saved at `/test-1/transcript.md`.
+
+### Path B validation (after MVP is built)
+
+1. Run the same Test 1 prompt through the Socratic discovery tool in a clean-room session (see test cases doc for protocol). Record the full transcript.
+2. Feed the resulting artifact into a fresh /superpowers session. Let /superpowers produce a plan.
+3. Score against the same rubric: Coverage (of the 8 expected items) and Correctness of Frame (operator judgment: would you ship this?).
+4. Path B wins if it beats Path A by +1 on both Coverage and Correctness of Frame.
+
+### Additional validation
+
+Run at least 2 more real problems (different domains) through both paths. A pass is "Path B wins in at least 2 of 3 total cases." Operator cost is tracked but does not gate.
 
 If the validation fails, the tool does not ship as-is; the failure mode is analyzed and fed back as a new root node in the tool itself (dog-fooding).
 
@@ -122,13 +150,52 @@ If the validation fails, the tool does not ship as-is; the failure mode is analy
 
 ## 9. Recommendation
 
-**Weak-go.** Proceed to an MVP-scoping brainstorm, then a spec, then implementation. The idea as evolved (§2) is coherent, differentiated at the discovery layer, and of manageable scope if limited to §6. The four gaps in §4 must be explicitly addressed in the MVP spec; validation per §7 must happen before the tool is declared useful.
+**Go.** The idea is validated at the discovery layer with empirical evidence (§11). The reframe to discovery + chunking only (§2 point 4, §6) makes the scope manageable and complementary to existing tools rather than competitive. The four gaps in §4 remain relevant — §4.5 is resolved, §4.1/4.2/4.3/4.4 must be addressed in the MVP spec.
 
 **Do not proceed** if any of the following are true:
-- The operator is unwilling to commit to the validation plan in §7 (because then we are validating an argument, not a tool)
-- The anti-sycophancy work in §4.2 is deferred or hand-waved (because then the "metacognition at every step" premise is unfounded)
-- Scope expands beyond §6 before the MVP ships (because ambitious meta-tooling ideas die from scope creep, and this one is no exception)
+- The anti-sycophancy work in §4.2 is deferred or hand-waved (because then the "pressure-testing" premise is unfounded — the tool degenerates into "tell me more about your idea")
+- Scope expands beyond §6 before the MVP ships (no planning, no execution, no per-node dispatch, no graph visualization)
+- The operator is unwilling to commit to Path B validation after the MVP is built (because then we shipped an argument, not a tool)
 
-## 10. Next step if go
+## 10. Next step
 
-Run a focused brainstorm scoped to: MVP interaction design, artifact format, and anti-sycophancy technique selection. That conversation produces a design doc and an implementation plan via /superpowers:writing-plans.
+Run a focused brainstorm scoped to: MVP interaction design (dialogue loop, mode transitions), artifact format (what does the handoff document look like?), anti-sycophancy technique selection, and chunking heuristics (when is a problem "too large for one executor"?). That conversation produces a design doc and an implementation plan via /superpowers:writing-plans.
+
+## 11. Empirical evidence: Path A scoring (Test 1)
+
+**Prompt:** "I want to deploy agents that are available for my entire team and the agents can communicate with each other." (15 words, intent only)
+
+**What /superpowers asked (6 questions, 6 turns):**
+
+| # | Question | Expected item covered |
+|---|----------|----------------------|
+| Q1 | What kind of agents? (terminal / always-on / scheduled / mix) | Item 1 (what is "an agent") ✓ |
+| Q2 | Which chat surface? (Slack / Teams / Discord / custom) | Not in expected list |
+| Q3 | What kinds of tasks? (dev / business / data / customer / mix) | Item 8 partial |
+| Q4 | How big is the deployment? (small / medium / large) | Item 2 (team scale) ✓ |
+| Q5 | Where will this run? (AWS / GCP / Azure / on-prem) | Item 3 (deploy target) ✓ |
+| Q6 | Who authors the agents? (platform team / self-service / low-code) | Not in expected list |
+
+**What was NOT asked:**
+
+| Expected item | Gap |
+|---------------|-----|
+| "Available for the entire team" — discoverable? invocable? shared state? | Assumed "via portal" without exploring |
+| "Communicate with each other" — message passing, shared memory, RPC, event bus? | Jumped to A2A-over-HTTPS in approach presentation. The user's literal ask was never explored as a question. |
+| Sync vs. async; persistence of conversation state | Decided for the user (A2A sync + Service Bus async) |
+| Identity, auth, observability, cost accounting | Partially — RBAC and observability were user-volunteered in Turn 5, not tool-surfaced. Auth assumed (Entra because Azure). Cost accounting never raised. |
+| Is this internal tooling, a product feature, a research artifact? | Assumed internal tooling |
+
+**Coverage score: 2/5** (3 of 8 items surfaced by the tool; 1 additional user-volunteered)
+
+**Correctness of Frame (operator judgment):** the resulting plan is deployable but likely overkill — it jumped to a complex multi-service architecture (orchestrator + specialist Container Apps + Service Bus + Entra + portal) without exploring simpler alternatives. The tool didn't challenge whether this level of complexity was warranted for ~5-20 users and 5-15 agents.
+
+**Key observations:**
+- No question challenged the user's framing or asked "do you actually need this?"
+- The 3 approach options were all "build a platform" — no "use existing tools" or "start simpler" option
+- The communication model was the biggest unasked question — presented as a recommendation, never explored
+- The tool moved from 6 clarifying questions to a full architecture to a 1,667-line implementation plan in 8 turns
+- The operator had to intervene to stop execution ("revert all the executing you did")
+
+**Transcript:** `/test-1/transcript.md`
+**Path A outputs:** `/test-1/docs/plans/`

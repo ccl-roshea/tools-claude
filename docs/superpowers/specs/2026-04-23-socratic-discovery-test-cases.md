@@ -116,11 +116,12 @@ For each prompt, run both paths. **Run all Path A results first**, then run Path
 1. Fresh session, clean-room as above
 2. Paste the prompt verbatim
 3. Run the Socratic discovery tool to completion (operator-terminated, or tool-terminated with operator concurrence)
-4. Save the resulting artifact
-5. Start a fresh /superpowers session and feed the artifact as the problem statement
-6. Let /superpowers produce a plan
-7. Record: Socratic transcript, Socratic artifact, final plan, total turn count across both steps, total operator typing, total wall-clock time
-8. Save to `docs/superpowers/specs/path-b-results/test-N-low|medium|high.md`
+4. **Before closing the session, save the full conversation transcript.** The transcript is the primary data; the artifact is secondary. (This was a protocol gap in Path A — the transcript was reconstructed after the fact. Path B must not repeat this.)
+5. Save the resulting discovery artifact
+6. Start a fresh /superpowers session and feed the artifact as the problem statement
+7. Let /superpowers produce a plan
+8. Record: Socratic transcript, Socratic artifact, final plan, total turn count across both steps, total operator typing, total wall-clock time
+9. Save to `docs/superpowers/specs/path-b-results/test-1-low.md`
 
 ## Scoring rubric
 
