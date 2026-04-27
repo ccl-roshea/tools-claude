@@ -21,6 +21,7 @@ It does not plan. It does not execute. It does the part that is currently missin
 - Graph visualization or graph-editing UI
 - Cross-session resume
 - Plugin structure (standalone skill; promote to plugin later if warranted)
+- Automated tool installation / integration testing — the research phase identifies candidates and classifies them, but does not install, test, or benchmark any external tool. Adoption decisions feed back into chunk structure; actual integration is the executor's job.
 
 ## File layout
 
@@ -31,6 +32,7 @@ skills/discover/
     artifact-template.md   # Markdown template for the discovery artifact
     chunking-guidelines.md # Heuristic signals + examples
     anti-sycophancy.md     # Technique specs (B, C, D) with examples
+    research-protocol.md   # Build-vs-buy search + evaluation protocol
     dispatch-protocol.md   # How to launch /superpowers per chunk
 ```
 
@@ -51,7 +53,7 @@ when_to_use: >
   before planning. When the problem might be too large for a single
   /superpowers session. When the user says things like "I'm not sure
   exactly what I want" or presents a vague/ambitious goal.
-allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate"
+allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate WebSearch WebFetch"
 ---
 ```
 
@@ -59,7 +61,7 @@ allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate"
 
 ## Phases
 
-The skill follows five sequential phases. The LLM executes them in order but can loop within phases.
+The skill follows six sequential phases. The LLM executes them in order but can loop within phases.
 
 ### Phase 1: DISCOVER (Socratic exploration)
 
@@ -111,6 +113,67 @@ The skill follows five sequential phases. The LLM executes them in order but can
 - Operator addresses each finding: accept (modify the chunk), dismiss (with reason), or defer.
 
 **Exit:** All CRITICAL findings addressed. Operator approves.
+
+### Phase 3.5: RESEARCH (build-vs-buy)
+
+**Entry:** Red-team complete. Chunks are pressure-tested and stable. Before the artifact is committed, actively research whether existing tools satisfy the chunks.
+
+**Why this phase exists:** Phase 3 (red-team) includes "is there an existing tool or simpler approach?" as one bullet, but answers it from LLM training data only. That's shallow — training data has cutoff and recency problems, and the LLM tends to reject existing options without rigorous evaluation. The Path A test demonstrated this: the design doc rejected AutoGen, LangGraph, and Microsoft Agent Framework in favor of build-it-yourself, but the rejection was intuition, not research. This phase replaces intuition with active investigation.
+
+**Behavior:**
+
+- For each chunk, search for existing tools, libraries, services, or open-source projects that satisfy it (fully or partially). Use WebSearch for general discovery and WebFetch / context7 for deeper investigation of specific candidates.
+- Run one additional **overall search** at the problem level: "is there a tool that does this entire problem?" — sometimes the right answer is to skip all chunks and adopt one platform.
+- For each candidate found, evaluate against the chunk's confirmed constraints. Note gaps explicitly.
+- Classify findings into four buckets:
+  - **Adopt fully** — the chunk is replaced with an evaluation-and-integration chunk (much smaller scope: install, configure, integrate)
+  - **Adopt partially** — the chunk shrinks to cover only the gap; the existing tool covers the rest
+  - **Reject** — the candidate doesn't fit; record the candidate name and rejection reason in the artifact (so future readers don't re-ask the same question)
+  - **Inspire** — note as reference; build custom but borrow patterns
+- Operator approves each classification. Chunks are restructured accordingly before Phase 4.
+- **Reverse sunk-cost check (Technique D applied):** before declaring "build" on any chunk where a viable existing tool was found, ask: "Is 'we want to build this ourselves' a constraint or a choice?" If choice, the bar for rejecting the existing tool must be specific gaps, not preference.
+- **Evaluation criteria** (for each candidate, not just functionality):
+  - Functionality match (covers what % of the chunk?)
+  - License compatibility
+  - Cost (free / paid / pricing model)
+  - Maintenance status (last release, open issues, contributor activity)
+  - Lock-in / dependency risk (how hard to swap out later?)
+  - Integration burden (auth, data formats, runtime requirements)
+
+**Scaling research depth to problem size:**
+
+- Single-chunk simple problem: one quick overall search, ~2-3 candidates considered.
+- Multi-chunk complex problem: per-chunk searches plus overall, ~3-5 candidates per chunk.
+- Don't research forever. The phase has a soft limit: if 3 candidates have been evaluated for a chunk and none clearly dominate, classify the rest as Reject and move on.
+
+**Output of this phase (folded into the artifact in Phase 4):**
+
+```markdown
+## Research outcomes
+
+### Overall problem
+- **Searched for:** "X tools for Y"
+- **Candidates evaluated:** [tool A], [tool B], [tool C]
+- **Outcome:** Adopt partially — tool A covers chunks 1-2; build chunks 3-4
+
+### Chunk N
+- **Searched for:** [query]
+- **Candidates evaluated:**
+  - **[Tool name]** — Adopt / Adopt partially / Reject / Inspire
+    - Functionality match: X%
+    - Gaps: [specific]
+    - Reason for classification: [specific]
+- **Outcome:** [chunk modified to ... | chunk eliminated | chunk unchanged, build custom]
+```
+
+**Risks (the LLM is reminded of these in the prompt):**
+
+- Search quality is variable. If results look thin, refine the query and re-search before declaring "no candidates exist."
+- Hidden costs. Pricing pages and license terms must be checked for any candidate before classification.
+- Reverse sunk-cost bias. Operators emotionally invested in building will dismiss good candidates. The Technique D check is mandatory.
+- Lock-in. Adopting a third-party tool has its own constraints. Note them as new chunk-level constraints if adopting.
+
+**Exit:** All chunks classified. Operator approves the build-vs-buy decisions. Chunks restructured.
 
 ### Phase 4: ARTIFACT (write the document)
 
@@ -254,6 +317,26 @@ None | Depends on: Chunk N (specifically: <what decision is needed>)
 ### Accepted risks
 - [MINOR] <finding> — Accepted because: <reason>
 
+## Research outcomes (build-vs-buy)
+
+### Overall problem
+- **Searched for:** <query>
+- **Candidates evaluated:** <tool A>, <tool B>, <tool C>
+- **Outcome:** <Adopt fully | Adopt partially | Reject all | Inspire>
+- **Effect on chunks:** <none | chunks N reduced/eliminated | new integration chunk added>
+
+### Chunk N
+- **Searched for:** <query>
+- **Candidates evaluated:**
+  - **<Tool name>** — Adopt / Adopt partially / Reject / Inspire
+    - Functionality match: <%>
+    - Cost: <free / paid / pricing>
+    - Maintenance: <active / stale>
+    - Lock-in: <low / medium / high>
+    - Gaps: <specific>
+    - Reason: <specific>
+- **Outcome:** <chunk modified to ... | chunk eliminated | chunk unchanged, build custom>
+
 ## Discovery log (collapsed)
 <details>
 <summary>Socratic Q&A highlights</summary>
@@ -309,10 +392,10 @@ For MVP, even independent chunks run sequentially. The artifact notes which chun
 
 | Test prompt | Expected behavior |
 |---|---|
-| "I want to deploy agents for my team that can communicate" | Technique D fires on specifics. At least 5 of 8 expected items explored. |
-| "Build me a todo app" | Full discovery + red-team. No chunking. Single-chunk artifact. |
-| "We need a platform with auth, billing, a marketplace, and analytics" | Chunking proposed early. At least 3 chunks. |
-| "Build a REST API using Express with Postgres and deploy to AWS ECS" | Technique D challenges at least 2 specifics. Technique B offers a simpler reframing. |
+| "I want to deploy agents for my team that can communicate" | Technique D fires on specifics. At least 5 of 8 expected items explored. Research phase surfaces AutoGen / LangGraph / Claude Agent SDK as candidates. |
+| "Build me a todo app" | Full discovery + red-team. No chunking. Single-chunk artifact. Research phase surfaces existing todo apps (TickTick, Todoist, Linear, plain text file) — at least one Adopt or Inspire classification. |
+| "We need a platform with auth, billing, a marketplace, and analytics" | Chunking proposed early. At least 3 chunks. Research phase surfaces Auth0 / Clerk for auth, Stripe for billing — at least one Adopt or Adopt-partially classification. |
+| "Build a REST API using Express with Postgres and deploy to AWS ECS" | Technique D challenges at least 2 specifics. Technique B offers a simpler reframing. Research phase considers managed alternatives (Supabase, Render, Railway). |
 
 ### Level 2: Path B validation (manual, against Path A baseline)
 
