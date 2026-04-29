@@ -17,7 +17,7 @@ Three techniques the skill uses to prevent the LLM from drifting into agreeable 
 Examples of "specific implementation details":
 - A named technology ("Postgres", "AWS", "Next.js", "Azure")
 - A protocol or pattern ("REST", "GraphQL", "event-driven")
-- A architectural choice ("microservices", "monorepo", "serverless")
+- An architectural choice ("microservices", "monorepo", "serverless")
 - A library or framework ("React", "FastAPI", "Tailwind")
 - A concrete number that wasn't justified ("3-week MVP", "$500/month budget")
 
