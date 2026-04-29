@@ -101,7 +101,7 @@ None | Depends on: Chunk N (specifically: <what decision is needed and why>)
 
 - **Searched for:** <query>
 - **Candidates evaluated:**
-  - **<Tool name>** — Adopt / Adopt partially / Reject / Inspire
+  - **<Tool name>** — Adopt fully / Adopt partially / Reject / Inspire
     - URL: <link>
     - Functionality match: <%>
     - Cost: <free / paid / pricing>
