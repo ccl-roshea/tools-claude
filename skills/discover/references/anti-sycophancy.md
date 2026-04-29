@@ -1,0 +1,145 @@
+# Anti-Sycophancy Techniques
+
+Three techniques the skill uses to prevent the LLM from drifting into agreeable summarization. Each catches a different failure mode and runs at different points in the flow.
+
+| Technique | When it fires | What it catches | Cost |
+|-----------|--------------|-----------------|------|
+| **D — Constraints vs. choices** | Continuously, every time a specific surfaces | Untested assumptions baked into the framing | ~0 extra turns |
+| **B — Alternative framings** | 2-3 times at convergence points in Phase 1 | Wrong problem frame, complexity bias | ~2-3 extra turns total |
+| **C — Red-team pass** | Once, as Phase 3 (its own phase) | Contradictions, missing concerns, scope creep, dependency gaps | ~2 extra turns |
+
+---
+
+## Technique D — Constraints vs. choices (continuous)
+
+**When to fire:** Any time a specific implementation detail appears in the conversation. The detail can come from the user's input, the user's answer to a question, or the LLM's own suggestion.
+
+Examples of "specific implementation details":
+- A named technology ("Postgres", "AWS", "Next.js", "Azure")
+- A protocol or pattern ("REST", "GraphQL", "event-driven")
+- A architectural choice ("microservices", "monorepo", "serverless")
+- A library or framework ("React", "FastAPI", "Tailwind")
+- A concrete number that wasn't justified ("3-week MVP", "$500/month budget")
+
+**The prompt:**
+
+> "You mentioned [X]. Is that a constraint — something imposed on you externally (company policy, existing infra, compliance, team decision) — or a choice you're making right now? If it's a choice, I want to explore alternatives before we lock it in."
+
+**If constraint:** record it in the running constraints list. Note who/what imposed it and why it can't be changed. Move on.
+
+**If choice:** briefly present 2-3 alternatives covering the realistic option space. The user picks one or keeps the original — but now it's a *tested* choice, not an untested assumption. Record the alternatives considered in the "Tested choices" list.
+
+### Example (good)
+
+User: "I want to build it on AWS."
+Skill: "Is AWS a constraint (company is on AWS, IT mandates it, existing infra) or a choice you're making? If choice, alternatives might include: GCP if you want managed AI services, a small VPS like Hetzner or Fly.io if you want simpler ops, or even running on a single server if scale is small."
+User: "Constraint — we have an enterprise AWS contract."
+Skill: [records constraint] "Got it. Locked in. Moving on."
+
+### Example (good — choice surfaced and tested)
+
+User: "Each agent will be a Python microservice."
+Skill: "Is 'microservice per agent' a constraint or a choice? Alternatives: a single multi-agent process with concurrency, a serverless function per agent, or even just classes inside one app."
+User: "Hm, I assumed microservices but actually a single process is fine for our scale."
+Skill: [records as tested choice: single process selected, microservices rejected because scale doesn't warrant it]
+
+### Example (anti-pattern — don't do this)
+
+User: "I want to use Postgres."
+Skill: "Great choice, Postgres is excellent. Moving on."
+
+This is the failure mode. Specifics get adopted without testing. Always classify.
+
+### Reverse sunk-cost check (Phase 3.5 only)
+
+In the research phase, when an existing tool was found that satisfies a chunk, apply Technique D to the operator's stated preference for building:
+
+> "Is 'we want to build this ourselves' a constraint or a choice? If choice, the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts — not preference."
+
+This fights the inverse failure mode: dismissing a good existing tool because the operator is emotionally invested in building.
+
+---
+
+## Technique B — Alternative framings (2-3 times per Phase 1)
+
+**When to fire:** At natural convergence points in Phase 1 (DISCOVER). Specifically:
+
+1. After the initial problem framing stabilizes (typically turns 3-5)
+2. When a major architectural direction emerges
+3. Before the tool proposes moving from DISCOVER to CHUNK
+
+The LLM should not fire this every turn. It should sense when the conversation is *settling* on a frame and use that as the cue.
+
+**The prompt:**
+
+> "Before we go further, let me offer three different ways to think about this problem:
+>
+> 1. [Current frame] — what we've been building toward
+> 2. [Alternative frame] — reframes the problem as [X]
+> 3. [Reductive frame] — what if the real problem is actually just [simpler thing]?
+>
+> Which resonates, or is the real answer a mix?"
+
+**Critical principle: equal weight across the complexity spectrum.** Option 3 (reductive) must always be present, but it is not a "have you considered doing less?" checkbox. The reductive frame must be evaluated with the same rigor as the complex frames. The right answer might be "yes, this really is a distributed system" or "actually, a single shell script does it."
+
+The bias the LLM must fight: Socratic exploration tends to expand problems. Without the reductive frame, conversations drift toward bigger, more architected solutions. Including the reductive frame keeps the full complexity space honest.
+
+### Example (good reframings for "deploy agents for my team")
+
+1. **Current frame:** A multi-service platform with a portal, orchestrator, and specialist agents communicating via A2A.
+2. **Alternative frame:** A shared chat workspace where each "agent" is just a Claude Code skill team members invoke via slash commands. No platform. No orchestrator. Just shared skills in a git repo.
+3. **Reductive frame:** A shared bookmark folder pointing to a few well-crafted prompts the team can paste into ChatGPT/Claude as needed. No code at all.
+
+The user might pick frame 2, or pick a hybrid of 1 and 2, or realize frame 3 is genuinely sufficient. All three deserve serious consideration.
+
+### Anti-pattern: weak reductive frame
+
+Don't write: "3. A simpler version of frame 1." That's not a real alternative — it's a hedge. The reductive frame must be *qualitatively different* in approach, not just a smaller version of the complex one.
+
+---
+
+## Technique C — Red-team pass (Phase 3, its own phase)
+
+**When to fire:** Once, as Phase 3 of the skill flow. Not optional. Not skippable. Even single-chunk simple problems get a red-team pass.
+
+**Mode shift signal:** the LLM announces explicitly that it is shifting to red-team mode. This signals the operator that the next round is adversarial, not collaborative.
+
+> "Switching to red-team mode. I'm going to try to break what we've concluded. For each finding I'll note severity: CRITICAL (must address before proceeding), DISCUSS (worth talking through), or MINOR (noting for awareness)."
+
+### What the red-team checks
+
+For each chunk (or the single problem):
+
+1. **Contradictions** — between chunks, between constraints, between constraints and chunk goals.
+2. **Untested specifics** — assumptions that surfaced but were never classified as constraints-vs-choices. (This catches Technique D misses.)
+3. **Missing concerns** — domains/topics that should have been explored but weren't. Cross-reference common architectural concerns: auth, observability, error handling, cost, performance, deployment, testing, security, data lifecycle.
+4. **Scope creep** — chunks bigger than they need to be. Could a chunk be split? Is a chunk pulling in concerns that belong elsewhere?
+5. **Dependency gaps** — would chunk N actually need information from chunk M that isn't captured in chunk M's outputs? If so, the dependency arrow is wrong or the upstream chunk is incomplete.
+6. **Existence question** — "do you even need to build this?" Is there an existing tool or simpler approach? (This is shallow check from training data — Phase 3.5 does the active research.)
+7. **Stop-the-clock check** — what happens if you stop here? What would be lost vs. what would be gained?
+
+### Severity classification
+
+- **CRITICAL** — must be addressed before proceeding. Examples: a contradiction between two chunks, a missing dependency that would invalidate a chunk's design, a constraint that conflicts with the chosen approach.
+- **DISCUSS** — worth talking through. The operator decides whether to act. Examples: scope creep that's borderline, a missing concern that may or may not matter for MVP.
+- **MINOR** — noting for awareness. No action required, but recorded. Examples: opinion-based concerns, future risks not relevant to current scope.
+
+### Operator response per finding
+
+- **Accept** — modify the chunk to address the finding. Record the change.
+- **Dismiss** — record the finding and the operator's reason for dismissing. Future readers should see why this concern was raised and rejected.
+- **Defer** — record as a known issue for V2. Not in MVP scope.
+
+### Exit criteria
+
+All CRITICAL findings must be either Accepted (chunk modified) or Dismissed with explicit reason. DISCUSS and MINOR findings are recorded regardless. Operator approves before phase exits.
+
+---
+
+## How the techniques interact
+
+- **Technique D feeds Technique C.** Specifics that *should* have been classified by D but weren't are exactly what C catches. If C is finding lots of unclassified specifics, the LLM is failing at D and should improve.
+- **Technique B feeds Technique D.** Choosing a frame in B makes some specifics constraints (locked in by the framing) and others choices (still open). D operates on both.
+- **Technique C is the safety net.** B and D run during exploration; C runs at commitment. By the time C runs, B and D should have caught most issues — C catches what they missed.
+
+If C is finding a lot of CRITICAL issues, it means B and D are weak. That's a signal the skill prompt needs improvement, not a sign that C is doing its job well.
