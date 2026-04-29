@@ -1,0 +1,85 @@
+{
+  "skill_name": "discover",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to deploy agents for my team that can communicate",
+      "expected_output": "The skill conducts thorough Socratic discovery on a vague problem statement. Constraints-vs-choices classification fires whenever specifics surface. Most of the 8 standard discovery items for this kind of problem are explored. Phase 3.5 (RESEARCH) actively searches and surfaces existing multi-agent frameworks (AutoGen, LangGraph, Claude Agent SDK) as build-vs-buy candidates. The final artifact reflects what the operator actually wants, not what they typed.",
+      "files": [],
+      "expectations": [
+        "Phase 1 (DISCOVER) executes — the skill asks at least one clarifying question before moving on",
+        "Technique D fires at least once: when any specific implementation detail (named technology, protocol, pattern, or library) surfaces in the conversation, the skill asks whether it's a constraint or a choice",
+        "The semantics of 'an agent' are explored (autonomous LLM loop vs. scheduled job vs. chat bot vs. shared skill)",
+        "Team scale is explored (rough size: e.g., 3 people vs. 30 vs. 300)",
+        "Deploy target is explored (local vs. cloud vs. hosted vs. specific provider)",
+        "The semantics of 'available for the entire team' are explored (discoverable how? invocable how? shared state?)",
+        "The semantics of 'communicate with each other' are explored (message bus vs. RPC vs. shared memory vs. event-driven)",
+        "Sync vs. async and conversation-state persistence is explored",
+        "At least one of: identity, auth, observability, cost accounting is explored",
+        "Internal-tooling vs. product-feature vs. research-artifact framing is explored",
+        "At least 5 of the 8 standard discovery items above (rows 3-10) are explored",
+        "Phase 3.5 (RESEARCH) executes with at least one WebSearch tool invocation",
+        "The research phase surfaces at least one of: AutoGen, LangGraph, Claude Agent SDK as a candidate",
+        "Each surfaced candidate is evaluated against at least 2 of: functionality match, license, cost, maintenance, lock-in, integration burden",
+        "Phase 4 (ARTIFACT) produces a discovery artifact at docs/discovery/<slug>.md following the template (header, framing, constraints, chunks, red-team findings, research outcomes, discovery log)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Build me a todo app",
+      "expected_output": "Full discovery, red-team, and research run even though the problem is small. Chunking is NOT proposed (single-chunk problem). Phase 3.5 surfaces existing todo apps as build-vs-buy candidates and classifies at least one as Adopt-fully or Inspire. Single-chunk artifact produced.",
+      "files": [],
+      "expectations": [
+        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+        "Phase 2 (CHUNK) executes",
+        "Phase 2 concludes that the problem is single-chunk and does NOT propose decomposition into multiple chunks",
+        "Phase 3 (RED-TEAM) executes and announces the mode shift to red-team explicitly",
+        "Phase 3 produces at least one finding of any severity (CRITICAL, DISCUSS, or MINOR)",
+        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
+        "Phase 3.5 surfaces at least 2 distinct existing todo apps or solutions as candidates (e.g., Todoist, TickTick, Linear, Things, Microsoft To Do, plain text file, Apple Reminders)",
+        "At least one of the surfaced candidates is classified as Adopt-fully or Inspire",
+        "Phase 4 (ARTIFACT) produces a discovery artifact with exactly one chunk section (or a 'single chunk — no decomposition needed' annotation)",
+        "The artifact's Research outcomes section records the specific candidates considered and the rationale for each classification"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "We need a platform with auth, billing, a marketplace, and analytics",
+      "expected_output": "The skill recognizes a multi-subsystem problem early and proposes chunking. At least 3 chunks identified with dependencies. Phase 3.5 surfaces well-known managed alternatives (Auth0/Clerk for auth, Stripe for billing) and classifies at least one as Adopt-fully or Adopt-partially.",
+      "files": [],
+      "expectations": [
+        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+        "Phase 2 (CHUNK) executes and proposes chunking (does NOT declare single-chunk)",
+        "Chunking is proposed within the first ~5 turns of Phase 2 (i.e., the skill recognizes multi-subsystem signals quickly)",
+        "At least 3 distinct chunks are identified",
+        "Each proposed chunk has explicit dependency annotation (None, or 'depends on Chunk N')",
+        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation per chunk OR an overall problem search",
+        "Phase 3.5 surfaces Auth0 OR Clerk OR another managed auth provider as a candidate for the auth chunk",
+        "Phase 3.5 surfaces Stripe OR another managed billing provider as a candidate for the billing chunk",
+        "At least one chunk has a candidate classified as Adopt-fully or Adopt-partially",
+        "If a candidate is classified as Adopt-fully, the corresponding chunk is restructured (replaced with an evaluate/install/integrate chunk)",
+        "Phase 4 (ARTIFACT) produces a multi-chunk discovery artifact with execution order computed (topological sort with parallelism notes)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Build a REST API using Express with Postgres and deploy to AWS ECS",
+      "expected_output": "The skill treats this as an over-specified prompt. Technique D challenges multiple specifics as constraints-vs-choices. Technique B offers alternative framings, with option 3 being a qualitatively different reductive frame (not just a smaller version of the original). Phase 3.5 considers managed/serverless alternatives like Supabase, Render, Railway, Fly.io.",
+      "files": [],
+      "expectations": [
+        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+        "Technique D challenges 'Express' as a constraint-or-choice",
+        "Technique D challenges 'Postgres' as a constraint-or-choice",
+        "Technique D challenges 'AWS ECS' as a constraint-or-choice",
+        "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) are challenged via Technique D",
+        "Technique B (alternative framings) fires at least once during Phase 1",
+        "Technique B presents exactly 3 framings: a current frame, an alternative frame, and a reductive frame",
+        "Technique B's option 3 (reductive frame) is qualitatively different from options 1 and 2 — not just 'a smaller version of frame 1'",
+        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
+        "Phase 3.5 surfaces at least one managed/serverless alternative such as Supabase, Render, Railway, Fly.io, Neon, Vercel, or PlanetScale",
+        "At least one of the surfaced alternatives is evaluated against the chunk's constraints (functionality match, cost, lock-in, etc.)",
+        "Each evaluated candidate is assigned a classification (Adopt fully / Adopt partially / Reject / Inspire) with a specific reason — not a vague 'doesn't fit' rejection"
+      ]
+    }
+  ]
+}
