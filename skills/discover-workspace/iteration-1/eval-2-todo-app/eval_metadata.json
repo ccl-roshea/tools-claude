@@ -1,0 +1,17 @@
+{
+  "eval_id": 2,
+  "eval_name": "todo-app-single-chunk",
+  "prompt": "Build me a todo app",
+  "assertions": [
+    "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+    "Phase 2 (CHUNK) executes",
+    "Phase 2 concludes that the problem is single-chunk and does NOT propose decomposition into multiple chunks",
+    "Phase 3 (RED-TEAM) executes and announces the mode shift to red-team explicitly",
+    "Phase 3 produces at least one finding of any severity (CRITICAL, DISCUSS, or MINOR)",
+    "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
+    "Phase 3.5 surfaces at least 2 distinct existing todo apps or solutions as candidates (e.g., Todoist, TickTick, Linear, Things, Microsoft To Do, plain text file, Apple Reminders)",
+    "At least one of the surfaced candidates is classified as Adopt-fully or Inspire",
+    "Phase 4 (ARTIFACT) produces a discovery artifact with exactly one chunk section (or a 'single chunk — no decomposition needed' annotation)",
+    "The artifact's Research outcomes section records the specific candidates considered and the rationale for each classification"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "eval_id": 4,
+  "eval_name": "overspecified-rest-api",
+  "prompt": "Build a REST API using Express with Postgres and deploy to AWS ECS",
+  "assertions": [
+    "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+    "Technique D challenges 'Express' as a constraint-or-choice",
+    "Technique D challenges 'Postgres' as a constraint-or-choice",
+    "Technique D challenges 'AWS ECS' as a constraint-or-choice",
+    "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) are challenged via Technique D",
+    "Technique B (alternative framings) fires at least once during Phase 1",
+    "Technique B presents exactly 3 framings: a current frame, an alternative frame, and a reductive frame",
+    "Technique B's option 3 (reductive frame) is qualitatively different from options 1 and 2 — not just 'a smaller version of frame 1'",
+    "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
+    "Phase 3.5 surfaces at least one managed/serverless alternative such as Supabase, Render, Railway, Fly.io, Neon, Vercel, or PlanetScale",
+    "At least one of the surfaced alternatives is evaluated against the chunk's constraints (functionality match, cost, lock-in, etc.)",
+    "Each evaluated candidate is assigned a classification (Adopt fully / Adopt partially / Reject / Inspire) with a specific reason — not a vague 'doesn't fit' rejection"
+  ]
+}

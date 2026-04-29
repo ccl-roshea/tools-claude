@@ -1,0 +1,18 @@
+{
+  "eval_id": 3,
+  "eval_name": "multi-subsystem-platform",
+  "prompt": "We need a platform with auth, billing, a marketplace, and analytics",
+  "assertions": [
+    "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
+    "Phase 2 (CHUNK) executes and proposes chunking (does NOT declare single-chunk)",
+    "Chunking is proposed within the first ~5 turns of Phase 2 (i.e., the skill recognizes multi-subsystem signals quickly)",
+    "At least 3 distinct chunks are identified",
+    "Each proposed chunk has explicit dependency annotation (None, or 'depends on Chunk N')",
+    "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation per chunk OR an overall problem search",
+    "Phase 3.5 surfaces Auth0 OR Clerk OR another managed auth provider as a candidate for the auth chunk",
+    "Phase 3.5 surfaces Stripe OR another managed billing provider as a candidate for the billing chunk",
+    "At least one chunk has a candidate classified as Adopt-fully or Adopt-partially",
+    "If a candidate is classified as Adopt-fully, the corresponding chunk is restructured (replaced with an evaluate/install/integrate chunk)",
+    "Phase 4 (ARTIFACT) produces a multi-chunk discovery artifact with execution order computed (topological sort with parallelism notes)"
+  ]
+}
