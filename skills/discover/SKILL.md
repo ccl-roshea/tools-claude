@@ -112,6 +112,21 @@ Maintain a running summary in your own working memory:
 
 You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured.
 
+### Discovery axes to consider
+
+These are not a strict checklist — exploration is emergent — but most non-trivial problems benefit from touching each of these axes. Before proposing to move on from Phase 1, check which axes are unexamined and ask if any of them are still open:
+
+- **Purpose / audience.** Is this internal tooling, a product feature, a research artifact, or a workflow orchestrator? *Always worth asking explicitly* — it shapes architecture decisions downstream and is easy to assume implicitly when it shouldn't be.
+- **Scale.** Rough user count, request volume, data volume — orders of magnitude only.
+- **Deploy target.** Local, shared server, cloud, hosted service. Often a constraint, but ask.
+- **Lifecycle.** Long-running vs. ephemeral, persistent state vs. stateless, scheduled vs. on-demand.
+- **Identity / trust model.** Who can use it? Per-user identity, shared identity, anonymous?
+- **Operability.** Auth, observability, cost accounting, error handling expectations.
+- **Communication / interaction surface.** How is it invoked, how does it respond, who sees the output?
+- **Constraints from outside.** Compliance, existing infra, team skills, budget, deadlines.
+
+If the user has answered the operator's prompt with rich detail that already covers many of these, don't re-litigate them. But if a major axis is genuinely unexplored, name it before declaring Phase 1 complete. *Especially* the purpose/audience question — if you don't know whether you're building internal tooling or a shippable product, you don't know what "good" looks like.
+
 ### Anti-patterns
 
 - ❌ **Asking compound questions.** "What's your scale and what's your tech stack?" — split into two questions.
