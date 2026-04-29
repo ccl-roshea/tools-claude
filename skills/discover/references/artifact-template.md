@@ -1,5 +1,7 @@
 # Discovery Artifact Template
 
+> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the artifact format only.
+
 The output document the skill writes in Phase 4. Every discovery session produces one artifact in this format, regardless of chunk count. Single-chunk problems get the same template — sections just stay short.
 
 ## Filename and location

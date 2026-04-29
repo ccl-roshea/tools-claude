@@ -1,5 +1,7 @@
 # Dispatch Protocol
 
+> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the dispatch protocol only.
+
 Phase 5 of the skill. After the artifact is committed, sequentially dispatch each chunk to /superpowers in dependency order.
 
 ## Sequential dispatch loop

@@ -1,5 +1,7 @@
 # Research Protocol (Build-vs-Buy)
 
+> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the research protocol only.
+
 Phase 3.5 of the skill. After red-team and before artifact commit, actively research existing tools that might satisfy chunks. Replaces training-data intuition with current web evidence.
 
 ## Why this phase exists

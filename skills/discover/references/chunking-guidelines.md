@@ -1,5 +1,7 @@
 # Chunking Guidelines
 
+> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the chunking heuristics only.
+
 Heuristic signals the LLM uses in Phase 2 (CHUNK) to decide whether to propose decomposition. These are guidelines, not hard rules. The LLM uses judgment informed by these signals.
 
 ## Goal of chunking

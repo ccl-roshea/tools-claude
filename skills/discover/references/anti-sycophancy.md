@@ -1,5 +1,7 @@
 # Anti-Sycophancy Techniques
 
+> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the technique specs only.
+
 Three techniques the skill uses to prevent the LLM from drifting into agreeable summarization. Each catches a different failure mode and runs at different points in the flow.
 
 | Technique | When it fires | What it catches | Cost |
@@ -66,7 +68,7 @@ This fights the inverse failure mode: dismissing a good existing tool because th
 
 1. After the initial problem framing stabilizes (typically turns 3-5)
 2. When a major architectural direction emerges
-3. Before the tool proposes moving from DISCOVER to CHUNK
+3. Before the skill proposes moving from DISCOVER to CHUNK
 
 The LLM should not fire this every turn. It should sense when the conversation is *settling* on a frame and use that as the cue.
 
@@ -115,7 +117,7 @@ For each chunk (or the single problem):
 3. **Missing concerns** — domains/topics that should have been explored but weren't. Cross-reference common architectural concerns: auth, observability, error handling, cost, performance, deployment, testing, security, data lifecycle.
 4. **Scope creep** — chunks bigger than they need to be. Could a chunk be split? Is a chunk pulling in concerns that belong elsewhere?
 5. **Dependency gaps** — would chunk N actually need information from chunk M that isn't captured in chunk M's outputs? If so, the dependency arrow is wrong or the upstream chunk is incomplete.
-6. **Existence question** — "do you even need to build this?" Is there an existing tool or simpler approach? (This is shallow check from training data — Phase 3.5 does the active research.)
+6. **Existence question** — "do you even need to build this?" Is there an existing tool or simpler approach? This is a shallow check from training data — Phase 3.5 does the active research. If a strong candidate surfaces here, record it as a CRITICAL finding and let Phase 3.5 verify.
 7. **Stop-the-clock check** — what happens if you stop here? What would be lost vs. what would be gained?
 
 ### Severity classification
