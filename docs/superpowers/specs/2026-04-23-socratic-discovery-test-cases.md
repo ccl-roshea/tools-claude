@@ -167,6 +167,91 @@ Operator cost does not enter this judgment. It will inform later MVP tuning: if 
 
 **Key question for Path B comparison:** Would a Socratic discovery pass have challenged the Azure/A2A/Container Apps stack before /superpowers locked it in? If yes, would the resulting plan look materially different?
 
+## Path B results (Test 1)
+
+**Run date:** 2026-05-01 (5-day gap from Path A — clean-room protocol satisfied)
+**Operator:** roshea@caracalcorp.com
+**Tool used:** /discover (built via this validation effort), with the chunk-recursion-suggestion amendment applied
+**Results location:** External path at `/test-path-b/`
+- Transcript: `/test-path-b/discovery-transcript.md` (1,024 lines)
+- Discovery artifact: `/test-path-b/docs/discovery/team-agent-platform.md` (346 lines)
+
+### Output summary
+
+From the same 15-word intent-only prompt, /discover produced a 6-chunk discovery artifact with PM /discover identified as a prerequisite, hub-and-spoke topology emerged, two chunks tagged for recursive /discover, all 14 red-team findings recorded with explicit resolutions, Phase 3.5 research summaries per chunk, and Phase 5 chunk-complexity assessment applied to every chunk with verbatim proposal text.
+
+The discovery is "Round 1" — the artifact explicitly notes it must be re-run after PM /discover completes, with PM outputs as inputs.
+
+### Coverage scoring (vs. the 8 expected items)
+
+| # | Expected item | Path A | Path B |
+|---|---------------|--------|--------|
+| 1 | What is "an agent"? | ✅ asked | ✅ Q1 — 4-way enumeration |
+| 2 | Team scale | ✅ asked | ✅ Q6 — order-of-magnitude users + volume + concurrency |
+| 3 | Deploy target | ✅ asked | ✅ Azure constraint + Chunk 0 explicitly compares Container Apps / AKS / Functions |
+| 4 | "Available for entire team" semantics | ❌ missed | ✅ Q5 — Teams/portal/CLI/email/mixed |
+| 5 | "Communicate with each other" semantics | ❌ missed | ✅ Turn 4 surfaced durable workflow pattern; Frame 2 selected; two-runtime model |
+| 6 | Sync vs. async + persistence | ❌ missed | ✅ Turn 4 explicitly: "state must survive process restarts and pauses that could last hours or days" |
+| 7 | Identity / auth / observability / cost | partial (user-volunteered) | ✅ all four — Entra (Chunk 4), Day-1 OTel observability contract (Chunk 5), cost via OSS self-host + LLM monitoring |
+| 8 | Internal vs. product vs. research framing | ❌ missed | ✅✅ Frame 3 explicitly asked "is there a platform need at all" — the new "Discovery axes to consider" guidance fired |
+
+**Path A: 3 of 8 items surfaced — Coverage = 2/5**
+**Path B: 8 of 8 items surfaced — Coverage = 5/5**
+
+### Correctness of Frame (operator self-judgment)
+
+**Path A:** 3 ("deployable but probably overkill — would miss critical things or be over-engineered").
+
+**Path B:** 4.5 ("There were some strawman decisions, such as Bicep (which I pushed back on) and GitHub Actions over Azure DevOps, which we could have nailed down properly. However overall I would ship this. Especially after rerunning with the PM first.")
+
+### Operator cost (tracked, not gated)
+
+**Path A:** ~7 turns of Q&A, brief answers, 1 session, ~3 minutes wall-clock.
+**Path B:** 26 turns of dialogue, detailed answers, multi-day session (with at least one resume), ~hours of operator engagement total.
+
+Path B is materially more operator-intensive. The protocol explicitly does not gate on this — the bet is that steering at every step is cheaper than rebuilding from a wrong frame. The +1.5 Correctness gain at 26 turns vs. 7 is the test of that bet, and the operator's 4.5 score implies it paid off.
+
+### Pass criterion check
+
+| Axis | Path A | Path B | Delta | Threshold | Result |
+|------|--------|--------|-------|-----------|--------|
+| Coverage | 2 | 5 | +3 | +1 | **PASS** |
+| Correctness of Frame | 3 | 4.5 | +1.5 | +1 | **PASS** |
+
+Both axes beat the +1 threshold. **Path B passes Test 1.**
+
+### Chunk-recursion enhancement (Phase 5 amendment) results
+
+The amendment was tested as part of this run. Behavior:
+
+| Chunk | Signals fired | Count | Action | Outcome |
+|-------|--------------|-------|--------|---------|
+| 0 (Platform Foundation) | (1) | 1 | No proposal | Correct silence |
+| 1 (Workflow Runtime) | (1), (2), (3) | 3 | Proposal — already /discover | Confirmed the existing tag |
+| 2 (Agent Runtime Harness) | (1), (2), (3), (4) | 4 | Proposal — already /discover | Confirmed the existing tag |
+| 3 (Web Chat Surface) | (1), (3) | 2 | **Proposal: borderline; recommended /superpowers** | Operator declined escalation: "Chunk 3 is superpowers" |
+| 4 (Identity & Auth) | (1) | 1 | No proposal | Correct silence |
+| 5 (Observability) | (1) | 1 | No proposal | Correct silence |
+
+No false positives, no false negatives. The verbatim proposal text was captured (including the skill's "honest take: borderline" note for Chunk 3, which fairly recommended against escalation). Halt complied with the eval instructions. Clean implementation.
+
+### Notable behaviors beyond the rubric
+
+- **Operator pushback respected at Turn 19.** The operator asked why Workflow Runtime defaulted to /superpowers; the skill admitted it had defaulted without applying its own discriminator and re-tagged Chunk 1 as /discover. Self-correction on a sycophancy-adjacent failure mode.
+- **Frame 3 (no platform) was rejected for a *specific* reason** ("we need observability — for it-ops compliance and audit is critical"), not "we want our own platform." Constraints-vs-choices machinery operating at the framing level.
+- **Hub-and-spoke architecture emerged** (PM front-door, IT-Ops gated). Wasn't a starting position — it surfaced via discovery.
+- **PM /discover became a prerequisite** via red-team finding #1 — the skill recognized it had over-committed and accepted a substantial restructure.
+
+### Carry-forward for future iterations
+
+Operator observation worth recording for iteration 3+: the skill applied its discriminator rigor (Workflow Runtime escalation, Frame 3 rejection probed for specifics) on high-stakes decisions but defaulted to strawmen on lower-stakes-looking ones (Bicep, GitHub Actions). The operator caught Bicep on Turn 22; GitHub Actions slipped through unchallenged. Pattern: anti-sycophancy *triggers* don't always fire on decisions the skill judges as low-stakes. Tightening Phase 1's Technique D firing threshold (or making strawman proposals subject to the same constraints-vs-choices challenge) is a candidate fix.
+
+Not a blocker for MVP — the skill works on the load-bearing decisions, which is what matters most. Worth capturing as known limitation.
+
 ## Next step
 
-Path A baseline is recorded. Path B runs after the Socratic discovery MVP is built. When running Path B, follow the clean-room protocol strictly — the operator has now seen the Path A output and must suppress that knowledge during the Path B run.
+Test 1 Path B passes validation. Per memo §7, the MVP gate is: "at least 2 of 3 cases produced an artifact that led to a materially better downstream plan." With N=1 passing convincingly (+3, +1.5 deltas, neither marginal), the operator can proceed to:
+1. Run additional real-problem tests (Test 2, Test 3 per memo §7) to strengthen confidence — *or*
+2. Accept N=1 with this margin as sufficient for personal use, ship the skill to main, and gather organic feedback from real-use sessions.
+
+Decision is operator's. The skill works.
