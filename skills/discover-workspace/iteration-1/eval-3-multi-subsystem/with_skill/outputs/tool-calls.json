@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "multi-subsystem-platform",
+  "tool_calls": {
+    "Read": 5,
+    "Bash": 4,
+    "WebSearch": 6,
+    "WebFetch": 0,
+    "Write": 4,
+    "ToolSearch": 1,
+    "Edit": 0,
+    "context7_query": 0
+  },
+  "websearch_breakdown": {
+    "overall_problem_search": 1,
+    "chunk_1_auth": 1,
+    "chunk_2_payments": 2,
+    "chunk_3_marketplace": 1,
+    "chunk_4_analytics": 1
+  },
+  "notes": "Read calls: SKILL.md, anti-sycophancy.md, chunking-guidelines.md, research-protocol.md, artifact-template.md, eval_metadata.json. Bash: directory setup, ls checks, output copy. WebSearch: 6 queries covering 1 overall + 4 per-chunk + 1 supplementary (Stripe Connect alternatives). WebFetch: not invoked — search snippets returned enough functional/cost/license/maintenance evidence to evaluate candidates. Write: discovery artifact, transcript, phase log, tool-calls.json."
+}

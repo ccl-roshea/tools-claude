@@ -1,0 +1,22 @@
+{
+  "eval_id": 1,
+  "eval_name": "vague-agents-prompt",
+  "prompt": "I want to deploy agents for my team that can communicate",
+  "assertions": [
+    "Phase 1 (DISCOVER) executes — the skill asks at least one clarifying question before moving on",
+    "Technique D fires at least once: when any specific implementation detail (named technology, protocol, pattern, or library) surfaces in the conversation, the skill asks whether it's a constraint or a choice",
+    "The semantics of 'an agent' are explored (autonomous LLM loop vs. scheduled job vs. chat bot vs. shared skill)",
+    "Team scale is explored (rough size: e.g., 3 people vs. 30 vs. 300)",
+    "Deploy target is explored (local vs. cloud vs. hosted vs. specific provider)",
+    "The semantics of 'available for the entire team' are explored (discoverable how? invocable how? shared state?)",
+    "The semantics of 'communicate with each other' are explored (message bus vs. RPC vs. shared memory vs. event-driven)",
+    "Sync vs. async and conversation-state persistence is explored",
+    "At least one of: identity, auth, observability, cost accounting is explored",
+    "Internal-tooling vs. product-feature vs. research-artifact framing is explored",
+    "At least 5 of the 8 standard discovery items above (rows 3-10) are explored",
+    "Phase 3.5 (RESEARCH) executes with at least one WebSearch tool invocation",
+    "The research phase surfaces at least one of: AutoGen, LangGraph, Claude Agent SDK as a candidate",
+    "Each surfaced candidate is evaluated against at least 2 of: functionality match, license, cost, maintenance, lock-in, integration burden",
+    "Phase 4 (ARTIFACT) produces a discovery artifact at docs/discovery/<slug>.md following the template (header, framing, constraints, chunks, red-team findings, research outcomes, discovery log)"
+  ]
+}
