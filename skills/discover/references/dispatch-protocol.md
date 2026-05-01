@@ -8,6 +8,8 @@ Phase 5 of the skill. After the artifact is committed, sequentially dispatch eac
 
 ```
 For each chunk in execution order:
+  0. Assess chunk complexity for recursion (see "Chunk-complexity assessment" below)
+       — if 2+ signals fire, propose recursive /discover; operator decides
   1. Compose the dispatch prompt (see "Composing the prompt" below)
   2. Launch via Agent tool (foreground, main workspace)
   3. Operator interacts with /superpowers normally
@@ -17,6 +19,47 @@ For each chunk in execution order:
 ```
 
 For MVP, even chunks that *could* run in parallel run sequentially — the operator can only interact with one /superpowers session at a time. The artifact records parallelism information for when parallel dispatch is built (deferred per memo §6).
+
+## Chunk-complexity assessment (step 0)
+
+Before dispatching each chunk, check whether it's well-scoped for /superpowers or whether it would benefit from its own /discover pass first. The parent /discover pressure-tested the *root* framing, but chunks can still be too large or multi-decision for a single /superpowers session.
+
+### Signals
+
+For each chunk, count how many of these fire:
+
+1. **Open-choice density.** Does the "Open choices" list have 3 or more independent items?
+2. **Lingering vagueness.** Does the problem statement still feel vague or multi-faceted when read aloud — would a fresh /superpowers session still need clarification on basic intent?
+3. **Sub-domain spread.** Does the chunk span multiple sub-domains (e.g., "Portal" = UX + auth + APIs)? Distinct sub-domains often deserve distinct framings.
+4. **Red-team flag.** Did Phase 3's red-team mark this chunk as scope-creep-prone or with unresolved untested specifics?
+
+### Decision rule
+
+- **0–1 signals fire:** proceed directly to dispatch. Do *not* surface a "should we run /discover?" prompt — that's operator fatigue. The point is to flag chunks that genuinely need it, not to ask about every chunk.
+- **2+ signals fire:** propose recursion to the operator:
+
+  > "Chunk N (<name>) looks like it might still need its own discovery pass before /superpowers can plan it well. The signals: [cite which fired and why]. Want to run /discover on this chunk first, or proceed straight to /superpowers?"
+
+### Operator response handling
+
+- **Operator chooses /discover.** Recursively invoke the /discover skill on the chunk's problem statement, inheriting the parent's confirmed constraints. The output is a sub-discovery artifact at `docs/discovery/<parent-slug>/<chunk-slug>.md`. Then dispatch the sub-chunks via the same Phase 5 logic (which itself includes step 0 — recursion can compound, operator-driven).
+- **Operator declines /discover.** Proceed straight to dispatch with the chunk as-is. Record the operator's response in the artifact's "Phase 5 — Chunk-complexity assessment" section.
+- **Operator says "ask me later" or similar:** treat as decline for now; revisit if downstream chunks reveal the chunking was wrong.
+
+### Honesty about borderline calls
+
+If you assess 2 signals but think the recursion is unnecessary anyway (e.g., the sub-domains integrate within a known pattern, the choices are well-bounded with clear criteria), say so in your proposal:
+
+> "Chunk N fires 2 signals (1 and 3). Honest take: borderline — [reason]. Recommend proceed with /superpowers unless you see specific framing risk I'm missing."
+
+Don't pretend every borderline case is a real recursion candidate. The operator's time is limited.
+
+### Anti-patterns
+
+- ❌ **Surfacing the prompt on every chunk.** That's not assessment, that's outsourcing the decision.
+- ❌ **Auto-recursing without operator approval.** Recursion compounds — uncontrolled depth blows the token budget and operator attention.
+- ❌ **Skipping the assessment because "the parent already discovered."** The parent discovery pressure-tested the root framing; chunks can still be too large.
+- ❌ **Treating 2 signals as automatic recursion.** 2 is a *threshold for surfacing*, not for recursing.
 
 ## Composing the dispatch prompt
 

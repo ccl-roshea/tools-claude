@@ -1,17 +1,29 @@
 ---
 name: discover
 description: >
-  Socratic idea discovery and chunking. Pressure-tests the user's
-  problem framing, distinguishes constraints from choices, decomposes
-  large problems into executor-sized chunks with dependencies, and
-  sequentially dispatches each chunk to /superpowers or another executor.
-  Use before /superpowers when the problem is vague, large, or the user
-  isn't sure what they want.
+  Socratic idea discovery and chunking — runs upstream of /superpowers.
+  Pressure-tests the user's problem framing, distinguishes constraints
+  from choices, decomposes large problems into executor-sized chunks
+  with dependencies, actively researches existing tools (build-vs-buy),
+  and sequentially dispatches each chunk to /superpowers or another
+  executor. Especially valuable when the user is unsure what they want,
+  presents an ambitious or multi-subsystem goal, OR when the prompt
+  looks tight but contains specifics that may be untested choices
+  rather than constraints (e.g., "build a REST API using Express with
+  Postgres on AWS ECS" — every named technology deserves a constraint-
+  vs-choice classification before downstream work locks them in).
 when_to_use: >
-  When the user has an idea or problem statement that needs exploration
-  before planning. When the problem might be too large for a single
-  /superpowers session. When the user says things like "I'm not sure
-  exactly what I want" or presents a vague/ambitious goal.
+  Use before /superpowers in any of these situations: (1) the user has
+  a vague or ambitious idea ("I want to build a platform for X"); (2)
+  the user says they're not sure what they want, or the problem
+  statement is one or two sentences; (3) the problem looks like it
+  could span multiple subsystems or domains; (4) the prompt is
+  over-specified — names specific technologies, protocols, or stacks
+  that may have been typed out of habit rather than chosen
+  deliberately; (5) the user is starting a new project, ambitious
+  feature, or platform build. Skip this skill for narrow well-scoped
+  bug fixes, single-function changes, or maintenance tasks where the
+  problem is genuinely tight.
 allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate WebSearch WebFetch"
 ---
 
@@ -349,25 +361,43 @@ Read `references/dispatch-protocol.md` for full sequential dispatch logic, promp
 
 **Step 2: for each chunk in execution order:**
 
-a. **Compose the dispatch prompt.** Combine:
+a. **Assess chunk complexity for recursion.** Before composing the dispatch prompt, check whether this chunk is well-scoped for /superpowers or whether it would benefit from its own /discover pass first. The parent /discover pressure-tested the *root* framing, but chunks can still be too large or multi-decision for a single /superpowers session.
+
+Apply these signals to the chunk:
+- Does the "Open choices" list have 3+ independent items?
+- Does the problem statement still feel vague or multi-faceted when read aloud (i.e., would a fresh executor still need clarification on basic intent)?
+- Does the chunk span multiple sub-domains (e.g., "Portal" = UX + auth + APIs)?
+- Did Phase 3's red-team flag this chunk as scope-creep-prone or with unresolved untested specifics?
+
+If 2 or more signals fire, propose to the operator:
+
+> "Chunk N (<name>) looks like it might still need its own discovery pass before /superpowers can plan it well. The signals: [cite which fired and why]. Want to run /discover on this chunk first, or proceed straight to /superpowers?"
+
+If the operator chooses /discover, recursively invoke this skill on the chunk's problem statement and constraints. The output is a sub-discovery artifact at `docs/discovery/<parent-slug>/<chunk-slug>.md`. Then dispatch the sub-chunks of that artifact via the same Phase 5 logic. Operator-driven recursion only — no automatic recursion. The operator decides per chunk and can stop the recursion at any depth.
+
+If 0-1 signals fire, proceed straight to dispatch — don't surface the prompt. Don't ask "should we run discovery?" on chunks that look fine; that's just operator fatigue. The point is to flag chunks that genuinely need it.
+
+If the operator declines /discover, proceed straight to dispatch.
+
+b. **Compose the dispatch prompt.** Combine:
 - The chunk's problem statement (verbatim from artifact)
 - A "## Constraints (do not re-open)" section with all top-level constraints + chunk-specific constraints
 - The chunk's "Open choices (for the executor to resolve)" section
 - An "## Upstream decisions (from completed chunks)" section IF this chunk has dependencies — populated from the prior chunks' /superpowers outputs
 
-b. **Launch via Agent tool:**
+c. **Launch via Agent tool:**
 - `subagent_type`: `general-purpose`
 - `description`: `"Plan chunk <N>: <chunk name>"`
 - `prompt`: the composed prompt
 - `run_in_background`: `false` (operator must interact)
 
-c. **Wait for completion.** The operator drives the /superpowers session. The agent returns when /superpowers' brainstorm + writing-plans sub-flow finishes.
+d. **Wait for completion.** The operator drives the /superpowers session. The agent returns when /superpowers' brainstorm + writing-plans sub-flow finishes.
 
-d. **Extract decisions.** Read the design doc and plan that /superpowers produced (in `docs/superpowers/specs/` and `docs/superpowers/plans/`). Summarize key decisions for downstream chunks: architecture choices, tech stack, API contracts, data models. Format into a "## Upstream decisions" section ready to feed into the next dependent chunk.
+e. **Extract decisions.** Read the design doc and plan that /superpowers produced (in `docs/superpowers/specs/` and `docs/superpowers/plans/`). Summarize key decisions for downstream chunks: architecture choices, tech stack, API contracts, data models. Format into a "## Upstream decisions" section ready to feed into the next dependent chunk.
 
-e. **Update the artifact.** Add a link to the chunk's design doc and plan in the chunk's section. Optionally add a "Decisions made" subsection. Commit the artifact update.
+f. **Update the artifact.** Add a link to the chunk's design doc and plan in the chunk's section. Optionally add a "Decisions made" subsection. Commit the artifact update.
 
-f. **Move to the next chunk** in execution order.
+g. **Move to the next chunk** in execution order.
 
 **Step 3: when all chunks are complete,** tell the operator:
 
