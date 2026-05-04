@@ -91,6 +91,20 @@ If 0-1 signals fire on a chunk, the agent does not surface the check — proceed
 
 This check happens at end of CHUNK phase, not at dispatch. By the time DISPATCH runs, any chunk that tripped 2+ signals has either been split or has an explicit override on record.
 
+## Per-chunk audit (mandatory)
+
+After the chunk-overload signal check (above), the agent runs a per-chunk audit on every chunk — whether or not signals fired. The audit asks two questions and writes the answers to the WIP file:
+
+1. **Split-or-not:** *"Could this chunk be split into 2-3 chunks with cleaner boundaries? If yes, propose. If no, justify."*
+2. **Per-open-choice self-challenge:** for each open choice in the chunk, *"Is this genuinely more answerable with executor context than now? If yes, why? If no, resolve it."*
+
+**Outcomes for open choices:**
+
+- **Survives self-challenge** → kept in the artifact's "Open choices" list with a one-liner survival justification. This justification is later checked by the artifact-time "Open choices survival justification gate" (see `artifact-gates.md`).
+- **Does not survive** → resolved in this phase. Result moves to "Tested choices" (with alternatives recorded) or to "Constraints" (if the resolution reveals a derived constraint).
+
+The audit's outputs are load-bearing for the artifact gates. An open choice without a survival justification will block the artifact write.
+
 ## How to propose chunks
 
 Once chunking is justified, present the proposal:

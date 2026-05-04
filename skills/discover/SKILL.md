@@ -279,6 +279,18 @@ If 0-1 signals fire on a chunk, do not surface the check — proceed silently to
 
 Do NOT punt this to dispatch-time. The signals are checked here, the action is taken here.
 
+**Step 5b: per-chunk audit (mandatory).** This audit runs at the same workflow point as Step 5's signal check, but unconditionally — whether or not Step 5's signals fired. For each chunk, the agent reads the chunk back to itself and writes the answers to the WIP file:
+
+1. *"Could this chunk be split into 2-3 chunks with cleaner boundaries? If yes, propose. If no, justify."*
+2. *For each open choice in this chunk: "Is this genuinely more answerable with executor context than now? If yes, why? If no, resolve it."*
+
+**Outcomes for open choices:**
+
+- **Survives self-challenge** → the open choice stays under "Open choices (for the executor to resolve)" in the artifact, AND a one-liner survival justification is recorded with it (e.g., *"deferred because the SDK's `requests` adapter may already cover retry; verifying in-chunk is cheaper than re-litigating here"*).
+- **Does not survive** → the agent resolves it now, in this phase. The result moves to "Tested choices" if alternatives were considered, or to "Constraints" if it turns out to be a derived constraint. Removed from "Open choices."
+
+The audit's outputs (split-or-not justification, per-open-choice survival justifications) feed directly into the artifact-time gates (see `references/artifact-gates.md`).
+
 **Step 6: iterate** with the operator until they approve. They may merge chunks, split further, reorder, or rename.
 
 ### Anti-patterns
