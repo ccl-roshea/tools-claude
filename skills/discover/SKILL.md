@@ -435,7 +435,9 @@ Read `references/artifact-template.md` for the full template and section guidanc
 
 **Step 3: review for self-containment.** Each chunk's problem statement must be self-contained. Test mentally: if you copied that section alone into a fresh /superpowers session, would the executor have enough? If not, expand it before saving.
 
-**Step 4: write to file** at `docs/discovery/<topic-slug>.md`. Create the `docs/discovery/` directory if it doesn't exist.
+**Step 4a: run artifact-time gates.** Before writing, run the four self-validation gates defined in `references/artifact-gates.md` against the assembled draft. If any gate fails, do NOT write. Surface the failures to the operator (grouped by gate name), enter the fixup loop (returning to the relevant phase as needed), and re-run all four gates after each fixup. Only proceed to Step 4b when all gates pass.
+
+**Step 4b: write to file** at `docs/discovery/<topic-slug>.md`. Create the `docs/discovery/` directory if it doesn't exist.
 
 **Step 5: stage the artifact:**
 
@@ -458,6 +460,7 @@ git commit -m "docs(discovery): add artifact and transcript for <topic>"
 - ❌ **Skipping sections that "don't apply."** Write `None` instead of deleting. Consistency matters.
 - ❌ **Pasting full transcripts into the discovery log.** Only key exchanges that shaped the framing. Keep it tight.
 - ❌ **Forgetting to commit.** The artifact is the durable output. Always commit.
+- ❌ **Skipping the artifact gates.** The gates run BEFORE the write, every time. A "looks fine" assessment does not substitute for the four checks.
 
 ## Phase 5: DISPATCH
 
