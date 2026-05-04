@@ -40,13 +40,20 @@ originally typed; it's what emerged from the conversation.>
 
 ## Confirmed constraints
 
-- <constraint>: <why it's a constraint, not a choice>
-- <constraint>: ...
+Each line MUST start with a label produced by Tech-D's V1/future-pull sub-classification, and end with a source annotation:
+
+- `[V1] <constraint text> (source: <operator quote / external source / inherited from chunk N>)`
+- `[future-pull, V1-justified: <specific V1 impact>] <constraint text> (source: ...)`
+
+A `[V2-driven, deferred]` item is NOT a V1 constraint — record those under a separate "Deferred (V2 only)" subsection if any exist, not here.
 
 ## Tested choices
 
-- <choice>: <alternatives considered, why this was selected>
-- <choice>: ...
+Each line MUST list the alternatives that were considered and the specific rejection reason for each:
+
+- `<choice> (alternatives: <alt 1> [rejected: <reason>], <alt 2> [rejected: <reason>])`
+
+A "Tested choices" entry without alternatives recorded fails the artifact gate.
 
 ## Chunk 1: <name>
 
@@ -63,8 +70,9 @@ can understand the problem without reading the rest of the artifact.>
 
 ### Open choices (for the executor to resolve)
 
-- <choice>
-- <choice>
+Each open choice MUST include a one-liner survival justification produced during the per-chunk audit (Phase 2 Step 5b). Format:
+
+- `<choice> — Deferred because: <one-liner: why this is more answerable with executor context than now>`
 
 ### Dependencies
 
@@ -152,8 +160,9 @@ The refined statement is *not* a paraphrase of the user's input. It's what emerg
 
 These are distinct sections, not interchangeable.
 
-- **Constraints** = externally imposed (company policy, existing infra, compliance, team decision). These cannot be challenged downstream.
-- **Tested choices** = surfaced as choices, alternatives explored, this one selected. Downstream executors should NOT re-open these — the alternatives were already considered.
+- **Constraints** = externally imposed OR derived from a V1 need. Each carries a `[V1]` or `[future-pull, V1-justified: <reason>]` label and a source annotation. Downstream executors cannot challenge these. The V1/future-pull label is mandatory; an unlabeled constraint blocks the artifact gate.
+- **Tested choices** = surfaced as choices, alternatives explored, this one selected. Each line records the alternatives considered. Downstream executors should NOT re-open these — the alternatives were already considered.
+- **Open choices** (per-chunk) = decisions deferred to the executor. Each carries a survival justification explaining why deferral produces a better outcome than resolution-now.
 
 ### Chunks
 
