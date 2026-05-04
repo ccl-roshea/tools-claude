@@ -194,7 +194,7 @@ Maintain a running summary in your own working memory:
 - Areas explored vs. not yet explored
 - Soft-signal counters per area
 
-You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured.
+You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured. This running summary feeds the phase-exit ledger defined in `references/checkpoint-protocol.md`: at phase boundaries, the ledger formalizes the constraints, tested choices, and unclassified specifics surfaced from your working memory.
 
 ### Checkpoint discipline
 
