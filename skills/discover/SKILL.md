@@ -42,6 +42,7 @@ When you need detailed guidance, read the relevant reference file:
 - `references/research-protocol.md` — Build-vs-buy search and evaluation
 - `references/artifact-template.md` — The output document format
 - `references/dispatch-protocol.md` — How to launch /superpowers per chunk
+- `references/checkpoint-protocol.md` — WIP file format, per-exchange writes, phase-boundary commits, resume, completion
 
 You should read these on demand, not all at once at session start.
 
@@ -58,11 +59,23 @@ You execute the following phases in order. Within each phase you can loop, but y
 
 The flow is: gather understanding → decompose → attack → research → write → execute. Each phase narrows commitment from "open exploration" to "executor-ready problem statements."
 
+## Session startup
+
+Read `references/checkpoint-protocol.md` for the full WIP file format, per-exchange write steps, and phase-boundary commit commands.
+
+**New session** (plain invocation):
+- After the first exchange, derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md`.
+- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator before continuing: "Found in-progress session(s): `<slug>` (Phase: X, Turn: N). Run `/discover resume <slug>` to resume, or continue for a new session."
+
+**Resume** (`/discover resume <slug>`):
+- Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md`.
+- Continue from the recorded phase. Do not re-ask questions already in the transcript.
+
 ## Phase 1: DISCOVER
 
 **Entry:** User pastes a problem statement. The statement may be a single sentence or multiple paragraphs. It may be vague ("I want to deploy agents for my team") or over-specified ("Use Express, Postgres, deploy to ECS"). Both are valid inputs.
 
-**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves.
+**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves. Commit the WIP file with `phase: CHUNK` per `references/checkpoint-protocol.md`.
 
 ### What you do in this phase
 
@@ -124,6 +137,10 @@ Maintain a running summary in your own working memory:
 
 You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured.
 
+### Checkpoint discipline
+
+After every turn in this phase (and in all phases through RESEARCH): write the turn to the WIP file per `references/checkpoint-protocol.md`. This applies whether you asked a question, fired Technique B, proposed moving on, or made any other exchange. Every turn goes in.
+
 ### Discovery axes to consider
 
 These are not a strict checklist — exploration is emergent — but most non-trivial problems benefit from touching each of these axes. Before proposing to move on from Phase 1, check which axes are unexamined and ask if any of them are still open:
@@ -151,7 +168,7 @@ If the user has answered the operator's prompt with rich detail that already cov
 
 **Entry:** Discovery is complete. You have a refined problem statement, confirmed constraints, tested choices, and a sense of the problem's scope.
 
-**Exit:** Chunk structure approved by operator (or "no chunking needed" approved).
+**Exit:** Chunk structure approved by operator (or "no chunking needed" approved). Commit the WIP file with `phase: RED-TEAM` per `references/checkpoint-protocol.md`.
 
 ### What you do in this phase
 
@@ -209,7 +226,7 @@ Then compute the execution order via topological sort. Note parallelism (which c
 
 **Entry:** Chunks are defined (or single chunk confirmed).
 
-**Exit:** All CRITICAL findings addressed. Operator approves.
+**Exit:** All CRITICAL findings addressed. Operator approves. Commit the WIP file with `phase: RESEARCH` per `references/checkpoint-protocol.md`.
 
 ### What you do in this phase
 
@@ -254,7 +271,7 @@ Read `references/anti-sycophancy.md` for full Technique C protocol.
 
 **Entry:** Red-team complete. Chunks pressure-tested.
 
-**Exit:** All chunks classified for build-vs-buy. Operator approves classifications. Chunks restructured.
+**Exit:** All chunks classified for build-vs-buy. Operator approves classifications. Chunks restructured. Commit the WIP file with `phase: ARTIFACT` per `references/checkpoint-protocol.md`.
 
 ### What you do in this phase
 
@@ -330,11 +347,18 @@ Read `references/artifact-template.md` for the full template and section guidanc
 
 **Step 4: write to file** at `docs/discovery/<topic-slug>.md`. Create the `docs/discovery/` directory if it doesn't exist.
 
-**Step 5: commit:**
+**Step 5: stage the artifact:**
 
 ```bash
 git add docs/discovery/<topic-slug>.md
-git commit -m "docs(discovery): add discovery artifact for <topic>"
+```
+
+**Step 5b: finalize the session transcript.** Follow the completion steps in `references/checkpoint-protocol.md`. Strip the YAML front matter from the WIP file, write the transcript to `docs/discovery/<topic-slug>.transcript.md`, then commit everything together:
+
+```bash
+git add docs/discovery/<topic-slug>.transcript.md
+git rm docs/discovery/.wip/<topic-slug>.wip.md
+git commit -m "docs(discovery): add artifact and transcript for <topic>"
 ```
 
 **Step 6: tell the operator** the artifact is written, with the file path. Ask if they want to review it before dispatch.
