@@ -82,39 +82,41 @@ This fights the inverse failure mode: dismissing a good existing tool because th
 
 ## Technique B — Alternative framings (2-3 times per Phase 1)
 
-**When to fire:** At natural convergence points in Phase 1 (DISCOVER). Specifically:
+**When to fire:**
 
-1. After the initial problem framing stabilizes (typically turns 3-5)
-2. When a major architectural direction emerges
-3. Before the skill proposes moving from DISCOVER to CHUNK
+1. **Mandatory turn 1, immediately after Phase 0 completes** — fire the 4-option frame *before* asking any other discovery question. By turn 3, the operator has typed multiple paragraphs inside the original frame; firing at turn 1 surfaces alternatives while the cost of switching is still low.
+2. When a major architectural direction emerges later in Phase 1.
+3. Before the skill proposes moving from DISCOVER to CHUNK.
 
-The LLM should not fire this every turn. It should sense when the conversation is *settling* on a frame and use that as the cue.
+The LLM should not fire this every turn between firings. It should sense when the conversation is *settling* on a frame and use that as the cue for firings 2 and 3.
 
 **The prompt:**
 
-> "Before we go further, let me offer three different ways to think about this problem:
+> "Before we go further, four ways to think about this problem:
 >
-> 1. [Current frame] — what we've been building toward
-> 2. [Alternative frame] — reframes the problem as [X]
-> 3. [Reductive frame] — what if the real problem is actually just [simpler thing]?
+> 1. **[Complex frame]** — what we've been building toward. Full custom system.
+> 2. **[Middle-build frame]** — same outcome, smaller surface. Reuse more, build less.
+> 3. **[Low-build frame]** — minimal new code. Glue + configuration over existing tools.
+> 4. **[No-build frame]** — outcome reached without writing code. Workflow change, existing tool adoption, accepting the pain.
 >
-> Which resonates, or is the real answer a mix?"
+> Which resonates, or is the answer a mix?"
 
-**Critical principle: equal weight across the complexity spectrum.** Option 3 (reductive) must always be present, but it is not a "have you considered doing less?" checkbox. The reductive frame must be evaluated with the same rigor as the complex frames. The right answer might be "yes, this really is a distributed system" or "actually, a single shell script does it."
+**Critical principle: equal weight across the full complexity spectrum.** All four options must be plausible, concrete paths the operator could actually take — same bar across the board. Option 4 (no-build) is not a formality; it is a credible alternative the operator must be able to evaluate seriously. If the agent cannot construct a credible no-build frame for the problem, that is itself a signal the framing is too narrow and needs reconsideration — re-state the outcome at a higher level and try again.
 
-The bias the LLM must fight: Socratic exploration tends to expand problems. Without the reductive frame, conversations drift toward bigger, more architected solutions. Including the reductive frame keeps the full complexity space honest.
+The bias the LLM must fight: Socratic exploration tends to expand problems. Without the no-build frame, conversations drift toward bigger, more architected solutions. Including all four frames keeps the full complexity space honest.
 
 ### Example (good reframings for "deploy agents for my team")
 
-1. **Current frame:** A multi-service platform with a portal, orchestrator, and specialist agents communicating via A2A.
-2. **Alternative frame:** A shared chat workspace where each "agent" is just a Claude Code skill team members invoke via slash commands. No platform. No orchestrator. Just shared skills in a git repo.
-3. **Reductive frame:** A shared bookmark folder pointing to a few well-crafted prompts the team can paste into ChatGPT/Claude as needed. No code at all.
+1. **Complex frame:** A multi-service platform with a portal, orchestrator, and specialist agents communicating via A2A.
+2. **Middle-build frame:** A shared chat workspace where each "agent" is a Claude Code skill team members invoke via slash commands. No platform. No orchestrator. Skill packages built and shared in a git repo.
+3. **Low-build frame:** A small set of well-crafted prompts saved in a shared git repo, plus a README that describes when to use each. Team uses Claude Code's existing skills mechanism to load them.
+4. **No-build frame:** Document a few prompt patterns in the team wiki. Team members paste into Claude/ChatGPT as needed. No code at all.
 
-The user might pick frame 2, or pick a hybrid of 1 and 2, or realize frame 3 is genuinely sufficient. All three deserve serious consideration.
+The user might pick any frame, or a hybrid. All four deserve serious consideration.
 
-### Anti-pattern: weak reductive frame
+### Anti-pattern: weak no-build frame
 
-Don't write: "3. A simpler version of frame 1." That's not a real alternative — it's a hedge. The reductive frame must be *qualitatively different* in approach, not just a smaller version of the complex one.
+Don't write: "4. Use a spreadsheet" or "4. Just don't build it" as a no-build placeholder. Don't write a no-build frame that the agent itself doesn't believe in. Each frame — including no-build — must be a *qualitatively different, credible* path the operator could actually take. If the no-build frame feels forced, re-examine the outcome restatement: the framing may be at the wrong level of abstraction.
 
 ---
 

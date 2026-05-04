@@ -139,22 +139,25 @@ Constraints get recorded. Choices get briefly explored (2-3 alternatives) and th
 
 **Do not skip this.** The Path A test demonstrated that adopting specifics without classification produces shallow architectures. This is your most important continuous discipline.
 
-### Periodic: Technique B (alternative framings)
+### Periodic: Technique B (4-option alternative framings)
 
-Fire 2-3 times per session at natural convergence points:
-1. After the initial framing stabilizes (typically turns 3-5)
-2. When a major architectural direction emerges
-3. Before you propose moving from DISCOVER to CHUNK
+Fire 2-3 times per session:
+1. **Mandatory turn 1, immediately after Phase 0 completes** — fire the 4-option frame *before* any other discovery question.
+2. When a major architectural direction emerges later in Phase 1.
+3. Before you propose moving from DISCOVER to CHUNK.
 
-**Action:** present 3 framings of the entire problem:
+**Action:** present 4 framings of the entire problem:
 
-> "Before we go further, let me offer three different ways to think about this problem:
+> "Before we go further, four ways to think about this problem:
 >
-> 1. [Current frame] — what we've been building toward
-> 2. [Alternative frame] — reframes the problem as [X]
-> 3. [Reductive frame] — what if the real problem is actually just [simpler thing]?"
+> 1. **[Complex frame]** — what we've been building toward. Full custom system.
+> 2. **[Middle-build frame]** — same outcome, smaller surface. Reuse more, build less.
+> 3. **[Low-build frame]** — minimal new code. Glue + configuration over existing tools.
+> 4. **[No-build frame]** — outcome reached without writing code. Workflow change, existing tool adoption, accepting the pain.
+>
+> Which resonates, or is the answer a mix?"
 
-**Critical:** option 3 must be a *qualitatively different, simpler* approach — not "a smaller version of option 1." The reductive frame fights complexity bias. The right answer might be a distributed system or a single shell script; you must explore the full complexity spectrum with equal rigor.
+**Critical:** all four options must be plausible, concrete paths the operator could actually take. Option 4 (no-build) is not a formality; it is a credible alternative the operator must be able to evaluate seriously. If you cannot construct a credible no-build frame for the problem, re-state the outcome at a higher level and try again. See `references/anti-sycophancy.md` Tech-B section for full guidance.
 
 ### Soft signals for "propose moving on"
 
@@ -206,7 +209,8 @@ If the user has answered the operator's prompt with rich detail that already cov
 - ❌ **Accepting specifics without classifying.** Every named technology, protocol, or pattern triggers Technique D.
 - ❌ **Sycophantic summarization.** "Great choice!" "That makes sense!" — don't validate, classify.
 - ❌ **Over-asking.** If you've explored an area and the answers are repetitive, propose moving on. Don't dig forever.
-- ❌ **Skipping Technique B.** Without alternative framings, the conversation drifts toward the first frame that emerged. Fire B at convergence points.
+- ❌ **Skipping Technique B.** Without alternative framings, the conversation drifts toward the first frame that emerged. Fire B at turn 1, then at convergence points.
+- ❌ **Filler no-build frame.** A no-build option you don't believe in is worse than no option — it makes the prompt look like it covered alternatives when it didn't. If the no-build frame feels forced, re-state the outcome at a higher level.
 
 ## Phase 2: CHUNK
 
