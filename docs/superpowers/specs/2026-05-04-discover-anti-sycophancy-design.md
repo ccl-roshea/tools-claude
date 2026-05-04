@@ -133,6 +133,7 @@ Constraints (4):
   [V1] Single primary operator (source: operator, "solo CTO")
   [future-pull, V1-justified: structlog avoids migration when orchestrator arrives] structlog logging
   [V1] Python for both surfaces (source: operator, locked turn 11)
+  [V2-driven, deferred] note: orchestrator log shipping (V2 only — not a V1 constraint)
 
 Tested choices (3):
   Same agent / two execution surfaces (alternatives: distinct agents, reductive Plane+skills)
@@ -165,7 +166,7 @@ Operator can override, but the override is recorded in the artifact as an explic
 
 **Where:** `SKILL.md` Phase 2 (CHUNK), and `references/chunking-guidelines.md`.
 
-Before declaring chunks final (the same gate as Mechanism 6, runs whether or not signals fired), the agent reads each chunk back to itself and answers two questions, written into the WIP:
+Before declaring chunks final (at the same workflow point as Mechanism 6's signal check, but this audit runs unconditionally — whether or not Mechanism 6's signals fired), the agent reads each chunk back to itself and answers two questions, written into the WIP:
 
 1. *"Could this chunk be split into 2-3 chunks with cleaner boundaries? If yes, propose. If no, justify."*
 2. *For each open choice in this chunk: "Is this genuinely more answerable with executor context than now? If yes, why? If no, resolve it."*
@@ -248,3 +249,4 @@ These are deferred to the implementation plan (writing-plans), not resolved here
 - The artifact-gate failure-message format (one bulleted list of failures, or one message per failure).
 - Whether `references/artifact-gates.md` cross-references the four gates by number or by name.
 - Migration: the existing PM agent discovery artifact at `/tmp/pm-agent.md` will not be re-run; new disciplines apply to future discoveries only. No backfill.
+- Resume interaction: when `/discover resume <slug>` is invoked, does Phase 0 re-run? Default assumption is no (the premise check is recorded in the WIP from the original session), but the implementation should state this explicitly and handle the edge case of resuming a session whose WIP predates the Phase 0 discipline.
