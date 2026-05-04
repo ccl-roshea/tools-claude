@@ -22,10 +22,17 @@ Examples of "specific implementation details":
 - An architectural choice ("microservices", "monorepo", "serverless")
 - A library or framework ("React", "FastAPI", "Tailwind")
 - A concrete number that wasn't justified ("3-week MVP", "$500/month budget")
+- A behavioral default or policy quote ("default-ON [X]", "always [Y] before [Z]", "never [W]", "[X] is the source of truth"). Also: any operator-quoted rationale that becomes the support for a design rule (e.g., "we don't want a PM agent without expertise..." → "default-ON it-ops consultation"). Any rule about agent behavior whose only support is operator preference, not external constraint.
 
 **The prompt:**
 
 > "You mentioned [X]. Is that a constraint — something imposed on you externally (company policy, existing infra, compliance, team decision) — or a choice you're making right now? If it's a choice, I want to explore alternatives before we lock it in."
+
+**Trigger phrasing for the sixth category (behavioral defaults / policy quotes):**
+
+> "You stated [Q]. The rule it justifies is [R]. Is [R] a constraint — something imposed externally — or a preference that should be pressure-tested? Alternatives to [R]: ..."
+
+The sixth category often surfaces when the operator phrases a preference as a justification ("we don't want X without Y"). The agent must classify the *rule the quote justifies*, not the quote itself.
 
 **If constraint:** record it in the running constraints list. Note who/what imposed it and why it can't be changed. Move on.
 
