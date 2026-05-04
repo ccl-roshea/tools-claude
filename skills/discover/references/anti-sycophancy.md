@@ -34,7 +34,18 @@ Examples of "specific implementation details":
 
 The sixth category often surfaces when the operator phrases a preference as a justification ("we don't want X without Y"). The agent must classify the *rule the quote justifies*, not the quote itself.
 
-**If constraint:** record it in the running constraints list. Note who/what imposed it and why it can't be changed. Move on.
+**If constraint:** do NOT record yet. First, sub-classify by scope-of-origin with this follow-up:
+
+> "Is [constraint] driven by V1 needs, or by out-of-scope/future needs (V2 features, hypothetical scale, undeployed systems)?"
+
+**Two outcomes:**
+
+- **V1-driven** → record as `[V1] constraint: <text>` (note who/what imposed it and why it can't be changed). Move on.
+- **Future-pull** → challenge: *"What specifically about V1 requires this? Would V1 work without it?"* The operator must either:
+  - Articulate a concrete V1 impact → record as `[future-pull, V1-justified: <reason>] constraint: <text>`
+  - Acknowledge it's V2-driven → either drop from V1 design, or record as `[V2-driven, deferred] note: <text>` (NOT as a V1 constraint)
+
+The agent MUST run sub-classification on every constraint, not only ones that "feel" V2-ish. Future-pull constraints often look reasonable on first encounter; they reveal themselves only when the question is asked explicitly.
 
 **If choice:** briefly present 2-3 alternatives covering the realistic option space. The user picks one or keeps the original — but now it's a *tested* choice, not an untested assumption. Record the alternatives considered in the "Tested choices" list.
 
