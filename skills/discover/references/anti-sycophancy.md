@@ -139,6 +139,15 @@ For each chunk (or the single problem):
 5. **Dependency gaps** — would chunk N actually need information from chunk M that isn't captured in chunk M's outputs? If so, the dependency arrow is wrong or the upstream chunk is incomplete.
 6. **Existence question** — "do you even need to build this?" Is there an existing tool or simpler approach? This is a shallow check from training data — Phase 3.5 does the active research. If a strong candidate surfaces here, record it as a CRITICAL finding and let Phase 3.5 verify.
 7. **Stop-the-clock check** — what happens if you stop here? What would be lost vs. what would be gained?
+8. **Future-pull contamination** — for each chunk and each constraint, ask: *"Is any design element here driven by features, scale, or systems that aren't in V1 scope?"* This catches what Tech-D's V1/future-pull sub-classification missed during DISCOVER.
+
+**Severity guidance for future-pull contamination findings:**
+
+- **CRITICAL** — the future-pull element materially shapes the chunk's architecture. Example: a "core/ has no Claude-runtime-specific imports" constraint shapes how every module in `core/` is structured.
+- **DISCUSS** — the future-pull element adds friction without shaping. Example: choosing structlog now instead of stdlib `logging` adds an extra V1 dependency with no V1-specific benefit.
+- **MINOR** — small choices with future-pull rationale that don't propagate.
+
+**Expectation:** by the time RED-TEAM runs, future-pull contamination should be rare because Tech-D's sub-classification caught it inline. If RED-TEAM finds many instances, that is itself a signal that Tech-D's sub-classification is being skipped in DISCOVER — not just a sign that RED-TEAM is doing its job.
 
 ### Severity classification
 

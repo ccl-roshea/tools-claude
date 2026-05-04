@@ -322,6 +322,7 @@ Read `references/anti-sycophancy.md` for full Technique C protocol.
 5. Dependency gaps — would chunk N actually need information from chunk M that isn't captured?
 6. Existence question — is there an existing tool? (shallow check; Phase 3.5 does the active research)
 7. Stop-the-clock check — what would happen if we stopped here?
+8. **Future-pull contamination** — is any design element (constraint or choice) driven by features, scale, or systems that aren't in V1 scope? See severity guidance in `references/anti-sycophancy.md` Tech-C section.
 
 **Step 3: present findings as a numbered list** with severity per finding. Include reasoning. Examples:
 
