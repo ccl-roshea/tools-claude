@@ -87,6 +87,8 @@ After proposing chunks (and before iterating with the operator to approve), the 
 
 If 2 or more signals fire on a chunk, the agent MUST propose a sub-decomposition in-line, before iterating with the operator. The operator may override; the override is recorded in the artifact as a one-liner under that chunk's section.
 
+If 0-1 signals fire on a chunk, the agent does not surface the check — proceed silently. Don't ask "should we split?" on chunks that look fine; that's operator fatigue.
+
 This check happens at end of CHUNK phase, not at dispatch. By the time DISPATCH runs, any chunk that tripped 2+ signals has either been split or has an explicit override on record.
 
 ## How to propose chunks

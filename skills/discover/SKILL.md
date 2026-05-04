@@ -275,6 +275,8 @@ If 2 or more signals fire on a chunk, you MUST present a sub-decomposition in-li
 
 The operator may override. If they override, record the override in the artifact under that chunk's section as a one-liner: *"This chunk was flagged for split (signals: X, Y); operator overrode with reason: Z."*
 
+If 0-1 signals fire on a chunk, do not surface the check — proceed silently to Step 6. Don't ask "should we split?" on chunks that look fine; that's operator fatigue. The point is to act on chunks that genuinely need it.
+
 Do NOT punt this to dispatch-time. The signals are checked here, the action is taken here.
 
 **Step 6: iterate** with the operator until they approve. They may merge chunks, split further, reorder, or rename.
