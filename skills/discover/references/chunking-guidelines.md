@@ -74,7 +74,7 @@ Don't chunk preemptively. Chunk when chunking is needed *now*, not when it might
 
 ### "The operator wants chunks but the problem is small"
 
-Push back gently. Apply Technique B's reductive frame: is there a simpler solve that wouldn't need chunking? If the operator confirms they want chunks, propose them. The operator has final say.
+Push back gently. Apply Technique B's no-build (or low-build) frame: is there a simpler solve that wouldn't need chunking? If the operator confirms they want chunks, propose them. The operator has final say.
 
 ## How to propose chunks
 

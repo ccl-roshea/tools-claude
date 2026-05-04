@@ -7,7 +7,7 @@ Three techniques the skill uses to prevent the LLM from drifting into agreeable 
 | Technique | When it fires | What it catches | Cost |
 |-----------|--------------|-----------------|------|
 | **D — Constraints vs. choices** | Continuously, every time a specific surfaces | Untested assumptions baked into the framing | ~0 extra turns |
-| **B — Alternative framings** | 2-3 times at convergence points in Phase 1 | Wrong problem frame, complexity bias | ~2-3 extra turns total |
+| **B — Alternative framings** | Turn 1 + 2 more at convergence points in Phase 1 | Wrong problem frame, complexity bias | ~2-3 extra turns total |
 | **C — Red-team pass** | Once, as Phase 3 (its own phase) | Contradictions, missing concerns, scope creep, dependency gaps | ~2 extra turns |
 
 ---

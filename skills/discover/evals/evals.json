@@ -64,7 +64,7 @@
     {
       "id": 4,
       "prompt": "Build a REST API using Express with Postgres and deploy to AWS ECS",
-      "expected_output": "The skill treats this as an over-specified prompt. Technique D challenges multiple specifics as constraints-vs-choices. Technique B offers alternative framings, with option 3 being a qualitatively different reductive frame (not just a smaller version of the original). Phase 3.5 considers managed/serverless alternatives like Supabase, Render, Railway, Fly.io.",
+      "expected_output": "The skill treats this as an over-specified prompt. Technique D challenges multiple specifics as constraints-vs-choices. Technique B offers alternative framings across the full complexity spectrum, including a credible no-build frame. Phase 3.5 considers managed/serverless alternatives like Supabase, Render, Railway, Fly.io.",
       "files": [],
       "expectations": [
         "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
@@ -73,8 +73,8 @@
         "Technique D challenges 'AWS ECS' as a constraint-or-choice",
         "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) are challenged via Technique D",
         "Technique B (alternative framings) fires at least once during Phase 1",
-        "Technique B presents exactly 3 framings: a current frame, an alternative frame, and a reductive frame",
-        "Technique B's option 3 (reductive frame) is qualitatively different from options 1 and 2 — not just 'a smaller version of frame 1'",
+        "Technique B presents exactly 4 framings: a complex frame, a middle-build frame, a low-build frame, and a no-build frame",
+        "Technique B's option 4 (no-build frame) is a credible no-code path the operator could actually take — not just 'a smaller version of frame 1'",
         "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
         "Phase 3.5 surfaces at least one managed/serverless alternative such as Supabase, Render, Railway, Fly.io, Neon, Vercel, or PlanetScale",
         "At least one of the surfaced alternatives is evaluated against the chunk's constraints (functionality match, cost, lock-in, etc.)",
