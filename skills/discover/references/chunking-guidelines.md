@@ -76,6 +76,19 @@ Don't chunk preemptively. Chunk when chunking is needed *now*, not when it might
 
 Push back gently. Apply Technique B's no-build (or low-build) frame: is there a simpler solve that wouldn't need chunking? If the operator confirms they want chunks, propose them. The operator has final say.
 
+## Chunk-overload signals (mandatory check)
+
+After proposing chunks (and before iterating with the operator to approve), the agent MUST check each chunk against four overload signals:
+
+1. **Open-choice density:** the chunk's "Open choices" list has 3+ independent items.
+2. **Lingering vagueness:** the chunk's problem statement still feels vague or multi-faceted when read aloud.
+3. **Sub-domain spread:** the chunk spans multiple sub-domains.
+4. **Red-team flag:** the agent's own draft red-team thinking flags the chunk as scope-creep-prone or with unresolved untested specifics.
+
+If 2 or more signals fire on a chunk, the agent MUST propose a sub-decomposition in-line, before iterating with the operator. The operator may override; the override is recorded in the artifact as a one-liner under that chunk's section.
+
+This check happens at end of CHUNK phase, not at dispatch. By the time DISPATCH runs, any chunk that tripped 2+ signals has either been split or has an explicit override on record.
+
 ## How to propose chunks
 
 Once chunking is justified, present the proposal:

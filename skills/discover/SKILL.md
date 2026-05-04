@@ -262,7 +262,22 @@ Then compute the execution order via topological sort. Note parallelism (which c
 >
 > Does this split make sense, or would you draw the lines differently?"
 
-**Step 5: iterate** with the operator until they approve. They may merge chunks, split further, reorder, or rename.
+**Step 5: chunk-overload signal check (mandatory).** For each proposed chunk, count how many of these signals fire:
+
+1. **Open-choice density:** the "Open choices" list has 3+ independent items.
+2. **Lingering vagueness:** the problem statement still feels vague or multi-faceted when read aloud — a fresh /superpowers session would still need clarification on basic intent.
+3. **Sub-domain spread:** the chunk spans multiple sub-domains (e.g., "Portal" = UX + auth + APIs).
+4. **Red-team flag:** Phase 3 has not yet run, but if your own draft red-team thinking flags this chunk as scope-creep-prone or with unresolved untested specifics, count it.
+
+If 2 or more signals fire on a chunk, you MUST present a sub-decomposition in-line, before moving on:
+
+> "Chunk N as written has [list signals that fired]. Here's how I'd split it into 2-3 sub-chunks: [proposal]. Want me to apply this split, or override and keep it as one chunk?"
+
+The operator may override. If they override, record the override in the artifact under that chunk's section as a one-liner: *"This chunk was flagged for split (signals: X, Y); operator overrode with reason: Z."*
+
+Do NOT punt this to dispatch-time. The signals are checked here, the action is taken here.
+
+**Step 6: iterate** with the operator until they approve. They may merge chunks, split further, reorder, or rename.
 
 ### Anti-patterns
 
@@ -433,43 +448,25 @@ Read `references/dispatch-protocol.md` for full sequential dispatch logic, promp
 
 **Step 2: for each chunk in execution order:**
 
-a. **Assess chunk complexity for recursion.** Before composing the dispatch prompt, check whether this chunk is well-scoped for /superpowers or whether it would benefit from its own /discover pass first. The parent /discover pressure-tested the *root* framing, but chunks can still be too large or multi-decision for a single /superpowers session.
-
-Apply these signals to the chunk:
-- Does the "Open choices" list have 3+ independent items?
-- Does the problem statement still feel vague or multi-faceted when read aloud (i.e., would a fresh executor still need clarification on basic intent)?
-- Does the chunk span multiple sub-domains (e.g., "Portal" = UX + auth + APIs)?
-- Did Phase 3's red-team flag this chunk as scope-creep-prone or with unresolved untested specifics?
-
-If 2 or more signals fire, propose to the operator:
-
-> "Chunk N (<name>) looks like it might still need its own discovery pass before /superpowers can plan it well. The signals: [cite which fired and why]. Want to run /discover on this chunk first, or proceed straight to /superpowers?"
-
-If the operator chooses /discover, recursively invoke this skill on the chunk's problem statement and constraints. The output is a sub-discovery artifact at `docs/discovery/<parent-slug>/<chunk-slug>.md`. Then dispatch the sub-chunks of that artifact via the same Phase 5 logic. Operator-driven recursion only — no automatic recursion. The operator decides per chunk and can stop the recursion at any depth.
-
-If 0-1 signals fire, proceed straight to dispatch — don't surface the prompt. Don't ask "should we run discovery?" on chunks that look fine; that's just operator fatigue. The point is to flag chunks that genuinely need it.
-
-If the operator declines /discover, proceed straight to dispatch.
-
-b. **Compose the dispatch prompt.** Combine:
+a. **Compose the dispatch prompt.** Combine:
 - The chunk's problem statement (verbatim from artifact)
 - A "## Constraints (do not re-open)" section with all top-level constraints + chunk-specific constraints
 - The chunk's "Open choices (for the executor to resolve)" section
 - An "## Upstream decisions (from completed chunks)" section IF this chunk has dependencies — populated from the prior chunks' /superpowers outputs
 
-c. **Launch via Agent tool:**
+b. **Launch via Agent tool:**
 - `subagent_type`: `general-purpose`
 - `description`: `"Plan chunk <N>: <chunk name>"`
 - `prompt`: the composed prompt
 - `run_in_background`: `false` (operator must interact)
 
-d. **Wait for completion.** The operator drives the /superpowers session. The agent returns when /superpowers' brainstorm + writing-plans sub-flow finishes.
+c. **Wait for completion.** The operator drives the /superpowers session. The agent returns when /superpowers' brainstorm + writing-plans sub-flow finishes.
 
-e. **Extract decisions.** Read the design doc and plan that /superpowers produced (in `docs/superpowers/specs/` and `docs/superpowers/plans/`). Summarize key decisions for downstream chunks: architecture choices, tech stack, API contracts, data models. Format into a "## Upstream decisions" section ready to feed into the next dependent chunk.
+d. **Extract decisions.** Read the design doc and plan that /superpowers produced (in `docs/superpowers/specs/` and `docs/superpowers/plans/`). Summarize key decisions for downstream chunks: architecture choices, tech stack, API contracts, data models. Format into a "## Upstream decisions" section ready to feed into the next dependent chunk.
 
-f. **Update the artifact.** Add a link to the chunk's design doc and plan in the chunk's section. Optionally add a "Decisions made" subsection. Commit the artifact update.
+e. **Update the artifact.** Add a link to the chunk's design doc and plan in the chunk's section. Optionally add a "Decisions made" subsection. Commit the artifact update.
 
-g. **Move to the next chunk** in execution order.
+f. **Move to the next chunk** in execution order.
 
 **Step 3: when all chunks are complete,** tell the operator:
 
