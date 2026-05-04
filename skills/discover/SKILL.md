@@ -119,7 +119,7 @@ Then proceed per the operator's choice.
 
 **Entry:** User pastes a problem statement. The statement may be a single sentence or multiple paragraphs. It may be vague ("I want to deploy agents for my team") or over-specified ("Use Express, Postgres, deploy to ECS"). Both are valid inputs.
 
-**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves. Commit the WIP file with `phase: CHUNK` per `references/checkpoint-protocol.md`.
+**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves. Surface the phase-exit ledger (constraints, tested choices, unclassified specifics) per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: CHUNK`.
 
 ### What you do in this phase
 
@@ -138,6 +138,18 @@ Read `references/anti-sycophancy.md` for the full Technique D protocol if you ha
 Constraints get recorded. Choices get briefly explored (2-3 alternatives) and then either confirmed or replaced.
 
 **Do not skip this.** The Path A test demonstrated that adopting specifics without classification produces shallow architectures. This is your most important continuous discipline.
+
+**Per-fire visibility (high-stakes specifics).** For most classifications, Tech-D fires silently and surfaces the result in the next phase-exit ledger. But for **high-stakes specifics**, the agent shows the classification result inline in the same turn rather than batching. Definition of high-stakes: specifics that, if wrong, would invalidate multiple downstream chunks. Concretely:
+
+- **Named foundational technology** that the rest of the design will sit on top of (database, framework, deployment target, language).
+- **Behavioral default that affects every operation** of the agent or system being designed (e.g., "default-ON consultation," "always confirm before write," "X is the source of truth").
+- **An item the agent is about to record as a `[future-pull, V1-justified: ...]` constraint** — these need explicit operator buy-in inline, not retrospective audit.
+
+Inline visibility format:
+
+> "Tech-D classification: [item] → [V1] constraint. Source: [your quote / external source]. Recording it. Want to challenge?"
+
+All other Tech-D classifications happen silently and appear in the next phase-exit ledger.
 
 ### Periodic: Technique B (4-option alternative framings)
 
@@ -216,7 +228,7 @@ If the user has answered the operator's prompt with rich detail that already cov
 
 **Entry:** Discovery is complete. You have a refined problem statement, confirmed constraints, tested choices, and a sense of the problem's scope.
 
-**Exit:** Chunk structure approved by operator (or "no chunking needed" approved). Commit the WIP file with `phase: RED-TEAM` per `references/checkpoint-protocol.md`.
+**Exit:** Chunk structure approved by operator (or "no chunking needed" approved). Surface the phase-exit ledger per `references/checkpoint-protocol.md` (the ledger now also includes the per-chunk audit results from Step 5b). Commit the WIP file with `phase: RED-TEAM`.
 
 ### What you do in this phase
 
@@ -303,7 +315,7 @@ The audit's outputs (split-or-not justification, per-open-choice survival justif
 
 **Entry:** Chunks are defined (or single chunk confirmed).
 
-**Exit:** All CRITICAL findings addressed. Operator approves. Commit the WIP file with `phase: RESEARCH` per `references/checkpoint-protocol.md`.
+**Exit:** All CRITICAL findings addressed. Operator approves. Surface the phase-exit ledger per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: RESEARCH`.
 
 ### What you do in this phase
 
@@ -349,7 +361,7 @@ Read `references/anti-sycophancy.md` for full Technique C protocol.
 
 **Entry:** Red-team complete. Chunks pressure-tested.
 
-**Exit:** All chunks classified for build-vs-buy. Operator approves classifications. Chunks restructured. Commit the WIP file with `phase: ARTIFACT` per `references/checkpoint-protocol.md`.
+**Exit:** All chunks classified for build-vs-buy. Operator approves classifications. Chunks restructured. Surface the phase-exit ledger per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: ARTIFACT`.
 
 ### What you do in this phase
 

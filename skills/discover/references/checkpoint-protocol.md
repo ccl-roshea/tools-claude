@@ -29,6 +29,30 @@ started: 2026-05-04
 
 YAML fields: `topic_slug`, `phase`, `turn_count`, `started`. Nothing else. All discovery content lives in the transcript.
 
+## Phase-exit ledger entries
+
+In addition to the per-turn transcript, the WIP file accumulates a ledger entry at every phase exit (DISCOVER → CHUNK, CHUNK → RED-TEAM, RED-TEAM → RESEARCH, RESEARCH → ARTIFACT). Each ledger entry is appended to a `## Ledgers` section at the end of the WIP file (created on first use). Format:
+
+```text
+─── Phase exit: <FROM> → <TO> (turn N) ───
+Constraints (M):
+  [V1] <constraint text> (source: <operator quote / external source / inherited from chunk N>)
+  [future-pull, V1-justified: <reason>] <constraint text> (source: ...)
+  [V2-driven, deferred] note: <text> (source: ...)
+
+Tested choices (K):
+  <choice> (alternatives: <list of alternatives considered>)
+
+Unclassified specifics that surfaced this phase (P):
+  <specific> — needs Tech-D before phase exits
+
+Want to address the unclassified item now, or proceed to <TO>?
+```
+
+- The "Constraints" line format mirrors the labels Tech-D produces (`[V1]`, `[future-pull, V1-justified: ...]`, `[V2-driven, deferred]`).
+- The "Unclassified specifics" line is load-bearing: if this list is non-empty at phase exit and the operator chooses to proceed anyway, each unclassified specific is automatically carried into RED-TEAM as a CRITICAL finding.
+- The ledger is shown to the operator before the phase-boundary commit, and the operator's decision (proceed / address unclassified items first) is recorded in the next turn block of the transcript.
+
 ## Slug derivation
 
 After the first exchange, derive a provisional slug: kebab-case from the first 4–5 significant words of the problem statement. Examples: `team-agent-platform`, `auth-redesign`, `cart-graphql-migration`. Use this slug for the WIP filename and YAML field from that point on. If Phase 4 confirms a different final slug, rename the WIP file at that point.
@@ -51,15 +75,18 @@ After every turn — questions, Technique B framings, "propose moving on" exchan
 
 At each phase exit, before announcing to the operator that you're moving on:
 
-1. Update the `phase` field in YAML to the next phase value.
-2. Write the file.
-3. Run:
+1. **Surface the phase-exit ledger** to the operator (see "Phase-exit ledger entries" above). Wait for the operator's acknowledgement.
+   - If unclassified specifics are present, the operator chooses whether to address them now or proceed (carrying them into RED-TEAM as CRITICAL findings).
+2. **Append the ledger entry** to the `## Ledgers` section of the WIP file.
+3. Update the `phase` field in YAML to the next phase value.
+4. Write the file.
+5. Run:
    ```bash
    git add docs/discovery/.wip/<slug>.wip.md
    git commit -m "chore(discover): checkpoint <slug> — entering <NEXT-PHASE>"
    ```
 
-Phase sequence: `DISCOVER` → `CHUNK` → `RED-TEAM` → `RESEARCH` → `ARTIFACT`
+Phase sequence: `PREMISE CHECK` → `DISCOVER` → `CHUNK` → `RED-TEAM` → `RESEARCH` → `ARTIFACT`. (Phase 0 / PREMISE CHECK does not produce a ledger entry — it produces a `Premise check` section in the transcript instead.)
 
 ## Resume reconstruction
 
