@@ -1,0 +1,8 @@
+session_name: tools-claude
+start_directory: ~/repos/tools-claude
+windows:
+  - window_name: main
+    layout: even-horizontal
+    panes:
+      - shell_command: 
+      - shell_command:
