@@ -46,30 +46,74 @@ When you need detailed guidance, read the relevant reference file:
 
 You should read these on demand, not all at once at session start.
 
-## The six phases
+## The seven phases
 
 You execute the following phases in order. Within each phase you can loop, but you don't skip ahead. Each phase has explicit entry and exit criteria.
 
-1. **DISCOVER** — Socratic exploration with continuous Technique D (constraints vs. choices) and 2-3 invocations of Technique B (alternative framings)
-2. **CHUNK** — Decompose into executor-sized chunks if needed; compute execution order
-3. **RED-TEAM** — Adversarial pass on the conclusions (Technique C)
-4. **RESEARCH** (Phase 3.5) — Active build-vs-buy research; restructure chunks based on findings
-5. **ARTIFACT** — Write and commit the discovery document
-6. **DISPATCH** — Sequentially launch /superpowers for each chunk
+0. **PREMISE CHECK** — One mandatory turn at session start. Restate the operator's highest-level outcome and ask whether a no-build path could reach it.
+1. **DISCOVER** — Socratic exploration with continuous Technique D (constraints vs. choices, with V1/future-pull sub-classification) and 2-3 invocations of Technique B (alternative framings, 4-option spectrum). First Tech-B firing is at turn 1, immediately after Phase 0.
+2. **CHUNK** — Decompose into executor-sized chunks if needed; compute execution order. Includes mandatory chunk-overload-signal check and per-chunk audit before exit.
+3. **RED-TEAM** — Adversarial pass on the conclusions (Technique C), including future-pull contamination check.
+4. **RESEARCH** (Phase 3.5) — Active build-vs-buy research; restructure chunks based on findings.
+5. **ARTIFACT** — Run write-time gates (see `references/artifact-gates.md`); write and commit the discovery document if gates pass.
+6. **DISPATCH** — Sequentially launch /superpowers for each chunk.
 
-The flow is: gather understanding → decompose → attack → research → write → execute. Each phase narrows commitment from "open exploration" to "executor-ready problem statements."
+The flow is: premise → gather understanding → decompose → attack → research → write → execute. Each phase narrows commitment from "open exploration" to "executor-ready problem statements." At every phase exit through ARTIFACT, the agent surfaces a structured ledger to the operator (see `references/checkpoint-protocol.md`) before advancing.
 
 ## Session startup
 
 Read `references/checkpoint-protocol.md` for the full WIP file format, per-exchange write steps, and phase-boundary commit commands.
 
 **New session** (plain invocation):
-- After the first exchange, derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md`.
-- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator before continuing: "Found in-progress session(s): `<slug>` (Phase: X, Turn: N). Run `/discover resume <slug>` to resume, or continue for a new session."
+- Begin with Phase 0 (PREMISE CHECK). Do not derive the slug or create the WIP file until after Phase 0 is recorded — the slug derivation may use the restated outcome from Phase 0 step 1.
+- After Phase 0 completes (or after the first exchange if Phase 0 took only one turn), derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md`. The WIP file's transcript starts with the Phase 0 turn(s) recorded under a `Premise check` section, then the regular transcript begins.
+- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X, Turn: N). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
 
 **Resume** (`/discover resume <slug>`):
 - Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md`.
 - Continue from the recorded phase. Do not re-ask questions already in the transcript.
+
+## Phase 0: PREMISE CHECK
+
+**Entry:** User pastes a problem statement. The statement may be vague ("I want to deploy agents for my team") or over-specified ("Use Express, Postgres, deploy to ECS"). Either is a valid input.
+
+**Exit:** Premise check recorded in the WIP file under a `Premise check` section. Phase advances to DISCOVER.
+
+### What you do in this phase
+
+Exactly one mandatory turn (with a possible 1-3 follow-up turns if the operator wants to explore the no-build path).
+
+**Step 1: Restate the highest-level outcome.** State back the *outcome* the operator is asking for, not the proposed solution. Example: for "build a PM agent for Plane" input, restate as "you want PM legwork off your plate" — *not* "you want a Plane-integrated agent." Naming the outcome forces the conversation onto the right axis (the goal) rather than the wrong axis (the solution shape).
+
+**Step 2: Ask the premise-check question.** Use this exact shape:
+
+> "Before I start asking questions about how to build this, one premise check: is there a path where this outcome gets reached *without building anything new*? Possible no-build paths I can see: [enumerate 2-3 specific ones]. Have you considered these and ruled them out, or is the build premise still open?"
+
+**Anti-pattern guard:** the agent MUST NOT enumerate generic no-build paths ("just don't build it"). The 2-3 paths must be *concrete to the operator's stated outcome*. For example, for a "build a PM agent for Plane" input, concrete no-build paths would include:
+- "Use Plane's MCP directly from your Claude installs (no new agent code)."
+- "Improve the existing markdown POC instead of greenfield rewrite."
+- "Accept that you do PM in Plane manually with a small skill set, no agent."
+
+If the agent cannot construct 2-3 *concrete* no-build paths for the operator's outcome, that itself is a signal the framing is too narrow — note this and re-state the outcome at a higher level before re-asking.
+
+**Step 3: Handle the operator's response.**
+
+- **"Considered and ruled out"** — record the ruling reason in the WIP file under a new `Premise check` section (format: `Ruled out because: <reason>`). Move to Phase 1.
+- **"Open / haven't considered"** — proceed to a brief no-build exploration (1-3 turns). For each no-build path the operator wants to consider, ask a clarifying question about whether it would actually reach the outcome. If a no-build path proves viable, suggest stopping the discovery and pursuing it. If not, record what was considered and why building wins (format: `Considered but rejected: <path> — <reason>`). Move to Phase 1.
+- **"Don't ask me this"** (operator override) — record the override and the operator's reason (format: `Operator override: <reason>`). Move to Phase 1.
+
+**Resume behavior:** if `/discover resume <slug>` is invoked, Phase 0 does NOT re-run. The WIP file's `Premise check` section is preserved. If a resumed WIP predates the Phase 0 discipline (no `Premise check` section present), tell the operator:
+
+> "This session predates the Phase 0 premise check. Want me to run a backfill premise check turn now, or skip and resume from Phase `<phase>`?"
+
+Then proceed per the operator's choice.
+
+### Anti-patterns
+
+- ❌ **Restating the solution instead of the outcome.** "You want a Plane-integrated agent" is a restatement of the proposed solution, not the underlying goal. Name the goal: "you want PM legwork off your plate."
+- ❌ **Skipping the no-build path enumeration.** The 2-3 concrete paths are load-bearing. A bare "have you considered alternatives?" invites "yes I did" without specifics.
+- ❌ **Treating Phase 0 as multiple turns by default.** It is ONE turn unless the operator opts into the no-build exploration.
+- ❌ **Generic no-build paths.** "Just don't build it" or "use a spreadsheet" without a credible path to the outcome is filler. If you can't construct 2-3 credible paths, re-state the outcome at a higher level.
 
 ## Phase 1: DISCOVER
 
