@@ -65,8 +65,10 @@ can understand the problem without reading the rest of the artifact.>
 
 ### Constraints (inherited + chunk-specific)
 
-- <constraint>
-- <constraint>
+Inherited constraints carry their `[V1]` / `[future-pull, V1-justified: ...]` labels and source annotations verbatim from the top-level "Confirmed constraints" section. Chunk-specific constraints follow the same labeling rule.
+
+- `[V1] <constraint text> (source: ...)`
+- `[future-pull, V1-justified: <reason>] <constraint text> (source: ...)`
 
 ### Open choices (for the executor to resolve)
 

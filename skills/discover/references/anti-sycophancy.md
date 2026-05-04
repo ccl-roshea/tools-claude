@@ -40,10 +40,12 @@ The sixth category often surfaces when the operator phrases a preference as a ju
 
 **Two outcomes:**
 
-- **V1-driven** → record as `[V1] constraint: <text>` (note who/what imposed it and why it can't be changed). Move on.
+- **V1-driven** → record as `[V1] <text> (source: <quote / external source>)`. Move on.
 - **Future-pull** → challenge: *"What specifically about V1 requires this? Would V1 work without it?"* The operator must either:
-  - Articulate a concrete V1 impact → record as `[future-pull, V1-justified: <reason>] constraint: <text>`
-  - Acknowledge it's V2-driven → either drop from V1 design, or record as `[V2-driven, deferred] note: <text>` (NOT as a V1 constraint)
+  - Articulate a concrete V1 impact → record as `[future-pull, V1-justified: <reason>] <text> (source: ...)`
+  - Acknowledge it's V2-driven → either drop from V1 design, or record as `[V2-driven, deferred] note: <text>` under a separate "Deferred (V2 only)" subsection (NOT as a V1 constraint)
+
+These recording formats match the artifact template (see `references/artifact-template.md`); operators following Tech-D produce strings that drop directly into the "Confirmed constraints" section without reformatting.
 
 The agent MUST run sub-classification on every constraint, not only ones that "feel" V2-ish. Future-pull constraints often look reasonable on first encounter; they reveal themselves only when the question is asked explicitly.
 
