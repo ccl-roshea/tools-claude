@@ -1,0 +1,11 @@
+# Egress allowlist for this project's hardened devcontainer.
+# One hostname per line. Lines starting with # are comments.
+# Bundles in this config contribute their own entries automatically.
+api.anthropic.com
+claude.ai
+files.pythonhosted.org
+github.com
+nodejs.org
+objects.githubusercontent.com
+pypi.org
+registry.npmjs.org

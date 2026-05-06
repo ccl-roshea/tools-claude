@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "rodc",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "init": true,
+  "updateRemoteUserUID": true,
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/rodc/.claude",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "SSH_AUTH_SOCK": "/run/dcs/ssh-agent.sock",
+    "UV_LINK_MODE": "copy",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "NPM_CONFIG_IGNORE_SCRIPTS": "true",
+    "NPM_CONFIG_AUDIT": "true",
+    "NPM_CONFIG_FUND": "false",
+    "NPM_CONFIG_SAVE_EXACT": "true",
+    "NPM_CONFIG_UPDATE_NOTIFIER": "false",
+    "NPM_CONFIG_MINIMUM_RELEASE_AGE": "1440"
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.gitconfig,target=/home/rodc/.gitconfig,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/nvim,target=/home/rodc/.config/nvim,type=bind,readonly",
+    "source=${localEnv:HOME}/.config/nvim/lazy-lock.json,target=/home/rodc/.config/nvim/lazy-lock.json,type=bind",
+    "source=${localEnv:HOME}/.tmux.conf,target=/home/rodc/.tmux.conf,type=bind,readonly",
+    "source=devc-${localWorkspaceFolderBasename}-nvim-share-${devcontainerId},target=/home/rodc/.local/share/nvim,type=volume",
+    "source=devc-${localWorkspaceFolderBasename}-commandhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=${localEnv:HOME}/.claude/skills,target=/home/rodc/.claude/skills,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/commands,target=/home/rodc/.claude/commands,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/dc-projects/${localWorkspaceFolderBasename},target=/home/rodc/.claude/projects,type=bind",
+    "source=${localEnv:HOME}/.claude/.credentials.json,target=/home/rodc/.claude/.credentials.json,type=bind",
+    "source=${localEnv:HOME}/.config/gh,target=/home/rodc/.config/gh,type=bind,readonly",
+    "source=devc-${localWorkspaceFolderBasename}-claude-cache-${devcontainerId},target=/home/rodc/.claude/cache,type=volume",
+    "source=devc-${localWorkspaceFolderBasename}-claude-plugins-${devcontainerId},target=/home/rodc/.claude/plugins,type=volume",
+    "source=${localEnv:HOME}/.claude.json,target=/run/host-claude/.claude.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/settings.json,target=/run/host-claude/settings.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/plugins/installed_plugins.json,target=/run/host-claude/plugins/installed_plugins.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.claude/plugins/known_marketplaces.json,target=/run/host-claude/plugins/known_marketplaces.json,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh/config,target=/home/rodc/.ssh/config,type=bind,readonly",
+    "source=${localEnv:HOME}/.ssh/known_hosts,target=/home/rodc/.ssh/known_hosts,type=bind,readonly",
+    "source=${localEnv:HOME}/.dcs/ssh-agent.sock,target=/run/dcs/ssh-agent.sock,type=bind"
+  ],
+  "initializeCommand": "sh -c 'mkdir -p \"$HOME/.config/nvim\"; touch \"$HOME/.config/nvim/lazy-lock.json\"'; sh -c 'test -f \"$HOME/.gitconfig\" || touch \"$HOME/.gitconfig\"; test -d \"$HOME/.config/gh\" || mkdir -p \"$HOME/.config/gh\"; mkdir -p \"$HOME/.claude/skills\" \"$HOME/.claude/plugins\" \"$HOME/.claude/commands\" \"$HOME/.claude/projects\" \"$HOME/.claude/dc-projects/$(basename \"$PWD\")\"; touch \"$HOME/.claude/settings.json\" \"$HOME/.claude/.credentials.json\" \"$HOME/.claude.json\" \"$HOME/.claude/plugins/installed_plugins.json\" \"$HOME/.claude/plugins/known_marketplaces.json\"; mkdir -p \"$HOME/.ssh\" \"$HOME/.dcs\"; touch \"$HOME/.ssh/known_hosts\" \"$HOME/.ssh/config\"; if [ -z \"$SSH_AUTH_SOCK\" ] || [ ! -S \"$SSH_AUTH_SOCK\" ]; then echo \"ERROR: ssh-agent not reachable on host (SSH_AUTH_SOCK unset or not a socket). Start your agent and ensure the github key is loaded:\" >&2; echo \"  eval \\\"\\$(ssh-agent)\\\"\" >&2; echo \"  ssh-add ~/.ssh/github\" >&2; echo \"Then re-run \\`dcs up\\`.\" >&2; exit 1; fi; ln -sfn \"$SSH_AUTH_SOCK\" \"$HOME/.dcs/ssh-agent.sock\"'",
+  "remoteEnv": {
+    "CLAUDE_CODE_OAUTH_TOKEN": "${localEnv:CLAUDE_CODE_OAUTH_TOKEN:}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY:}"
+  },
+  "onCreateCommand": "sh -c '[ -s /run/host-claude/.claude.json ] && [ ! -e \"$CLAUDE_CONFIG_DIR/.claude.json\" ] && cp /run/host-claude/.claude.json \"$CLAUDE_CONFIG_DIR/.claude.json\" || true; [ -s /run/host-claude/settings.json ] && [ ! -e \"$CLAUDE_CONFIG_DIR/settings.json\" ] && jq \"del(.hooks)\" /run/host-claude/settings.json > \"$CLAUDE_CONFIG_DIR/settings.json\" || true'",
+  "postCreateCommand": "seed-plugins || true",
+  "runArgs": [
+    "--cap-add=NET_ADMIN"
+  ],
+  "name": "Claude Code Sandbox"
+}

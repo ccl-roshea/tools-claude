@@ -1,0 +1,14 @@
+{
+  "config": "claude-sandbox",
+  "bundles": [
+    "base",
+    "python-uv",
+    "node-fnm",
+    "zsh-history",
+    "claude-code",
+    "net-isolation",
+    "claude-sandbox"
+  ],
+  "source_commit": "0c4f1d42889c50cb05505235ee23198db9126c8d",
+  "user_mounts": []
+}
