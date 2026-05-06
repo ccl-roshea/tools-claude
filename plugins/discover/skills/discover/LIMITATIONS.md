@@ -68,7 +68,15 @@ These are real gaps in the current `/discover` skill, observed during the valida
 
 **Mitigation hypothesis (not implemented):** if real-world use shows agents skipping gates, the design moves from "agent reads its own draft" to a more mechanical check (e.g., a structured validation protocol the agent must produce as evidence of running the gates). For now, accept the standard reliability profile.
 
-## 10. The chunk-overload signal check is now mandatory at CHUNK exit, not advisory at DISPATCH
+## 10. JSONL transcript hook is cwd-gated and single-WIP only
+
+**Observed:** The plugin's `mirror-jsonl.sh` hook fires on every Claude Code `Stop` and `SessionEnd`, but it only acts when exactly one `*.wip.md` file exists under `<cwd>/docs/discovery/.wip/`. Zero or two-plus WIPs → no-op (the latter logs to stderr).
+
+**Pattern:** This is the simplest disambiguation rule, but it means recursive discovery (multiple chunks discovered in parallel from the same project root) cannot rely on the auto-mirror — it would skip every turn because the WIP set is ambiguous. The current skill flow does in-line sub-decomposition rather than recursive `/discover`, so the constraint doesn't bite the default flow.
+
+**Mitigation:** If recursive `/discover` is ever resurrected, the hook needs a slug-passing mechanism (e.g., env var or marker file written at session start) to disambiguate. For now, operators doing recursive discovery manually should sequence the sessions, not parallelize.
+
+## 11. The chunk-overload signal check is now mandatory at CHUNK exit, not advisory at DISPATCH
 
 **Observed:** The signals previously surfaced as an optional prompt at dispatch time; they now surface as a mandatory action at end of CHUNK phase. The change shifts when chunk-decomposition decisions are made (earlier, while context is hot) but adds friction in the CHUNK phase.
 

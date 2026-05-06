@@ -42,7 +42,7 @@ When you need detailed guidance, read the relevant reference file:
 - `references/research-protocol.md` — Build-vs-buy search and evaluation
 - `references/artifact-template.md` — The output document format
 - `references/dispatch-protocol.md` — How to launch /superpowers per chunk
-- `references/checkpoint-protocol.md` — WIP file format, per-exchange writes, phase-boundary commits, resume, completion
+- `references/checkpoint-protocol.md` — WIP file format, phase-boundary commits, resume, completion. Note: the per-turn JSONL transcript is mirrored automatically by the plugin's hook; the agent does not write turns by hand.
 
 You should read these on demand, not all at once at session start.
 
@@ -62,16 +62,16 @@ The flow is: premise → gather understanding → decompose → attack → resea
 
 ## Session startup
 
-Read `references/checkpoint-protocol.md` for the full WIP file format, per-exchange write steps, and phase-boundary commit commands.
+Read `references/checkpoint-protocol.md` for the full WIP file format and phase-boundary commit commands. The raw session transcript (JSONL) is captured automatically by the plugin's hook into `docs/discovery/.wip/<slug>/<session-id>.jsonl` — the agent does not record turns by hand.
 
 **New session** (plain invocation):
 - Begin with Phase 0 (PREMISE CHECK). Do not derive the slug or create the WIP file until after Phase 0 is recorded — the slug derivation may use the restated outcome from Phase 0 step 1.
-- After Phase 0 completes (or after the first exchange if Phase 0 took only one turn), derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md`. The WIP file's transcript starts with the Phase 0 turn(s) recorded under a `Premise check` section, then the regular transcript begins.
-- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X, Turn: N). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
+- After Phase 0 completes (or after the first exchange if Phase 0 took only one turn), derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md` containing the YAML header and a `## Premise check` section recording the Phase 0 outcome. The hook will start mirroring the JSONL into `docs/discovery/.wip/<slug>/` from the next turn onward.
+- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
 
 **Resume** (`/discover resume <slug>`):
-- Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md`.
-- Continue from the recorded phase. Do not re-ask questions already in the transcript.
+- Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md` (read YAML + `## Premise check` + `## Ledgers`; do not read the JSONLs).
+- Continue from the recorded phase. Do not re-ask questions covered by the ledger entries.
 
 ## Phase 0: PREMISE CHECK
 
@@ -98,11 +98,11 @@ If the agent cannot construct 2-3 *concrete* no-build paths for the operator's o
 
 **Step 3: Handle the operator's response.**
 
-- **"Considered and ruled out"** — record the ruling reason in the WIP file under a new `Premise check` section (format: `Ruled out because: <reason>`). Move to Phase 1.
+- **"Considered and ruled out"** — record the ruling reason in the WIP file under a new `## Premise check` section (format: `Ruled out because: <reason>`). Move to Phase 1.
 - **"Open / haven't considered"** — proceed to a brief no-build exploration (1-3 turns). For each no-build path the operator wants to consider, ask a clarifying question about whether it would actually reach the outcome. If a no-build path proves viable, suggest stopping the discovery and pursuing it. If not, record what was considered and why building wins (format: `Considered but rejected: <path> — <reason>`). Move to Phase 1.
 - **"Don't ask me this"** (operator override) — record the override and the operator's reason (format: `Operator override: <reason>`). Move to Phase 1.
 
-**Resume behavior:** if `/discover resume <slug>` is invoked, Phase 0 does NOT re-run. The WIP file's `Premise check` section is preserved. If a resumed WIP predates the Phase 0 discipline (no `Premise check` section present), tell the operator:
+**Resume behavior:** if `/discover resume <slug>` is invoked, Phase 0 does NOT re-run. The WIP file's `## Premise check` section is preserved. If a resumed WIP predates the Phase 0 discipline (no `## Premise check` section present), tell the operator:
 
 > "This session predates the Phase 0 premise check. Want me to run a backfill premise check turn now, or skip and resume from Phase `<phase>`?"
 
@@ -198,7 +198,7 @@ You don't need to surface this summary every turn — but you can show it when p
 
 ### Checkpoint discipline
 
-After every turn in this phase (and in all phases through RESEARCH): write the turn to the WIP file per `references/checkpoint-protocol.md`. This applies whether you asked a question, fired Technique B, proposed moving on, or made any other exchange. Every turn goes in.
+The plugin's hook mirrors the raw session JSONL into `docs/discovery/.wip/<slug>/<session-id>.jsonl` after every turn — automatically, with no agent action required. Your only checkpoint duty is at phase boundaries: surface the phase-exit ledger, append it to the WIP file's `## Ledgers` section, update the YAML `phase` field, and commit. See `references/checkpoint-protocol.md` for the exact format and commit command.
 
 ### Discovery axes to consider
 
@@ -445,11 +445,12 @@ Read `references/artifact-template.md` for the full template and section guidanc
 git add docs/discovery/<topic-slug>.md
 ```
 
-**Step 5b: finalize the session transcript.** Follow the completion steps in `references/checkpoint-protocol.md`. Strip the YAML front matter from the WIP file, write the transcript to `docs/discovery/<topic-slug>.transcript.md`, then commit everything together:
+**Step 5b: finalize the session transcript.** Follow the completion steps in `references/checkpoint-protocol.md`. Move the JSONL transcript directory out of `.wip/` and remove the WIP file, then commit everything together:
 
 ```bash
-git add docs/discovery/<topic-slug>.transcript.md
+git mv docs/discovery/.wip/<topic-slug> docs/discovery/<topic-slug>
 git rm docs/discovery/.wip/<topic-slug>.wip.md
+git add docs/discovery/<topic-slug>/
 git commit -m "docs(discovery): add artifact and transcript for <topic>"
 ```
 
