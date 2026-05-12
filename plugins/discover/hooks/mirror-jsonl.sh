@@ -36,3 +36,13 @@ mkdir -p "$dest_dir"
 tmp="$(mktemp "$dest_dir/.${session_id}.XXXXXX")"
 cp "$transcript_path" "$tmp"
 mv "$tmp" "$dest_dir/${session_id}.jsonl"
+
+# Stage the mirror into the git index so a crash leaves a recoverable,
+# tracked file instead of an untracked orphan. Phase 5b's git mv of the
+# whole .wip/<slug>/ directory picks the staged blob up unchanged.
+mirror_path="$dest_dir/${session_id}.jsonl"
+if git -C "$cwd" rev-parse --git-dir >/dev/null 2>&1; then
+  if ! git -C "$cwd" add -- "$mirror_path" 2>/dev/null; then
+    echo "discover/mirror-jsonl: git add of $mirror_path failed; mirror is on disk but not staged" >&2
+  fi
+fi
