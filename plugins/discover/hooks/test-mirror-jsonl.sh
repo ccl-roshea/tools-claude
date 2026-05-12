@@ -52,4 +52,27 @@ if ! grep -qx "$expected" <<<"$staged"; then
   exit 1
 fi
 
+# --- Case 2: cwd is not a git repo. Hook should still copy, not crash. ---
+tmp2="$(mktemp -d)"
+trap 'rm -rf "$tmp" "$tmp2"' EXIT
+
+mkdir -p "$tmp2/docs/discovery/.wip"
+echo "# WIP" >"$tmp2/docs/discovery/.wip/bar.wip.md"
+transcript2="$tmp2/.fake-cc/def456.jsonl"
+mkdir -p "$(dirname "$transcript2")"
+printf '{"turn":1}\n' >"$transcript2"
+
+payload2="$(jq -n \
+  --arg t "$transcript2" \
+  --arg c "$tmp2" \
+  --arg s "def456" \
+  '{transcript_path:$t, cwd:$c, session_id:$s}')"
+echo "$payload2" | bash "$hook"
+
+mirror2="$tmp2/docs/discovery/.wip/bar/def456.jsonl"
+if [[ ! -f "$mirror2" ]]; then
+  echo "FAIL (case 2): mirror file not created in non-git cwd" >&2
+  exit 1
+fi
+
 echo "PASS"
