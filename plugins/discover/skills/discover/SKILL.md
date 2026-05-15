@@ -88,9 +88,35 @@ Read `references/checkpoint-protocol.md` for the full WIP file format and phase-
 
 ### What you do in this phase
 
-Exactly one mandatory turn (with a possible 1-3 follow-up turns if the operator wants to explore the no-build path).
+Exactly one mandatory turn (with a possible 1-3 follow-up turns if the operator wants to explore the no-build path). The mandatory turn covers Step 1 (restate outcome), Step 1.5 (audit prompt for shape-language), and Step 2 (premise-check question) in a single response. Step 3 handles the operator's reply.
 
 **Step 1: Restate the highest-level outcome.** State back the *outcome* the operator is asking for, not the proposed solution. Example: for "build a PM agent for Plane" input, restate as "you want PM legwork off your plate" — *not* "you want a Plane-integrated agent." Naming the outcome forces the conversation onto the right axis (the goal) rather than the wrong axis (the solution shape).
+
+**Step 1.5: Audit the prompt for shape-language.** After the outcome restatement, scan the operator's prompt for *shape-language* — phrases that name a *how* rather than a *what*. List them back to the operator and let them pre-authorize any with an external source citation; the rest get parked for Phase 1.
+
+Audit heuristic: flag phrases that name a **how** (process, workflow), a **tool / technology** (named product, library, framework), a **pattern** (architectural, behavioral, interaction style), or a **non-functional shape framing** ("first-class citizen", "comprehensive", "primary tool", "real-time"). Pure outcomes ("juniors execute reliably", "PM legwork off my plate") are NOT shape-language and do not get flagged.
+
+Use this exact shape:
+
+> "Your prompt also contains shape-language — phrases that look like solutions ('the how') rather than outcomes ('the what'):
+>
+> - "<quoted phrase>" — looks like <how / tool / pattern / non-functional shape>
+> - …
+>
+> In Phase 1 each will be put on trial: what outcome does it serve? Want to flag any as definitely-external (regulator, contract, deployed system, prior empirical result, factual measurement)? If so, cite the source and I'll lock it in now. Otherwise I'll park them all for Phase 1."
+
+If the operator pre-authorizes any shape with a concrete external source, lock it in as a constraint per the verifiability rule in `references/anti-sycophancy.md` Tech-D. All other shape-phrases get recorded under "Parked shapes" in the WIP ledger (see `references/checkpoint-protocol.md`) with `parked_at_turn: 0` and an outcome-question to be answered in Phase 1.
+
+**Caps to prevent friction:**
+
+- **At most 5 shape-phrases listed.** If more surface, show the 5 most load-bearing and note "+N more — will surface in Phase 1." Don't list trivial nouns (a noun like "juniors" is not shape-language; "task instructions with guardrails" is).
+- **Shape-clean fast path.** If the prompt has NO shape-language, give a one-sentence audit and move on: "Prompt is shape-clean. Moving to premise check." Do not invent shapes to flag.
+
+**Anti-patterns:**
+
+- ❌ **Listing every word as a potential shape.** Be conservative. Flag load-bearing shape-language only — phrases the rest of the design would inherit if left unchallenged.
+- ❌ **Accepting "I don't know if it's a constraint."** Push to external-with-source (lock in) or park (defer to Phase 1). There is no third option.
+- ❌ **Skipping the audit when the prompt looks tight.** That is exactly when shape-smuggling happens most — a fluent prompt full of named tools and patterns reads as "decided" but is usually full of habit-typed defaults.
 
 **Step 2: Ask the premise-check question.** Use this exact shape:
 
