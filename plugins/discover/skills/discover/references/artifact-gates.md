@@ -11,9 +11,9 @@ The gates are agent-driven self-validation in the prompt — not external toolin
 For each line under "## Confirmed constraints" in the assembled artifact draft, verify both:
 
 - A label is present at the start of the line: either `[V1]` or `[future-pull, V1-justified: <reason>]`.
-- A source annotation is present in parens at the end of the line: `(source: <operator quote / external source / inherited from chunk N>)`.
+- A source annotation is present in parens at the end of the line. The source MUST cite one of the five external categories from Tech-D's verifiability rule (see `anti-sycophancy.md`): **regulator** (compliance framework + control), **contract** (commercial agreement + clause), **deployed system** (system + version), **prior empirical result** (experiment / POC / incident + where recorded), or **factual measurement** (measured value + when taken). Format: `(source: <category> — <specific citation>)`. Inherited constraints may instead use `(source: inherited from chunk N)` and carry the upstream category-tagged citation.
 
-**Fails if:** any line lacks the label or lacks the source annotation. Lines under a separate "Deferred (V2 only)" subsection are not checked here (those use the `[V2-driven, deferred]` label format and are not V1 constraints).
+**Fails if:** any line lacks the label, lacks the source annotation, or carries a source that does not cite one of the five external categories (regulator, contract, deployed system, prior empirical result, factual measurement). A bare operator quote without an external category tag fails the gate — that input belongs in the WIP ledger's "Parked shapes" subsection, not in confirmed constraints. Lines under a separate "Deferred (V2 only)" subsection are not checked here (those use the `[V2-driven, deferred]` label format and are not V1 constraints).
 
 ## Gate 2: Tested choices alternatives gate
 

@@ -76,6 +76,10 @@ Each open choice MUST include a one-liner survival justification produced during
 
 - `<choice> — Deferred because: <one-liner: why this is more answerable with executor context than now>`
 
+This section also accepts **Shape-candidates deferred to executor** — entries carried from the WIP ledger's "Parked shapes" subsection (any parked shape that remained unresolved at artifact write-time). Each carried entry surfaces the parked shape and its outcome-question so the executor can resolve the shape against its actual outcome. Format:
+
+- `Shape-candidate: "<parked shape>" — Outcome-question: <the outcome-question recorded when the shape was parked>. Deferred because: this shape lacked an external source citation in /discover; the executor resolves it against the outcome-question above.`
+
 ### Dependencies
 
 None | Depends on: Chunk N (specifically: <what decision is needed and why>)
