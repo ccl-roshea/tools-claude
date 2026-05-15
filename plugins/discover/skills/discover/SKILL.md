@@ -43,9 +43,9 @@ When you need detailed guidance, read the relevant reference file:
 - `references/artifact-template.md` — The output document format
 - `references/dispatch-protocol.md` — How to launch /superpowers per chunk
 - `references/checkpoint-protocol.md` — WIP file format, phase-boundary commits, resume, completion. Note: the per-turn JSONL transcript is mirrored automatically by the plugin's hook; the agent does not write turns by hand.
-- `references/labeling-protocol.md` — addressable `§X.Y.Z` labels for every response
+- `references/labeling-protocol.md` — Addressable `§X.Y.Z` labels for every response
 
-You should read these on demand, not all at once at session start.
+You should read these on demand, not all at once at session start — except for `labeling-protocol.md` (see next section).
 
 ## Response labeling
 
