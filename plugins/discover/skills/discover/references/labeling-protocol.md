@@ -51,6 +51,9 @@ Do not put labels in a separate column or in an end-of-message TOC.
 - **Nested bullets.** Each level adds a digit: top bullet `§1.1.1`, its sub-bullet `§1.1.1.1`. Limit to four levels deep; deeper structures usually want flattening.
 - **Single-section responses with no enclosing heading.** If the entire response is just bullets with no parent heading, address them directly: `§1`, `§2`, `§3` for the bullets themselves.
 - **Tables.** Address each row separately when the operator might want to discuss or modify a single row in isolation (e.g., a comparison matrix of options). Address the whole table as one item when rows are jointly meaningful and not separately actionable (e.g., a key-value reference table). When in doubt, prefer the whole-table address — granular row addresses can be added later if asked for.
+- **Answer-option bullets under a question.** When a single question is followed by a bulleted list of answer choices the operator picks from, address the choices as sub-parts of the question: `§Q1.1`, `§Q1.2`, etc. (not as `§1`, `§2` content). This keeps the operator's "answer §Q1.2" unambiguous and ties the choices to the question they belong to.
+- **Prose-introduced lists.** When a prose paragraph introduces a list (e.g., "Here are four ways to think about this:" followed by 4 items), treat the introducing prose as a virtual section heading. The list items become `§1.1`–`§1.N` under that virtual section, not top-level `§1`–`§N`. This keeps the address space hierarchical and lets you reference the introducing context separately from the items.
+- **Inline classification that is also the question.** When a Tech-D probe is the same line as a question to the operator (e.g., "Is `Claude Code` a constraint or a choice?"), address it once as `§Q`, not twice. The question framing is load-bearing; the classification framing is descriptive of what the agent is doing.
 
 ## Worked example
 
