@@ -2,7 +2,7 @@
 
 > Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the Phase 4 write-time validation only.
 
-Before writing the discovery artifact to `docs/discovery/<slug>.md`, the agent runs four self-validation gates against the assembled draft. Any failure blocks the write and returns the agent to a fixup loop.
+Before writing the discovery artifact to `docs/socrates/discover/<slug>.md`, the agent runs four self-validation gates against the assembled draft. Any failure blocks the write and returns the agent to a fixup loop.
 
 The gates are agent-driven self-validation in the prompt — not external tooling. The agent reads its own draft, runs the four checks, and reports its conclusions to the operator before writing.
 
@@ -68,7 +68,7 @@ When any gate fails, the agent does NOT write the artifact. Instead:
 
 3. **Re-run all four gates after each fixup.** A single missed item won't be the only one; re-running catches cascade failures.
 
-4. **Only after all gates pass:** proceed to write the artifact to `docs/discovery/<slug>.md`.
+4. **Only after all gates pass:** proceed to write the artifact to `docs/socrates/discover/<slug>.md`.
 
 ## Anti-patterns
 

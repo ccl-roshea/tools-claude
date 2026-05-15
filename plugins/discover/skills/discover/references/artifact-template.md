@@ -6,7 +6,7 @@ The output document the skill writes in Phase 4. Every discovery session produce
 
 ## Filename and location
 
-`docs/discovery/<topic-slug>.md`
+`docs/socrates/discover/<topic-slug>.md`
 
 `<topic-slug>` is a kebab-case identifier derived from the refined problem statement. Examples: `team-agent-platform`, `auth-redesign`, `cart-graphql-migration`.
 

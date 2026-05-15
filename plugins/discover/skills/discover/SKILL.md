@@ -69,12 +69,12 @@ The flow is: premise → gather understanding → decompose → attack → resea
 
 ## Session startup
 
-Read `references/checkpoint-protocol.md` for the full WIP file format and phase-boundary commit commands. The raw session transcript (JSONL) is captured automatically by the plugin's hook into `docs/discovery/.wip/<slug>/<session-id>.jsonl` — the agent does not record turns by hand.
+Read `references/checkpoint-protocol.md` for the full WIP file format and phase-boundary commit commands. The raw session transcript (JSONL) is captured automatically by the plugin's hook into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` — the agent does not record turns by hand.
 
 **New session** (plain invocation):
 - Begin with Phase 0 (PREMISE CHECK). Do not derive the slug or create the WIP file until after Phase 0 is recorded — the slug derivation may use the restated outcome from Phase 0 step 1.
-- After Phase 0 completes (or after the first exchange if Phase 0 took only one turn), derive a provisional topic slug and create `docs/discovery/.wip/<slug>.wip.md` containing the YAML header and a `## Premise check` section recording the Phase 0 outcome. The hook will start mirroring the JSONL into `docs/discovery/.wip/<slug>/` from the next turn onward.
-- If `docs/discovery/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
+- After Phase 0 completes (or after the first exchange if Phase 0 took only one turn), derive a provisional topic slug and create `docs/socrates/discover/.wip/<slug>.wip.md` containing the YAML header and a `## Premise check` section recording the Phase 0 outcome. The hook will start mirroring the JSONL into `docs/socrates/discover/.wip/<slug>/` from the next turn onward.
+- If `docs/socrates/discover/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
 
 **Resume** (`/discover resume <slug>`):
 - Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md` (read YAML + `## Premise check` + `## Ledgers`; do not read the JSONLs).
@@ -255,7 +255,7 @@ You don't need to surface this summary every turn — but you can show it when p
 
 ### Checkpoint discipline
 
-The plugin's hook mirrors the raw session JSONL into `docs/discovery/.wip/<slug>/<session-id>.jsonl` after every turn — automatically, with no agent action required. Your only checkpoint duty is at phase boundaries: surface the phase-exit ledger, append it to the WIP file's `## Ledgers` section, update the YAML `phase` field, and commit. See `references/checkpoint-protocol.md` for the exact format and commit command.
+The plugin's hook mirrors the raw session JSONL into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` after every turn — automatically, with no agent action required. Your only checkpoint duty is at phase boundaries: surface the phase-exit ledger, append it to the WIP file's `## Ledgers` section, update the YAML `phase` field, and commit. See `references/checkpoint-protocol.md` for the exact format and commit command.
 
 ### Discovery axes to consider
 
@@ -473,7 +473,7 @@ If the operator can't articulate a specific reason, the rejection is suspect.
 
 **Entry:** Red-team complete, research done, chunks finalized.
 
-**Exit:** Artifact written to `docs/discovery/<topic>.md` and committed.
+**Exit:** Artifact written to `docs/socrates/discover/<topic>.md` and committed.
 
 ### What you do in this phase
 
@@ -497,20 +497,20 @@ Read `references/artifact-template.md` for the full template and section guidanc
 
 **Step 4a: run artifact-time gates.** Before writing, run the four self-validation gates defined in `references/artifact-gates.md` against the assembled draft. If any gate fails, do NOT write. Surface the failures to the operator (grouped by gate name), enter the fixup loop (returning to the relevant phase as needed), and re-run all four gates after each fixup. Only proceed to Step 4b when all gates pass.
 
-**Step 4b: write to file** at `docs/discovery/<topic-slug>.md`. Create the `docs/discovery/` directory if it doesn't exist.
+**Step 4b: write to file** at `docs/socrates/discover/<topic-slug>.md`. Create the `docs/socrates/discover/` directory if it doesn't exist.
 
 **Step 5: stage the artifact:**
 
 ```bash
-git add docs/discovery/<topic-slug>.md
+git add docs/socrates/discover/<topic-slug>.md
 ```
 
 **Step 5b: finalize the session transcript.** Follow the completion steps in `references/checkpoint-protocol.md`. Move the JSONL transcript directory out of `.wip/` and remove the WIP file, then commit everything together:
 
 ```bash
-git mv docs/discovery/.wip/<topic-slug> docs/discovery/<topic-slug>
-git rm docs/discovery/.wip/<topic-slug>.wip.md
-git add docs/discovery/<topic-slug>/
+git mv docs/socrates/discover/.wip/<topic-slug> docs/socrates/discover/<topic-slug>
+git rm docs/socrates/discover/.wip/<topic-slug>.wip.md
+git add docs/socrates/discover/<topic-slug>/
 git commit -m "docs(discovery): add artifact and transcript for <topic>"
 ```
 
@@ -593,7 +593,7 @@ If, mid-dispatch, the operator says "skip this chunk":
 ## Closing
 
 When all phases complete and dispatch is done, the operator has:
-- A committed discovery artifact at `docs/discovery/<topic>.md`
+- A committed discovery artifact at `docs/socrates/discover/<topic>.md`
 - Per-chunk design docs and implementation plans (produced by /superpowers)
 - A clear hand-off point: each plan can be executed independently
 

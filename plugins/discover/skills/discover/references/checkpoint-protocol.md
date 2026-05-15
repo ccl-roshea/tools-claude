@@ -4,7 +4,7 @@ Instructions for maintaining the WIP file during a `/discover` session. Read thi
 
 ## What captures the transcript
 
-The plugin ships a hook (`hooks/mirror-jsonl.sh`) that fires on `Stop` and `SessionEnd`. After every turn it copies the active Claude Code session JSONL from `~/.claude/projects/<encoded-cwd>/<session-id>.jsonl` into `docs/discovery/.wip/<slug>/<session-id>.jsonl`. This is automatic — the agent does not write turn blocks by hand. The hook is conditional: if no WIP file exists in cwd, or if multiple WIPs exist (ambiguous), the hook is a no-op.
+The plugin ships a hook (`hooks/mirror-jsonl.sh`) that fires on `Stop` and `SessionEnd`. After every turn it copies the active Claude Code session JSONL from `~/.claude/projects/<encoded-cwd>/<session-id>.jsonl` into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl`. This is automatic — the agent does not write turn blocks by hand. The hook is conditional: if no WIP file exists in cwd, or if multiple WIPs exist (ambiguous), the hook is a no-op.
 
 The agent's only writes to the WIP file are:
 - Creating it after Phase 0 with the YAML header + `## Premise check` section.
@@ -12,7 +12,7 @@ The agent's only writes to the WIP file are:
 
 ## WIP file format
 
-**Location:** `docs/discovery/.wip/<topic-slug>.wip.md`
+**Location:** `docs/socrates/discover/.wip/<topic-slug>.wip.md`
 
 ```markdown
 ---
@@ -102,7 +102,7 @@ At each phase exit, before announcing to the operator that you're moving on:
 4. Write the file.
 5. Run:
    ```bash
-   git add docs/discovery/.wip/<slug>.wip.md docs/discovery/.wip/<slug>/
+   git add docs/socrates/discover/.wip/<slug>.wip.md docs/socrates/discover/.wip/<slug>/
    git commit -m "chore(discover): checkpoint <slug> — entering <NEXT-PHASE>"
    ```
 
@@ -114,30 +114,30 @@ Phase sequence: `PREMISE CHECK` → `DISCOVER` → `CHUNK` → `RED-TEAM` → `R
 
 When invoked as `/discover resume <slug>`:
 
-1. Read `docs/discovery/.wip/<slug>.wip.md`.
+1. Read `docs/socrates/discover/.wip/<slug>.wip.md`.
 2. Parse YAML: extract `topic_slug` and `phase`.
-3. Read the `## Premise check` and `## Ledgers` sections. Do **not** read the JSONLs in `docs/discovery/.wip/<slug>/` — they are large and the structured ledger entries are the canonical resume context.
+3. Read the `## Premise check` and `## Ledgers` sections. Do **not** read the JSONLs in `docs/socrates/discover/.wip/<slug>/` — they are large and the structured ledger entries are the canonical resume context.
 4. Tell the operator:
 
    > "Resuming `<slug>` from Phase `<phase>`. Confirmed constraints: [list from latest ledger]. Tested choices: [list from latest ledger]. Continuing where we left off."
 
 5. Resume the Socratic flow from the current phase's entry state. Do not re-ask anything covered by the ledger entries.
 
-The hook will resume mirroring on the first turn of the resumed session — a new `<new-session-id>.jsonl` will appear in `docs/discovery/.wip/<slug>/` alongside the prior session's JSONL.
+The hook will resume mirroring on the first turn of the resumed session — a new `<new-session-id>.jsonl` will appear in `docs/socrates/discover/.wip/<slug>/` alongside the prior session's JSONL.
 
 ## Completion (end of Phase 4)
 
-After the artifact is written to `docs/discovery/<slug>.md`:
+After the artifact is written to `docs/socrates/discover/<slug>.md`:
 
 ```bash
-git mv docs/discovery/.wip/<slug> docs/discovery/<slug>
-git rm docs/discovery/.wip/<slug>.wip.md
-git add docs/discovery/<slug>.md docs/discovery/<slug>/
+git mv docs/socrates/discover/.wip/<slug> docs/socrates/discover/<slug>
+git rm docs/socrates/discover/.wip/<slug>.wip.md
+git add docs/socrates/discover/<slug>.md docs/socrates/discover/<slug>/
 git commit -m "docs(discovery): add artifact and transcript for <slug>"
 ```
 
 The final layout is:
-- `docs/discovery/<slug>.md` — the artifact
-- `docs/discovery/<slug>/<session-id>.jsonl` — one or more JSONL files, one per Claude Code session that touched this discovery (resumed sessions accumulate)
+- `docs/socrates/discover/<slug>.md` — the artifact
+- `docs/socrates/discover/<slug>/<session-id>.jsonl` — one or more JSONL files, one per Claude Code session that touched this discovery (resumed sessions accumulate)
 
-The WIP file (`docs/discovery/.wip/<slug>.wip.md`) is removed in this commit.
+The WIP file (`docs/socrates/discover/.wip/<slug>.wip.md`) is removed in this commit.

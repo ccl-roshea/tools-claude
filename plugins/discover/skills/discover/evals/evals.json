@@ -21,7 +21,7 @@
         "Phase 3.5 (RESEARCH) executes with at least one WebSearch tool invocation",
         "The research phase surfaces at least one of: AutoGen, LangGraph, Claude Agent SDK as a candidate",
         "Each surfaced candidate is evaluated against at least 2 of: functionality match, license, cost, maintenance, lock-in, integration burden",
-        "Phase 4 (ARTIFACT) produces a discovery artifact at docs/discovery/<slug>.md following the template (header, framing, constraints, chunks, red-team findings, research outcomes, discovery log)"
+        "Phase 4 (ARTIFACT) produces a discovery artifact at docs/socrates/discover/<slug>.md following the template (header, framing, constraints, chunks, red-team findings, research outcomes, discovery log)"
       ]
     },
     {

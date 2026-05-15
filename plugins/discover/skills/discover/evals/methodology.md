@@ -12,8 +12,8 @@ This methodology pairs a per-dimension rubric with a parallel subagent dispatch 
 
 For any session evaluation:
 
-- **Session JSONL transcript** (the raw turn record from Claude Code; mirror lives at `docs/discovery/<slug>/<session-id>.jsonl` after artifact commit)
-- **Exported artifact** at `docs/discovery/<slug>.md`
+- **Session JSONL transcript** (the raw turn record from Claude Code; mirror lives at `docs/socrates/discover/<slug>/<session-id>.jsonl` after artifact commit)
+- **Exported artifact** at `docs/socrates/discover/<slug>.md`
 - **Skill documentation contemporaneous with the session** — pin the version from the session date. Files: `SKILL.md`, all of `references/`, `LIMITATIONS.md`, `evals/evals.json`. Protocols evolve; auditing against current docs when the session predates them produces false negatives.
 
 ## The seven dimensions
@@ -150,7 +150,7 @@ The orchestrator (main thread) reads all 6 reports and writes a unified `evaluat
 
 ## Output deliverables
 
-This methodology lives at `plugins/discover/skills/discover/evals/methodology.md` (alongside `evals.json`). Per-session evaluation reports live at `plugins/discover/skills/discover/evals/reports/<session-slug>.md`. The session transcript itself stays where the session generated it (`docs/discovery/<slug>/<session-id>.jsonl` in whichever repo the session ran in).
+This methodology lives at `plugins/discover/skills/discover/evals/methodology.md` (alongside `evals.json`). Per-session evaluation reports live at `plugins/discover/skills/discover/evals/reports/<session-slug>.md`. The session transcript itself stays where the session generated it (`docs/socrates/discover/<slug>/<session-id>.jsonl` in whichever repo the session ran in).
 
 Each session report contains:
 
