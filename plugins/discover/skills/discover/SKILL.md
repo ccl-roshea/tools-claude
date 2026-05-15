@@ -221,6 +221,27 @@ When any signal fires, propose:
 
 The operator decides. You don't terminate unilaterally.
 
+#### Visible soft-signal checks (every 5 turns)
+
+Surface the soft-signal counter status inline every 5 turns — first check at turn 5, then turn 10, turn 15, and so on. Show the line whether or not any signal is firing; predictability is the point. Cadence rationale: the "10+ turns since a new theme" threshold is the slowest signal, so a 5-turn cadence gives the operator two visibility checks before it can fire — enough lead time to call wrap-up before a signal is forced.
+
+Format: a single inline line at the appropriate turn. Counters reported are revisits, turns-since-new-theme, answer-length-trend, and repetitive-question-count.
+
+When no signals are firing:
+
+> **Soft-signal check (turn 5):** revisits=0, turns-since-new-theme=3, answer-length-trend=stable, repetitive-question-count=0. No signal firing — continuing.
+
+When ≥1 signal is firing:
+
+> **Soft-signal check (turn 15):** revisits=2, turns-since-new-theme=10 ⚠️, answer-length-trend=shortening ⚠️, repetitive-question-count=1. Two signals firing on [substrate selection]. Want to converge or keep digging?
+
+Anti-pattern guards:
+
+- ❌ Firing more often than every 5 turns — N=5 is the floor, not a target.
+- ❌ Suppressing visibility when no signals fire — show the zero-state. Predictability is the point.
+- ❌ Treating the visibility check as a pause for response — it's a status line; no mandatory acknowledgment.
+- ❌ Stale counters — increment per-turn before producing the status line.
+
 ### What you track internally
 
 Maintain a running summary in your own working memory:
