@@ -6,71 +6,117 @@ Three techniques the skill uses to prevent the LLM from drifting into agreeable 
 
 | Technique | When it fires | What it catches | Cost |
 |-----------|--------------|-----------------|------|
-| **D — Constraints vs. choices** | Continuously, every time a specific surfaces | Untested assumptions baked into the framing | ~0 extra turns |
+| **D — Verifiability rule** | Continuously, every time a specific surfaces | Shapes locked in without external grounding; untested assumptions baked into the framing | ~0 extra turns |
 | **B — Alternative framings** | Turn 1 + 2 more at convergence points in Phase 1 | Wrong problem frame, complexity bias | ~2-3 extra turns total |
 | **C — Red-team pass** | Once, as Phase 3 (its own phase) | Contradictions, missing concerns, scope creep, dependency gaps | ~2 extra turns |
 
 ---
 
-## Technique D — Constraints vs. choices (continuous)
+## Technique D — Verifiability rule (continuous)
 
-**When to fire:** Any time a specific implementation detail appears in the conversation. The detail can come from the user's input, the user's answer to a question, or the LLM's own suggestion.
+**When to fire:** Any time a specific surfaces. The specific can come from the operator's prompt, an answer to a question, or the skill's own suggestion. "Specific" includes:
 
-Examples of "specific implementation details":
 - A named technology ("Postgres", "AWS", "Next.js", "Azure")
 - A protocol or pattern ("REST", "GraphQL", "event-driven")
 - An architectural choice ("microservices", "monorepo", "serverless")
 - A library or framework ("React", "FastAPI", "Tailwind")
 - A concrete number that wasn't justified ("3-week MVP", "$500/month budget")
-- A behavioral default or policy quote ("default-ON [X]", "always [Y] before [Z]", "never [W]", "[X] is the source of truth"). Also: any operator-quoted rationale that becomes the support for a design rule (e.g., "we don't want a PM agent without expertise..." → "default-ON it-ops consultation"). Any rule about agent behavior whose only support is operator preference, not external constraint.
+- A solution-shaped abstraction ("real-time updates", "comprehensive task instructions with guardrails", "auditability as a first-class citizen", "primary working tool")
+- A behavioral default or policy quote ("default-ON [X]", "always [Y] before [Z]", "never [W]", "[X] is the source of truth"). Also: any operator-quoted rationale that becomes the support for a design rule (e.g., "we don't want a PM agent without expertise..." → "default-ON it-ops consultation"). The rule the quote justifies is what gets classified, not the quote itself.
 
-**The prompt:**
+**The rule.** Every surfaced specific is one of two things:
 
-> "You mentioned [X]. Is that a constraint — something imposed on you externally (company policy, existing infra, compliance, team decision) — or a choice you're making right now? If it's a choice, I want to explore alternatives before we lock it in."
+- **EXTERNAL** — verifiable via a concrete external source from one of the five categories below. Lock in as a constraint.
+- **PREFERENCE / SHAPE** — no external source. Do not classify the shape itself. Peel back to the outcome it serves and park it.
 
-**Trigger phrasing for the sixth category (behavioral defaults / policy quotes):**
+Absence of an external source is not "soft constraint" or "operator strong preference." It is a preference, and a preference gets peeled back.
 
-> "You stated [Q]. The rule it justifies is [R]. Is [R] a constraint — something imposed externally — or a preference that should be pressure-tested? Alternatives to [R]: ..."
+### The five external-source categories
 
-The sixth category often surfaces when the operator phrases a preference as a justification ("we don't want X without Y"). The agent must classify the *rule the quote justifies*, not the quote itself.
+A specific qualifies as EXTERNAL only if the operator can point to one of:
 
-**If constraint:** do NOT record yet. First, sub-classify by scope-of-origin with this follow-up:
+1. **Regulator / compliance framework** — SOC2, HIPAA, PCI-DSS, GDPR, FedRAMP, etc. Cite framework + the specific control. *Example:* `regulator — SOC2 CC6.1: logical access controls`.
+2. **Contract / commercial agreement** — enterprise contract, vendor SLA, customer MSA. Cite contract + clause. *Example:* `contract — enterprise AWS agreement, §4.2 cloud exclusivity`.
+3. **Deployed system** — infrastructure already running in the operator's environment. Cite system + version. *Example:* `deployed system — Postgres 15 cluster on RDS, prod since 2024-01`.
+4. **Prior empirical result** — previous experiment, POC, production incident, or load test with documentation. Cite result + where recorded. *Example:* `prior empirical — INC-2025-0412 postmortem: Redis cluster failover took 47s`.
+5. **Factual measurement** — headcount, revenue, traffic, scale numbers from observed reality. Cite measurement + when taken. *Example:* `factual measurement — 12 engineers across 3 squads, as of 2026-04`.
+
+If the proposed source doesn't fit one of these five, treat the specific as preference. "It's what we usually do," "the team is comfortable with it," "we discussed it last quarter" are not external sources.
+
+### Source citation format
+
+Tightens the existing `(source: …)` field; no new field is introduced.
+
+- **External:** `(source: <category> — <specific citation>)` — e.g., `(source: regulator — SOC2 CC6.1: logical access controls)`.
+- **Preference:** no `source` field. Record under the WIP ledger's "Parked shapes" subsection instead, with the outcome-question the shape raises. (Ledger format defined in `references/checkpoint-protocol.md`.)
+
+### Operator-facing prompt
+
+> "[X] surfaced. What's the external source? Specifically: is there a (regulator, contract, deployed system, prior empirical result, factual measurement) that mandates this? If yes, cite it and I'll record as constraint. If no, this is a design preference — I'll park it with the outcome-question it raises."
+
+For the "rule justified by quoted preference" case (e.g., "we don't want X without Y"):
+
+> "You stated [Q]. The rule it justifies is [R]. What external source mandates [R] — regulator, contract, deployed system, prior empirical result, or factual measurement? If none, [R] is a preference and I'll park the shape it implies."
+
+### Lock-in path (external only): V1/future-pull sub-classification
+
+After an external source is cited, do NOT record yet. First sub-classify by scope-of-origin:
 
 > "Is [constraint] driven by V1 needs, or by out-of-scope/future needs (V2 features, hypothetical scale, undeployed systems)?"
 
 **Two outcomes:**
 
-- **V1-driven** → record as `[V1] <text> (source: <quote / external source>)`. Move on.
+- **V1-driven** → record as `[V1] <text> (source: <category> — <specific citation>)`. Move on.
 - **Future-pull** → challenge: *"What specifically about V1 requires this? Would V1 work without it?"* The operator must either:
-  - Articulate a concrete V1 impact → record as `[future-pull, V1-justified: <reason>] <text> (source: ...)`
-  - Acknowledge it's V2-driven → either drop from V1 design, or record as `[V2-driven, deferred] note: <text>` under a separate "Deferred (V2 only)" subsection (NOT as a V1 constraint)
+  - Articulate a concrete V1 impact → record as `[future-pull, V1-justified: <reason>] <text> (source: <category> — <specific citation>)`.
+  - Acknowledge it's V2-driven → either drop from V1 design, or record as `[V2-driven, deferred] note: <text>` under a separate "Deferred (V2 only)" subsection (NOT as a V1 constraint).
+
+The agent MUST run sub-classification on every external constraint, not only ones that "feel" V2-ish. Future-pull constraints often look reasonable on first encounter; they reveal themselves only when the question is asked explicitly.
 
 These recording formats match the artifact template (see `references/artifact-template.md`); operators following Tech-D produce strings that drop directly into the "Confirmed constraints" section without reformatting.
 
-The agent MUST run sub-classification on every constraint, not only ones that "feel" V2-ish. Future-pull constraints often look reasonable on first encounter; they reveal themselves only when the question is asked explicitly.
+### Peel-back path (preference): park the shape
 
-**If choice:** briefly present 2-3 alternatives covering the realistic option space. The user picks one or keeps the original — but now it's a *tested* choice, not an untested assumption. Record the alternatives considered in the "Tested choices" list.
+V1/future-pull does NOT apply on the preference path. The shape itself is not classified. Instead:
 
-### Example (good)
+1. Name the outcome-question the shape raises ("What outcome does [X] serve? What breaks if it isn't met?").
+2. Record an entry in the WIP ledger's "Parked shapes" subsection with the shape, the turn it surfaced, the outcome-question, and who introduced it (operator vs. skill).
+3. Surface the outcome-question to the operator inline: *"Parking [X] — the outcome-question I'm tracking against it is [Q]. Does that capture what you actually want to know?"*
 
-User: "I want to build it on AWS."
-Skill: "Is AWS a constraint (company is on AWS, IT mandates it, existing infra) or a choice you're making? If choice, alternatives might include: GCP if you want managed AI services, a small VPS like Hetzner or Fly.io if you want simpler ops, or even running on a single server if scale is small."
-User: "Constraint — we have an enterprise AWS contract."
-Skill: [records constraint] "Got it. Locked in. Moving on."
+A parked shape can be revived later as a tested choice once its outcome-question is answered (handled by the ledger's `resolved` field). What it cannot do in Phase 1 is escape unresolved or get promoted to constraint without a source citation.
 
-### Example (good — choice surfaced and tested)
+### Example (good — external lock-in)
 
-User: "Each agent will be a Python microservice."
-Skill: "Is 'microservice per agent' a constraint or a choice? Alternatives: a single multi-agent process with concurrency, a serverless function per agent, or even just classes inside one app."
-User: "Hm, I assumed microservices but actually a single process is fine for our scale."
-Skill: [records as tested choice: single process selected, microservices rejected because scale doesn't warrant it]
+User: "We need SOC2-grade audit logging on every agent action."
+Skill: "What's the external source — regulator, contract, deployed system, prior empirical, or factual measurement?"
+User: "Regulator. SOC2 CC7.2 — system monitoring."
+Skill: "Got it. Is the audit-logging requirement V1-driven, or pulled from a future scope (e.g., a not-yet-signed enterprise customer)?"
+User: "V1 — we're in the SOC2 audit window now."
+Skill: [records] `[V1] SOC2-grade audit logging on every agent action (source: regulator — SOC2 CC7.2: system monitoring)`. "Locked in. Moving on."
+
+### Example (good — peel-back to outcome, shape parked)
+
+User: "I want real-time updates from the agents."
+Skill: "What's the external source for 'real-time' — regulator, contract, deployed system, prior empirical, or factual measurement?"
+User: "No external source — I just think it'd be better."
+Skill: "Then 'real-time' is a preference, not a constraint. The outcome-question I'm parking it against: *how often does the outcome 'real-time' serves actually trigger, and what breaks if it isn't met?* I'll record it under Parked shapes and we'll resolve it when the outcome is clearer. Sound right?"
+User: "Yeah, that's fair."
+Skill: [adds to WIP ledger Parked shapes subsection: shape="real-time updates", outcome_question="how often does the outcome 'real-time' serves actually trigger? what breaks if not met?", introduced_by=operator, resolved=false]
 
 ### Example (anti-pattern — don't do this)
 
 User: "I want to use Postgres."
 Skill: "Great choice, Postgres is excellent. Moving on."
 
-This is the failure mode. Specifics get adopted without testing. Always classify.
+This is the failure mode. Specifics get adopted without an external-source check. Always apply the verifiability rule.
+
+### Anti-patterns
+
+- ❌ **Classifying a shape as constraint without an external source citation.** "It's a constraint because the operator feels strongly" is preference, not external grounding. Default to peel-back.
+- ❌ **Accepting non-categorical justifications as external sources.** "Team consensus", "we always do it this way", "it's our style" do not match any of the five categories. Treat as preference.
+- ❌ **Running V1/future-pull on the preference path.** Sub-classification only applies after a source is cited. Parked shapes are not classified.
+- ❌ **Skipping the source citation when the specific "obviously" looks like a constraint.** Even AWS or Postgres needs an explicit category + citation. The whole point is to surface untested assumptions.
+- ❌ **Letting a parked shape escape Phase 1 without an outcome-question.** Every Parked-shapes entry has its outcome-question filled in.
 
 ### Reverse sunk-cost check (Phase 3.5 only)
 
