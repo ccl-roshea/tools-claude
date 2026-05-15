@@ -2,16 +2,18 @@
 name: discover
 description: >
   Socratic idea discovery and chunking — runs upstream of /superpowers.
-  Pressure-tests the user's problem framing, distinguishes constraints
-  from choices, decomposes large problems into executor-sized chunks
+  Pressure-tests the user's problem framing, applies the verifiability
+  rule to surface untested assumptions (parking shape-decisions for
+  solutioning), decomposes large problems into executor-sized chunks
   with dependencies, actively researches existing tools (build-vs-buy),
   and sequentially dispatches each chunk to /superpowers or another
   executor. Especially valuable when the user is unsure what they want,
   presents an ambitious or multi-subsystem goal, OR when the prompt
-  looks tight but contains specifics that may be untested choices
-  rather than constraints (e.g., "build a REST API using Express with
-  Postgres on AWS ECS" — every named technology deserves a constraint-
-  vs-choice classification before downstream work locks them in).
+  looks tight but contains specifics that may be untested preferences
+  rather than externally-sourced constraints (e.g., "build a REST API
+  using Express with Postgres on AWS ECS" — every named technology
+  needs an external source citation or it gets parked as a shape
+  before downstream work locks it in).
 when_to_use: >
   Use before /superpowers in any of these situations: (1) the user has
   a vague or ambitious idea ("I want to build a platform for X"); (2)
@@ -31,7 +33,7 @@ allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate WebSearc
 
 You are running the `/discover` skill. Your job is to take a user's problem statement (any vagueness, any specificity) and produce a discovery artifact that downstream tools like /superpowers can consume.
 
-You do NOT plan. You do NOT execute. You do the part that is currently missing upstream of /superpowers: pressure-test the framing, classify constraints vs. choices, research existing solutions, decompose into executor-sized chunks, and dispatch each chunk in dependency order.
+You do NOT plan. You do NOT execute. You do the part that is currently missing upstream of /superpowers: pressure-test the framing, apply the verifiability rule to specifics (lock in externally-sourced constraints, park shape-preferences against their outcome-questions), research existing solutions, decompose into executor-sized chunks, and dispatch each chunk in dependency order.
 
 ## Reference files
 
@@ -58,7 +60,7 @@ This is the one reference file you should read once at session start (it is shor
 You execute the following phases in order. Within each phase you can loop, but you don't skip ahead. Each phase has explicit entry and exit criteria.
 
 0. **PREMISE CHECK** — One mandatory turn at session start. Restate the operator's highest-level outcome and ask whether a no-build path could reach it.
-1. **DISCOVER** — Socratic exploration with continuous Technique D (constraints vs. choices, with V1/future-pull sub-classification) and 2-3 invocations of Technique B (alternative framings, 4-option spectrum). First Tech-B firing is at turn 1, immediately after Phase 0.
+1. **DISCOVER** — Socratic exploration with continuous Technique D (verifiability rule with V1/future-pull sub-classification on the lock-in path) and 2-3 invocations of Technique B (alternative framings, 4-option spectrum). First Tech-B firing is at turn 1, immediately after Phase 0.
 2. **CHUNK** — Decompose into executor-sized chunks if needed; compute execution order. Includes mandatory chunk-overload-signal check and per-chunk audit before exit.
 3. **RED-TEAM** — Adversarial pass on the conclusions (Technique C), including future-pull contamination check.
 4. **RESEARCH** (Phase 3.5) — Active build-vs-buy research; restructure chunks based on findings.
@@ -445,11 +447,11 @@ Read `references/research-protocol.md` for full search strategy, evaluation crit
 - **Reject** — record candidate name and *specific* rejection reason
 - **Inspire** — note as reference link, build custom
 
-**Step 5: reverse sunk-cost check.** Before classifying any candidate as Reject, apply Technique D:
+**Step 5: reverse sunk-cost check.** Before classifying any candidate as Reject, apply Technique D's verifiability rule (see `references/anti-sycophancy.md` Reverse sunk-cost subsection):
 
-> "Is 'we want to build this ourselves' a constraint or a choice? If choice, what specific functional gaps or constraint conflicts make [tool name] unacceptable?"
+> "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts, not preference itself."
 
-If the operator can't articulate a specific reason, the rejection is suspect.
+If the operator can't cite an external source AND can't articulate specific functional gaps or constraint conflicts, the rejection is suspect.
 
 **Step 6: respect soft limits.** Per chunk, ~3-5 candidates max. Per session, ~30 minutes total research. Stop early when a clear winner emerges.
 

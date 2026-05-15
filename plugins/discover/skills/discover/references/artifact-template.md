@@ -45,7 +45,7 @@ Each line MUST start with a label produced by Tech-D's V1/future-pull sub-classi
 - `[V1] <constraint text> (source: <category> — <specific citation>)`
 - `[future-pull, V1-justified: <specific V1 impact>] <constraint text> (source: <category> — <specific citation>)`
 
-where `<category>` is one of: `regulator`, `contract`, `deployed-system`, `prior-empirical-result`, `factual-measurement` (per Tech-D's verifiability rule in `references/anti-sycophancy.md`). Operator-preference shapes do not appear here; they live in the WIP ledger's `## Parked shapes` subsection per `references/checkpoint-protocol.md`, and any that remain unresolved at artifact write-time surface in the per-chunk "Open choices" section as Shape-candidates.
+where `<category>` is one of: `regulator`, `contract`, `deployed system`, `prior empirical result`, `factual measurement` (per Tech-D's verifiability rule in `references/anti-sycophancy.md`). Operator-preference shapes do not appear here; they live in the WIP ledger's `## Parked shapes` subsection per `references/checkpoint-protocol.md`, and any that remain unresolved at artifact write-time surface in the per-chunk "Open choices" section as Shape-candidates.
 
 A `[V2-driven, deferred]` item is NOT a V1 constraint — record those under a separate "Deferred (V2 only)" subsection if any exist, not here.
 

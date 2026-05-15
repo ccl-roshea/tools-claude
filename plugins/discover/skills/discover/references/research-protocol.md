@@ -129,11 +129,11 @@ Don't adopt, but the candidate has architecture or interface ideas worth borrowi
 
 ## Reverse sunk-cost check
 
-Before classifying any candidate as Reject, apply Technique D to the operator's stated preference for building:
+Before classifying any candidate as Reject, apply Technique D's verifiability rule to the operator's stated preference for building (see `anti-sycophancy.md` Reverse sunk-cost subsection):
 
-> "Is 'we want to build this ourselves' a constraint (e.g., must be self-hosted, must be open-source-only) or a choice? If choice, what specific functional gaps or constraint conflicts make [tool name] unacceptable? Pricing? Lock-in? Integration burden? Be specific."
+> "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts (pricing, lock-in, integration burden), not preference itself."
 
-If the operator can't articulate a specific reason, the rejection is suspect. Either find a real reason or reconsider Adopt/Adopt partially.
+If the operator can cite an external source, record the rejection with the citation. Otherwise the operator must articulate specific functional gaps or constraint conflicts; without either, the rejection is suspect — find a real reason or reconsider Adopt/Adopt partially.
 
 ## Soft limits
 
@@ -169,6 +169,6 @@ Then per-chunk outcome:
 
 - ❌ **Searching once, skimming the first result, declaring "no good options."** Always evaluate at least 2-3 candidates against the criteria.
 - ❌ **Vague rejection reasons.** "Doesn't fit" is a placeholder. Specify what doesn't fit.
-- ❌ **Skipping the reverse sunk-cost check.** When you find a candidate that matches the chunk and the operator says "let's build anyway," apply Technique D before recording Reject.
+- ❌ **Skipping the reverse sunk-cost check.** When you find a candidate that matches the chunk and the operator says "let's build anyway," apply Technique D's verifiability rule before recording Reject — externally sourced (mandate / contract / regulator / factual constraint) → record rejection with citation; otherwise treat as preference and require specific functional gaps or constraint conflicts.
 - ❌ **Pricing-page hand-waving.** If a candidate is paid, check the actual pricing page. Don't guess.
 - ❌ **Researching forever.** Soft limits exist for a reason. After 3 candidates without a clear winner, move on.

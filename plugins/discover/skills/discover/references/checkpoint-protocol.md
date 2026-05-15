@@ -39,9 +39,9 @@ A ledger entry is appended to the `## Ledgers` section at every phase exit (DISC
 ```text
 ─── Phase exit: <FROM> → <TO> ───
 Constraints (M):
-  [V1] <constraint text> (source: <operator quote / external source / inherited from chunk N>)
-  [future-pull, V1-justified: <reason>] <constraint text> (source: ...)
-  [V2-driven, deferred] note: <text> (source: ...)
+  [V1] <constraint text> (source: <category> — <specific citation>)
+  [future-pull, V1-justified: <reason>] <constraint text> (source: <category> — <specific citation>)
+  [V2-driven, deferred] note: <text> (source: <category> — <specific citation>)
 
 Tested choices (K):
   <choice> (alternatives: <list of alternatives considered>)
@@ -52,7 +52,7 @@ Unclassified specifics that surfaced this phase (P):
 Want to address the unclassified item now, or proceed to <TO>?
 ```
 
-- The "Constraints" line format mirrors the labels Tech-D produces (`[V1]`, `[future-pull, V1-justified: ...]`, `[V2-driven, deferred]`).
+- The "Constraints" line format mirrors the labels Tech-D produces (`[V1]`, `[future-pull, V1-justified: ...]`, `[V2-driven, deferred]`). `<category>` MUST be one of the five from Tech-D's verifiability rule — `regulator`, `contract`, `deployed system`, `prior empirical result`, `factual measurement` — per `references/anti-sycophancy.md`. Operator-preference shapes do NOT belong in Constraints; they go to the `## Parked shapes` subsection (see below) and the strict source-citation form is what Gate 1 validates against.
 - The "Unclassified specifics" line is load-bearing: if this list is non-empty at phase exit and the operator chooses to proceed anyway, each unclassified specific is automatically carried into RED-TEAM as a CRITICAL finding.
 - The ledger is shown to the operator before the phase-boundary commit, and the operator's decision (proceed / address unclassified items first) is recorded in the next ledger entry under "Constraints" or "Tested choices" as appropriate.
 
