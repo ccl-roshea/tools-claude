@@ -254,7 +254,7 @@ If the user has answered the operator's prompt with rich detail that already cov
 ### Anti-patterns
 
 - ❌ **Asking compound questions.** "What's your scale and what's your tech stack?" — split into two questions.
-- ❌ **Accepting specifics without classifying.** Every named technology, protocol, or pattern triggers Technique D.
+- ❌ **Accepting specifics without applying the verifiability check.** Every named technology, protocol, or pattern triggers Tech-D's verifiability rule (external source → lock in; preference → peel back to outcome).
 - ❌ **Sycophantic summarization.** "Great choice!" "That makes sense!" — don't validate, classify.
 - ❌ **Over-asking.** If you've explored an area and the answers are repetitive, propose moving on. Don't dig forever.
 - ❌ **Skipping Technique B.** Without alternative framings, the conversation drifts toward the first frame that emerged. Fire B at turn 1, then at convergence points.
