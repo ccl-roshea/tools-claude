@@ -120,11 +120,11 @@ This is the failure mode. Specifics get adopted without an external-source check
 
 ### Reverse sunk-cost check (Phase 3.5 only)
 
-In the research phase, when an existing tool was found that satisfies a chunk, apply Technique D to the operator's stated preference for building:
+In the research phase, when an existing tool was found that satisfies a chunk, apply Technique D's verifiability rule to the operator's stated preference for building:
 
-> "Is 'we want to build this ourselves' a constraint or a choice? If choice, the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts — not preference."
+> "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts, not preference itself."
 
-This fights the inverse failure mode: dismissing a good existing tool because the operator is emotionally invested in building.
+This fights the inverse failure mode: dismissing a good existing tool because the operator is emotionally invested in building. The verifiability rule applies symmetrically — the same standard that prevents shapes from masquerading as constraints in Phase 1 prevents preferences from masquerading as constraints in Phase 3.5.
 
 ---
 
