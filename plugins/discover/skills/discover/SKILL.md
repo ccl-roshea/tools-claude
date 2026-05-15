@@ -43,8 +43,15 @@ When you need detailed guidance, read the relevant reference file:
 - `references/artifact-template.md` — The output document format
 - `references/dispatch-protocol.md` — How to launch /superpowers per chunk
 - `references/checkpoint-protocol.md` — WIP file format, phase-boundary commits, resume, completion. Note: the per-turn JSONL transcript is mirrored automatically by the plugin's hook; the agent does not write turns by hand.
+- `references/labeling-protocol.md` — addressable `§X.Y.Z` labels for every response
 
 You should read these on demand, not all at once at session start.
+
+## Response labeling
+
+Every response uses the labeling protocol from `references/labeling-protocol.md` — `§X.Y.Z` inline on section headings, sub-headings, list items, and inline classifications; `§Q1`, `§Q2` for questions to the operator. Always on, including one-question turns.
+
+This is the one reference file you should read once at session start (it is short) rather than on demand — the protocol applies to every response from turn 1 onward.
 
 ## The seven phases
 
