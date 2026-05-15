@@ -56,6 +56,37 @@ Want to address the unclassified item now, or proceed to <TO>?
 - The "Unclassified specifics" line is load-bearing: if this list is non-empty at phase exit and the operator chooses to proceed anyway, each unclassified specific is automatically carried into RED-TEAM as a CRITICAL finding.
 - The ledger is shown to the operator before the phase-boundary commit, and the operator's decision (proceed / address unclassified items first) is recorded in the next ledger entry under "Constraints" or "Tested choices" as appropriate.
 
+## Parked shapes
+
+A running ledger subsection that captures solution-shapes (operator-introduced or skill-proposed) which failed Tech-D's verifiability rule and were peeled back to an outcome-question rather than locked in as constraints. Unlike the phase-exit ledger entries above, this subsection is updated as shapes are parked — it is not a phase-exit snapshot. Lives in the WIP file under a top-level `## Parked shapes` heading; format is a YAML list:
+
+```yaml
+## Parked shapes
+- shape: "real-time updates"
+  parked_at_turn: 7
+  outcome_question: "How often does the outcome 'real-time' serves actually trigger? What breaks if not met?"
+  introduced_by: operator   # or "skill" for skill-proposed strawmans
+  resolved: false           # set true when outcome-question is answered later
+  resolution: null          # filled with the answered outcome when resolved
+- shape: "comprehensive task instructions with guardrails"
+  parked_at_turn: 0         # parked from Phase 0 prompt audit
+  outcome_question: "What outcome does the 'comprehensive guardrails' frame serve? What junior failure mode is it preventing?"
+  introduced_by: operator
+  resolved: false
+  resolution: null
+```
+
+Field semantics (one entry per parked shape):
+
+- `shape` — the verbatim shape-language phrase as it surfaced (operator quote or skill phrasing). Quote it.
+- `parked_at_turn` — turn number when the shape was parked. `0` means parked during Phase 0 prompt audit; otherwise the Phase 1 turn index.
+- `outcome_question` — the outcome-question the shape gets put on trial against. Required; never leave blank or "obvious." This is what later turns answer to convert the entry to `resolved: true`.
+- `introduced_by` — `operator` (came from the prompt or operator response) or `skill` (skill-proposed strawman that failed verifiability). No other values.
+- `resolved` — `false` until the outcome-question is answered in a later turn; flip to `true` at that point.
+- `resolution` — `null` while unresolved; filled with the answered outcome string when `resolved: true`. The shape is then a candidate for promotion to "Tested choices" in the next phase-exit ledger entry.
+
+PR 1 has no `/solution` skill. Parked shapes that remain unresolved at end-of-session carry through to the artifact's "Open choices" section as "Shape-candidates deferred to executor." (PR 2's `/solution` skill will consume the parked-shapes list as its candidate-shape input set.)
+
 ## Slug derivation
 
 After Phase 0, derive a provisional slug: kebab-case from the first 4–5 significant words of the problem statement. Examples: `team-agent-platform`, `auth-redesign`, `cart-graphql-migration`. Use this slug for the WIP filename and YAML field from that point on. If Phase 4 confirms a different final slug, rename both the WIP file and the JSONL directory at that point.
