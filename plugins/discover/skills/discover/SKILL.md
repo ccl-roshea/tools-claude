@@ -511,7 +511,7 @@ git add docs/socrates/discover/<topic-slug>.md
 git mv docs/socrates/discover/.wip/<topic-slug> docs/socrates/discover/<topic-slug>
 git rm docs/socrates/discover/.wip/<topic-slug>.wip.md
 git add docs/socrates/discover/<topic-slug>/
-git commit -m "docs(discovery): add artifact and transcript for <topic>"
+git commit -m "docs(discover): add artifact and transcript for <topic>"
 ```
 
 **Step 6: tell the operator** the artifact is written, with the file path. Ask if they want to review it before dispatch.

@@ -16,8 +16,8 @@ These are gating only if the skill is being shared with others. For solo use, Te
 
 ## Iteration candidates (from LIMITATIONS.md)
 
-- [ ] **Strawman challenge.** Make strawman defaults the skill proposes subject to the same Technique D classification as user-introduced specifics. Pattern observed in Path B: Bicep / GitHub Actions slipped through unchallenged.
-- [ ] **Visible soft signals.** Make the "should we move on?" check explicit every N turns so the operator can see when it's firing.
+(Both addressed in PR 1, 2026-05-15.)
+
 - [ ] **Recursive /discover end-to-end test.** First real recursive run will surface integration issues; do this when the next genuinely-multi-chunk problem comes up.
 
 ## Future capability (deferred per spec)

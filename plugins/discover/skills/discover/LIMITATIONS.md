@@ -4,6 +4,8 @@ These are real gaps in the current `/discover` skill, observed during the valida
 
 ## 1. Strawman defaults bypass anti-sycophancy
 
+**Status:** addressed in PR 1, 2026-05-15. See docs/plans/2026-05-15-discover-socratic-tightening-design.md §1 + §3.
+
 **Observed:** Path B Test 1 (2026-05-01). When the skill proposes "strawman" defaults for chunk-internal decisions (e.g., Bicep as IaC default, GitHub Actions as CI/CD), it doesn't apply the same constraints-vs-choices rigor (Technique D) that fires on user-introduced specifics. The operator caught Bicep on Turn 22 and pushed back; GitHub Actions slipped through unchallenged.
 
 **Pattern:** Anti-sycophancy *triggers* don't fire reliably on decisions the skill itself proposes when those decisions look "low-stakes" or "default-y." The skill defends well against the user's untested assumptions but not against its own.
@@ -11,6 +13,8 @@ These are real gaps in the current `/discover` skill, observed during the valida
 **Hypothesis for fix (iteration 3):** When the skill proposes a strawman, frame it explicitly as "I'm proposing X as a default — should I run Technique D on this, or is it good enough for the MVP?" Make the strawman itself subject to the same machinery.
 
 ## 2. Soft signals under-fire on long sessions
+
+**Status:** addressed in PR 1, 2026-05-15. See docs/plans/2026-05-15-discover-socratic-tightening-design.md §1 + §3.
 
 **Observed:** Iteration 1 Eval 1 ran 40 turns; iteration 2 ran 29 turns. The "10+ turns since a new theme emerged" soft signal didn't fire as aggressively as the spec implies it should. The skill keeps asking sequentially when it could propose moving on.
 
@@ -70,7 +74,7 @@ These are real gaps in the current `/discover` skill, observed during the valida
 
 ## 10. JSONL transcript hook is cwd-gated and single-WIP only
 
-**Observed:** The plugin's `mirror-jsonl.sh` hook fires on every Claude Code `Stop` and `SessionEnd`, but it only acts when exactly one `*.wip.md` file exists under `<cwd>/docs/discovery/.wip/`. Zero or two-plus WIPs → no-op (the latter logs to stderr).
+**Observed:** The plugin's `mirror-jsonl.sh` hook fires on every Claude Code `Stop` and `SessionEnd`, but it only acts when exactly one `*.wip.md` file exists under `<cwd>/docs/socrates/discover/.wip/`. Zero or two-plus WIPs → no-op (the latter logs to stderr).
 
 **Pattern:** This is the simplest disambiguation rule, but it means recursive discovery (multiple chunks discovered in parallel from the same project root) cannot rely on the auto-mirror — it would skip every turn because the WIP set is ambiguous. The current skill flow does in-line sub-decomposition rather than recursive `/discover`, so the constraint doesn't bite the default flow.
 

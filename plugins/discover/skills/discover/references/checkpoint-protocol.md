@@ -133,7 +133,7 @@ After the artifact is written to `docs/socrates/discover/<slug>.md`:
 git mv docs/socrates/discover/.wip/<slug> docs/socrates/discover/<slug>
 git rm docs/socrates/discover/.wip/<slug>.wip.md
 git add docs/socrates/discover/<slug>.md docs/socrates/discover/<slug>/
-git commit -m "docs(discovery): add artifact and transcript for <slug>"
+git commit -m "docs(discover): add artifact and transcript for <slug>"
 ```
 
 The final layout is:
