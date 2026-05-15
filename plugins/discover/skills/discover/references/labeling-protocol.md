@@ -4,7 +4,7 @@ Every `/discover` response uses this addressing scheme so the operator can targe
 
 ## Format
 
-- **Sections and sub-sections:** `§N`, `§N.M`, `§N.M.K` — hierarchical numeric, prefixed with `§`.
+- **Sections and sub-sections:** `§N`, `§N.M`, `§N.M.K`, … — hierarchical numeric (depth follows document structure, capped at four levels per the Edge cases), prefixed with `§`.
 - **Questions to the operator:** `§Q1`, `§Q2` — parallel counter, prefixed `Q`.
 
 The `§` prefix prevents collision with in-content numbering (numbered list items, lettered options).
@@ -18,12 +18,14 @@ The `§` prefix prevents collision with in-content numbering (numbered list item
 | Bullet inside a section | Yes — `§N.M.K` |
 | Numbered list item | Yes — `§N.M.K` (the `§` address replaces any inline `1.`/`2.`) |
 | Lettered option (A./B./C.) | Yes — collapse into `§N.M.K` numerics |
-| Inline Tech-D classification line | Yes — addressable as the bullet/section it appears in |
+| Inline Tech-D classification line | Yes — gets its own `§N.M.K` address when on its own line |
 | Question to the operator | Yes — separate counter `§Q1`, `§Q2` |
 | Plain prose paragraph (transition, mode-shift announcement, connective text) | No |
 | Code block | No — rendered content within a parent address |
 | Horizontal rule (`---`) | No — separator |
-| Block quote | Yes — labeled as the bullet/paragraph it stands in for |
+| Block quote | Yes — gets its own `§N.M.K` address when it stands as a distinct addressable unit (not when it merely quotes within a larger bullet) |
+
+**Depth follows the document tree, not the element type.** A bullet directly under section `§1` is `§1.1`. A sub-heading under `§1` is also `§1.1`, and a bullet inside that sub-heading is `§1.1.1`. The address says where the item sits, not what kind of item it is.
 
 ## Numbering rules
 
@@ -48,7 +50,7 @@ Do not put labels in a separate column or in an end-of-message TOC.
 - **Existing in-content numbering.** When the content already uses `1.`, `2.`, or A./B./C. options, the `§` address replaces it. Do not double-label; pick the `§` scheme.
 - **Nested bullets.** Each level adds a digit: top bullet `§1.1.1`, its sub-bullet `§1.1.1.1`. Limit to four levels deep; deeper structures usually want flattening.
 - **Single-section responses with no enclosing heading.** If the entire response is just bullets with no parent heading, address them directly: `§1`, `§2`, `§3` for the bullets themselves.
-- **Tables.** Treat each row as an addressable item only if rows are independent points the operator might target; otherwise the table gets one address.
+- **Tables.** Address each row separately when the operator might want to discuss or modify a single row in isolation (e.g., a comparison matrix of options). Address the whole table as one item when rows are jointly meaningful and not separately actionable (e.g., a key-value reference table). When in doubt, prefer the whole-table address — granular row addresses can be added later if asked for.
 
 ## Worked example
 
