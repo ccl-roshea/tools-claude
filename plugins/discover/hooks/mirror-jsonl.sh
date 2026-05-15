@@ -3,7 +3,7 @@
 # so that long-running /discover sessions are recoverable and replayable.
 #
 # Reads hook JSON from stdin. Acts only if the cwd contains exactly one
-# active discovery WIP file at docs/discovery/.wip/<slug>.wip.md. Otherwise
+# active discovery WIP file at docs/socrates/discover/.wip/<slug>.wip.md. Otherwise
 # exits 0 (no-op) so the hook is safe to ship enabled by default.
 
 set -euo pipefail
@@ -17,7 +17,7 @@ session_id="$(jq -r '.session_id // empty' <<<"$input")"
 [[ -z "$transcript_path" || -z "$cwd" || -z "$session_id" ]] && exit 0
 [[ -f "$transcript_path" ]] || exit 0
 
-wip_dir="$cwd/docs/discovery/.wip"
+wip_dir="$cwd/docs/socrates/discover/.wip"
 [[ -d "$wip_dir" ]] || exit 0
 
 shopt -s nullglob

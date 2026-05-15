@@ -16,8 +16,8 @@ git -C "$tmp" config user.email test@example.com
 git -C "$tmp" config user.name test
 
 # Set up the discovery WIP state the hook expects
-mkdir -p "$tmp/docs/discovery/.wip"
-echo "# WIP" >"$tmp/docs/discovery/.wip/foo.wip.md"
+mkdir -p "$tmp/docs/socrates/discover/.wip"
+echo "# WIP" >"$tmp/docs/socrates/discover/.wip/foo.wip.md"
 
 # Fake CC transcript (lives outside the project, like the real one)
 transcript="$tmp/.fake-cc/abc123.jsonl"
@@ -33,7 +33,7 @@ payload="$(jq -n \
 echo "$payload" | bash "$hook"
 
 # Assert 1: the JSONL was copied to the expected path
-mirror="$tmp/docs/discovery/.wip/foo/abc123.jsonl"
+mirror="$tmp/docs/socrates/discover/.wip/foo/abc123.jsonl"
 if [[ ! -f "$mirror" ]]; then
   echo "FAIL: mirror file not created at $mirror" >&2
   exit 1
@@ -45,7 +45,7 @@ fi
 
 # Assert 2: the JSONL is staged in the git index
 staged="$(git -C "$tmp" diff --cached --name-only)"
-expected="docs/discovery/.wip/foo/abc123.jsonl"
+expected="docs/socrates/discover/.wip/foo/abc123.jsonl"
 if ! grep -qx "$expected" <<<"$staged"; then
   echo "FAIL: expected $expected in git index, got:" >&2
   echo "$staged" >&2
@@ -56,8 +56,8 @@ fi
 tmp2="$(mktemp -d)"
 trap 'rm -rf "$tmp" "$tmp2"' EXIT
 
-mkdir -p "$tmp2/docs/discovery/.wip"
-echo "# WIP" >"$tmp2/docs/discovery/.wip/bar.wip.md"
+mkdir -p "$tmp2/docs/socrates/discover/.wip"
+echo "# WIP" >"$tmp2/docs/socrates/discover/.wip/bar.wip.md"
 transcript2="$tmp2/.fake-cc/def456.jsonl"
 mkdir -p "$(dirname "$transcript2")"
 printf '{"turn":1}\n' >"$transcript2"
@@ -69,7 +69,7 @@ payload2="$(jq -n \
   '{transcript_path:$t, cwd:$c, session_id:$s}')"
 echo "$payload2" | bash "$hook"
 
-mirror2="$tmp2/docs/discovery/.wip/bar/def456.jsonl"
+mirror2="$tmp2/docs/socrates/discover/.wip/bar/def456.jsonl"
 if [[ ! -f "$mirror2" ]]; then
   echo "FAIL (case 2): mirror file not created in non-git cwd" >&2
   exit 1
