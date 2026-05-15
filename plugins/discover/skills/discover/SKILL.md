@@ -158,31 +158,34 @@ Then proceed per the operator's choice.
 
 Ask one question at a time. Socratic style — probe the framing, surface assumptions, classify specifics. Never ask multi-part compound questions; if you have multiple things to ask, ask them in sequence.
 
-### Continuous: Technique D (constraints vs. choices)
+### Continuous: Technique D (verifiability rule — peel back shapes)
 
-Read `references/anti-sycophancy.md` for the full Technique D protocol if you haven't already.
+Read `references/anti-sycophancy.md` for the full Tech-D protocol — the five external-source categories, source-citation format, V1/future-pull sub-classification, and worked examples. Re-read it whenever the rule is about to fire and you are not certain of the categories.
 
-**Trigger:** any time a specific implementation detail appears in the conversation. The detail can come from the user's input, an answer they give, or a suggestion you make.
+**Trigger:** any time a specific implementation detail appears in the conversation — from the operator's prompt, an answer they give, or a suggestion you make.
 
-**Action:** classify it. Ask:
+**Default action:** apply the verifiability rule. The specific is either EXTERNAL (verifiable via a concrete external source from one of the five categories) or it is a PREFERENCE / SHAPE. Shapes peel back to the outcome they serve and get parked; only externally-sourced specifics lock in as constraints.
 
-> "You mentioned [X]. Is that a constraint — something imposed on you externally — or a choice you're making right now?"
+**Operator-facing prompt** (replaces the older "constraint or choice?" phrasing):
 
-Constraints get recorded. Choices get briefly explored (2-3 alternatives) and then either confirmed or replaced.
+> "[X] surfaced. What's the external source? Specifically: is there a (regulator, contract, deployed system, prior empirical result, factual measurement) that mandates this? If yes, cite it and I'll record as constraint. If no, this is a design preference — I'll park it with the outcome-question it raises."
 
-**Do not skip this.** The Path A test demonstrated that adopting specifics without classification produces shallow architectures. This is your most important continuous discipline.
+If EXTERNAL: lock in with `(source: <category> — <specific citation>)` and apply V1/future-pull sub-classification per `references/anti-sycophancy.md`. If PREFERENCE: do not classify the shape itself. Surface the outcome-question and add an entry under `## Parked shapes` in the WIP ledger (see `references/checkpoint-protocol.md` for the YAML format).
 
-**Per-fire visibility (high-stakes specifics).** For most classifications, Tech-D fires silently and surfaces the result in the next phase-exit ledger. But for **high-stakes specifics**, the agent shows the classification result inline in the same turn rather than batching. Definition of high-stakes: specifics that, if wrong, would invalidate multiple downstream chunks. Concretely:
+**Do not skip this.** The Path A test demonstrated that adopting specifics without verifiability checks produces shallow architectures. Locking in a shape because it "feels like a constraint" or because the operator stated it confidently is the failure mode this rule exists to prevent.
+
+**Per-fire visibility (high-stakes specifics).** For most firings, Tech-D resolves silently and the result surfaces in the next phase-exit ledger (or under `## Parked shapes` if peeled back). But for **high-stakes specifics**, show the result inline in the same turn rather than batching. Definition of high-stakes: specifics that, if wrong, would invalidate multiple downstream chunks. Concretely:
 
 - **Named foundational technology** that the rest of the design will sit on top of (database, framework, deployment target, language).
 - **Behavioral default that affects every operation** of the agent or system being designed (e.g., "default-ON consultation," "always confirm before write," "X is the source of truth").
 - **An item the agent is about to record as a `[future-pull, V1-justified: ...]` constraint** — these need explicit operator buy-in inline, not retrospective audit.
 
-Inline visibility format:
+Inline visibility format depends on the path:
 
-> "Tech-D classification: [item] → [V1] constraint. Source: [your quote / external source]. Recording it. Want to challenge?"
+- **Locked-in (EXTERNAL):** *"Tech-D classification: [item] → [V1] constraint. Source: [category — specific citation]. Recording it. Want to challenge?"*
+- **Parked (PREFERENCE):** *"Tech-D peel-back: [item] is a shape, not external. Here's the outcome-question I'm parking it against: [outcome-question] — does that capture what you actually want to know?"*
 
-All other Tech-D classifications happen silently and appear in the next phase-exit ledger.
+All other Tech-D firings resolve silently and appear in the next phase-exit ledger or `## Parked shapes` subsection.
 
 ### Periodic: Technique B (4-option alternative framings)
 
@@ -239,11 +242,11 @@ These are not a strict checklist — exploration is emergent — but most non-tr
 
 - **Purpose / audience.** Is this internal tooling, a product feature, a research artifact, or a workflow orchestrator? *Always worth asking explicitly* — it shapes architecture decisions downstream and is easy to assume implicitly when it shouldn't be.
 - **Scale.** Rough user count, request volume, data volume — orders of magnitude only.
-- **Deploy target.** Local, shared server, cloud, hosted service. Often a constraint, but ask.
+- **Deploy target.** *Where does this need to run, and why?* (Ask the outcome — locality, isolation, who can reach it, what already runs there. Specific platforms the operator names — "AWS," "our k8s cluster," "Vercel" — are shapes; they get parked unless externally sourced per Tech-D.)
 - **Lifecycle.** Long-running vs. ephemeral, persistent state vs. stateless, scheduled vs. on-demand.
 - **Identity / trust model.** Who can use it? Per-user identity, shared identity, anonymous?
-- **Operability.** Auth, observability, cost accounting, error handling expectations.
-- **Communication / interaction surface.** How is it invoked, how does it respond, who sees the output?
+- **Operability.** *What auth / observability / cost / error-handling outcomes do you need?* (Ask the outcome — who needs to see what, what failure modes are unacceptable, what cost ceilings matter. Specific tools — Datadog, OAuth, Sentry, Stripe — are shapes; they get parked unless externally sourced per Tech-D.)
+- **Communication / interaction surface.** *How is it invoked, how does it respond, who sees the output?* (Ask the outcome — synchronous vs. async, who initiates, what the consumer expects to receive. Specific protocols — REST, GraphQL, message bus, gRPC — are shapes; they get parked unless externally sourced per Tech-D.)
 - **Constraints from outside.** Compliance, existing infra, team skills, budget, deadlines.
 
 If the user has answered the operator's prompt with rich detail that already covers many of these, don't re-litigate them. But if a major axis is genuinely unexplored, name it before declaring Phase 1 complete. *Especially* the purpose/audience question — if you don't know whether you're building internal tooling or a shippable product, you don't know what "good" looks like.
@@ -256,6 +259,9 @@ If the user has answered the operator's prompt with rich detail that already cov
 - ❌ **Over-asking.** If you've explored an area and the answers are repetitive, propose moving on. Don't dig forever.
 - ❌ **Skipping Technique B.** Without alternative framings, the conversation drifts toward the first frame that emerged. Fire B at turn 1, then at convergence points.
 - ❌ **Filler no-build frame.** A no-build option you don't believe in is worse than no option — it makes the prompt look like it covered alternatives when it didn't. If the no-build frame feels forced, re-state the outcome at a higher level.
+- ❌ **Classifying a shape as constraint without an external source citation.** Default to peel-back. Only lock in when the operator can cite a concrete external source from one of the five categories in `references/anti-sycophancy.md`. "Operator stated it confidently" is not a source.
+- ❌ **Accepting a parked shape's outcome-question as "obvious."** Every parked entry has its outcome-question recorded explicitly in the `## Parked shapes` ledger. Implicit outcome-questions get forgotten and the shape silently re-enters the design.
+- ❌ **Letting a parked shape escape Phase 1 without an outcome-question filled in.** Before exiting Phase 1, every entry under `## Parked shapes` must have a non-empty `outcome_question`. A parked shape with no outcome-question is just a deleted constraint with no record of what it was meant to serve.
 
 ## Phase 2: CHUNK
 
