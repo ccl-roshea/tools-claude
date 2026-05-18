@@ -1,10 +1,10 @@
 # Checkpoint Protocol
 
-Instructions for maintaining the WIP file during a `/discover` session. Read this when the skill references checkpoint-protocol.md.
+Instructions for maintaining the WIP file during a Socrates session (currently `/discover`; `/solution` adopts the same protocol with its own slug directory). Read this when the skill references checkpoint-protocol.md.
 
 ## What captures the transcript
 
-The plugin ships a hook (`hooks/mirror-jsonl.sh`) that fires on `Stop` and `SessionEnd`. After every turn it copies the active Claude Code session JSONL from `~/.claude/projects/<encoded-cwd>/<session-id>.jsonl` into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl`. This is automatic — the agent does not write turn blocks by hand. The hook is conditional: if no WIP file exists in cwd, or if multiple WIPs exist (ambiguous), the hook is a no-op.
+The plugin ships a hook (`hooks/mirror-jsonl.sh`) that fires on `Stop` and `SessionEnd`. After every turn it copies the active Claude Code session JSONL from `~/.claude/projects/<encoded-cwd>/<session-id>.jsonl` into the matching WIP's slug directory (`docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` for `/discover`; `docs/socrates/solution/.wip/<slug>/<session-id>.jsonl` for `/solution`). This is automatic — the agent does not write turn blocks by hand. The hook uses the `session_id` field in each WIP's YAML frontmatter (see below) to disambiguate when multiple WIPs exist in the same cwd (e.g., a parent `/solution` session and a child `/discover` sub-skill session). If no WIP's `session_id` matches the current session, the hook is a no-op.
 
 The agent's only writes to the WIP file are:
 - Creating it after Phase 0 with the YAML header + `## Premise check` section.
@@ -19,6 +19,7 @@ The agent's only writes to the WIP file are:
 topic_slug: team-agent-platform
 phase: DISCOVER
 started: 2026-05-04
+session_id: 01abcd23-4567-89ef-0123-456789abcdef
 ---
 
 ## Premise check
@@ -30,7 +31,13 @@ Ruled out because: <reason>
 (populated at each phase exit)
 ```
 
-YAML fields: `topic_slug`, `phase`, `started`. Nothing else. The `## Premise check` section is created at session start (after Phase 0 records its outcome). The `## Ledgers` section is created on first phase exit.
+YAML fields: `topic_slug`, `phase`, `started`, `session_id`. Nothing else. The `## Premise check` section is created at session start (after Phase 0 records its outcome). The `## Ledgers` section is created on first phase exit.
+
+**`session_id` field semantics:** the Claude Code session ID for the session that created and owns this WIP. Used by the JSONL mirror hook (`hooks/mirror-jsonl.sh`) to disambiguate when multiple WIPs exist in the same cwd — for example, a parent `/solution` session running and a child `/discover` sub-skill session firing in parallel. The hook reads each WIP's frontmatter, extracts `session_id`, and mirrors the current session's JSONL only to the WIP whose `session_id` matches the current session.
+
+- **Where it's written:** the consuming skill creates the WIP at Phase 0 (or SHAPE-DISCOVER for `/solution`); `session_id` is written into the frontmatter at WIP creation, alongside `topic_slug`, `phase`, and `started`. It is not changed after creation.
+- **Where the value comes from:** Claude Code exposes the running session's ID to the skill (the session-id environment surfaced to the skill at invocation). The skill reads it and writes it verbatim into the YAML. If the value is unavailable, the skill records `session_id: unknown` and surfaces the issue to the operator — the hook will then no-op for this WIP (safer than mirroring to the wrong slug).
+- **Sub-skill case:** when `/solution` dispatches a `/discover` subagent, the subagent runs in its own CC session with its own session ID; it creates its own WIP under `docs/socrates/discover/.wip/` with that subagent's session ID. The parent `/solution`'s WIP keeps the parent's session ID. The hook fires once per session and matches each session's JSONL to the correct WIP.
 
 ## Phase-exit ledger entries
 

@@ -1,14 +1,14 @@
 # Anti-Sycophancy Techniques
 
-> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the technique specs only.
+> Shared library consumed by multiple Socrates skills (currently `/discover` and `/solution`). Phase names and the overall flow are defined in each consuming skill's `SKILL.md`; this file expands the technique specs only and is skill-agnostic at the rule level. Skill-specific specializations are flagged inline.
 
-Three techniques the skill uses to prevent the LLM from drifting into agreeable summarization. Each catches a different failure mode and runs at different points in the flow.
+Three techniques each consuming skill uses to prevent the LLM from drifting into agreeable summarization. Each catches a different failure mode and runs at different points in the flow.
 
 | Technique | When it fires | What it catches | Cost |
 |-----------|--------------|-----------------|------|
 | **D — Verifiability rule** | Continuously, every time a specific surfaces | Shapes locked in without external grounding; untested assumptions baked into the framing | ~0 extra turns |
-| **B — Alternative framings** | Turn 1 + 2 more at convergence points in Phase 1 | Wrong problem frame, complexity bias | ~2-3 extra turns total |
-| **C — Red-team pass** | Once, as Phase 3 (its own phase) | Contradictions, missing concerns, scope creep, dependency gaps | ~2 extra turns |
+| **B — Alternative framings** | Turn 1 + 2 more at convergence points in the discovery/shape-discovery phase | Wrong problem frame (in /discover) or wrong shape frame (in /solution); complexity bias | ~2-3 extra turns total |
+| **C — Red-team pass** | Once, as a dedicated red-team phase in each consuming skill | Contradictions, missing concerns, scope creep, dependency gaps | ~2 extra turns |
 
 ---
 
@@ -27,9 +27,18 @@ Three techniques the skill uses to prevent the LLM from drifting into agreeable 
 **The rule.** Every surfaced specific is one of two things:
 
 - **EXTERNAL** — verifiable via a concrete external source from one of the five categories below. Lock in as a constraint.
-- **PREFERENCE / SHAPE** — no external source. Do not classify the shape itself. Peel back to the outcome it serves and park it.
+- **PREFERENCE / SHAPE** — no external source. Do not classify the shape itself. The consuming skill handles the preference per its own rule (see below).
 
-Absence of an external source is not "soft constraint" or "operator strong preference." It is a preference, and a preference gets peeled back.
+Absence of an external source is not "soft constraint" or "operator strong preference." It is a preference, and the consuming skill takes it from there.
+
+**Skill-specific handling of the PREFERENCE path:**
+
+- **In `/discover`:** peel back to the outcome the shape serves and park it in the WIP ledger's Parked shapes subsection with the outcome-question. (See the /discover SKILL.md Phase 1 spec and "Peel-back path (preference): park the shape" below for the operator-facing prompt and ledger format.)
+- **In `/solution`:** classify the parked shape as one of:
+  - **candidate-shape** — evaluate against alternatives via Tech-D's tested-choice path (the shape is one of several plausible designs; pick by comparing).
+  - **default-to-test** — run Tech-B's no-build framing against it (the shape may not need to exist at all; pressure-test by constructing the no-build alternative).
+
+  /solution's input set for SHAPE-DISCOVER is /discover's parked-shapes ledger entries.
 
 ### The five external-source categories
 
@@ -48,7 +57,7 @@ If the proposed source doesn't fit one of these five, treat the specific as pref
 Tightens the existing `(source: …)` field; no new field is introduced.
 
 - **External:** `(source: <category> — <specific citation>)` — e.g., `(source: regulator — SOC2 CC6.1: logical access controls)`.
-- **Preference:** no `source` field. Record under the WIP ledger's "Parked shapes" subsection instead, with the outcome-question the shape raises. (Ledger format defined in `references/checkpoint-protocol.md`.)
+- **Preference:** no `source` field. Record under the WIP ledger's "Parked shapes" subsection instead, with the outcome-question the shape raises. (Ledger format defined in `shared/checkpoint-protocol.md`.)
 
 ### Operator-facing prompt
 
@@ -75,15 +84,15 @@ The agent MUST run sub-classification on every external constraint, not only one
 
 These recording formats match the artifact template (see `references/artifact-template.md`); operators following Tech-D produce strings that drop directly into the "Confirmed constraints" section without reformatting.
 
-### Peel-back path (preference): park the shape
+### Peel-back path (preference): park the shape — /discover specialization
 
-V1/future-pull does NOT apply on the preference path. The shape itself is not classified. Instead:
+V1/future-pull does NOT apply on the preference path. The shape itself is not classified. This is the `/discover` realization of the PREFERENCE-path rule above. Instead:
 
 1. Name the outcome-question the shape raises ("What outcome does [X] serve? What breaks if it isn't met?").
 2. Record an entry in the WIP ledger's "Parked shapes" subsection with the shape, the turn it surfaced, the outcome-question, and who introduced it (operator vs. skill).
 3. Surface the outcome-question to the operator inline: *"Parking [X] — the outcome-question I'm tracking against it is [Q]. Does that capture what you actually want to know?"*
 
-A parked shape can be revived later as a tested choice once its outcome-question is answered (handled by the ledger's `resolved` field). What it cannot do in Phase 1 is escape unresolved or get promoted to constraint without a source citation.
+A parked shape can be revived later as a tested choice once its outcome-question is answered (handled by the ledger's `resolved` field). What it cannot do in /discover Phase 1 is escape unresolved or get promoted to constraint without a source citation. The parked-shapes ledger is consumed by `/solution`'s SHAPE-DISCOVER phase as its candidate-shape input set.
 
 ### Example (good — external lock-in)
 
@@ -118,23 +127,30 @@ This is the failure mode. Specifics get adopted without an external-source check
 - ❌ **Skipping the source citation when the specific "obviously" looks like a constraint.** Even AWS or Postgres needs an explicit category + citation. The whole point is to surface untested assumptions.
 - ❌ **Letting a parked shape escape Phase 1 without an outcome-question.** Every Parked-shapes entry has its outcome-question filled in.
 
-### Reverse sunk-cost check (Phase 3.5 only)
+### Reverse sunk-cost check (research/build-vs-buy phase only)
 
-In the research phase, when an existing tool was found that satisfies a chunk, apply Technique D's verifiability rule to the operator's stated preference for building:
+In a research / build-vs-buy phase (currently lives in `/solution`'s RESEARCH phase), when an existing tool was found that satisfies a chunk, apply Technique D's verifiability rule to the operator's stated preference for building:
 
 > "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts, not preference itself."
 
-This fights the inverse failure mode: dismissing a good existing tool because the operator is emotionally invested in building. The verifiability rule applies symmetrically — the same standard that prevents shapes from masquerading as constraints in Phase 1 prevents preferences from masquerading as constraints in Phase 3.5.
+This fights the inverse failure mode: dismissing a good existing tool because the operator is emotionally invested in building. The verifiability rule applies symmetrically — the same standard that prevents shapes from masquerading as constraints during shape-discovery prevents preferences from masquerading as constraints during research.
 
 ---
 
 ## Technique B — Alternative framings (2-3 times per Phase 1)
 
+**Skill-specific framing of what Tech-B challenges:**
+
+- **`/discover`'s Tech-B** fires on alternative **outcome** framings — the 4-way complexity spectrum runs from full-custom problem → no-build problem. The operator is being asked which *problem framing* they actually want to solve.
+- **`/solution`'s Tech-B** fires on alternative **shape** framings — the same 4-way complexity spectrum applied to candidate shapes, where No-build = adopt an existing tool / nothing new built. The operator is being asked which *shape* solves the already-agreed problem.
+
+In both cases the 4-option structure below is identical; the substantive content of each option differs by skill.
+
 **When to fire:**
 
-1. **Mandatory turn 1, immediately after Phase 0 completes** — fire the 4-option frame *before* asking any other discovery question. By turn 3, the operator has typed multiple paragraphs inside the original frame; firing at turn 1 surfaces alternatives while the cost of switching is still low.
-2. When a major architectural direction emerges later in Phase 1.
-3. Before the skill proposes moving from DISCOVER to CHUNK.
+1. **Mandatory turn 1, immediately after Phase 0 completes (in /discover) or Phase 0 SHAPE-DISCOVER opens (in /solution)** — fire the 4-option frame *before* asking any other question. By turn 3, the operator has typed multiple paragraphs inside the original frame; firing at turn 1 surfaces alternatives while the cost of switching is still low.
+2. When a major direction emerges later in the phase (architectural direction in /discover; shape direction in /solution).
+3. Before the skill proposes moving to its next phase (DISCOVER → next phase in /discover; SHAPE-DISCOVER → CHUNK in /solution).
 
 The LLM should not fire this every turn between firings. It should sense when the conversation is *settling* on a frame and use that as the cue for firings 2 and 3.
 
@@ -168,50 +184,20 @@ Don't write: "4. Use a spreadsheet" or "4. Just don't build it" as a no-build pl
 
 ---
 
-## Technique C — Red-team pass (Phase 3, its own phase)
+## Technique C — Red-team pass (its own phase in each consuming skill)
 
-**When to fire:** Once, as Phase 3 of the skill flow. Not optional. Not skippable. Even single-chunk simple problems get a red-team pass.
+**When to fire:** Once per skill flow, as a dedicated red-team phase. Not optional. Not skippable. Even single-chunk simple problems get a red-team pass.
 
-**Mode shift signal:** the LLM announces explicitly that it is shifting to red-team mode. This signals the operator that the next round is adversarial, not collaborative.
+**Where the mechanics live:** The *mechanics* of running a red-team pass — mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), and exit criteria — are defined once in `shared/red-team-protocol.md`. Consult that file for the operational details. Tech-C in this file covers the underlying *technique* (why red-teaming counters sycophancy); the protocol file covers the *how*.
 
-> "Switching to red-team mode. I'm going to try to break what we've concluded. For each finding I'll note severity: CRITICAL (must address before proceeding), DISCUSS (worth talking through), or MINOR (noting for awareness)."
+**Where the check categories live:** The list of *what* the red-team checks for is skill-specific — it names the kinds of conclusions the upstream phase produced. Each consuming skill's `SKILL.md` defines its own check list in its red-team phase section:
 
-### What the red-team checks
+- `/discover` red-teams **outcomes**: contradictions in outcomes, untested specifics that should have been Tech-D'd, missing concerns, scope drift in the problem framing, future-pull contamination of the outcome statement, existence question (do you even need to solve this?).
+- `/solution` red-teams **shapes and chunks**: contradictions between shape choices, untested shape commitments, missing concerns at the shape level, scope creep in chunks, dependency gaps between chunks, future-pull contamination of shape decisions, existence question at the shape level (is there an existing tool that obviates this whole shape?).
 
-For each chunk (or the single problem):
+The shared check categories that recur across both (contradictions, untested specifics, missing concerns, future-pull contamination, existence question) get tailored language per skill; the protocol file does not enumerate them.
 
-1. **Contradictions** — between chunks, between constraints, between constraints and chunk goals.
-2. **Untested specifics** — assumptions that surfaced but were never classified as constraints-vs-choices. (This catches Technique D misses.)
-3. **Missing concerns** — domains/topics that should have been explored but weren't. Cross-reference common architectural concerns: auth, observability, error handling, cost, performance, deployment, testing, security, data lifecycle.
-4. **Scope creep** — chunks bigger than they need to be. Could a chunk be split? Is a chunk pulling in concerns that belong elsewhere?
-5. **Dependency gaps** — would chunk N actually need information from chunk M that isn't captured in chunk M's outputs? If so, the dependency arrow is wrong or the upstream chunk is incomplete.
-6. **Existence question** — "do you even need to build this?" Is there an existing tool or simpler approach? This is a shallow check from training data — Phase 3.5 does the active research. If a strong candidate surfaces here, record it as a CRITICAL finding and let Phase 3.5 verify.
-7. **Stop-the-clock check** — what happens if you stop here? What would be lost vs. what would be gained?
-8. **Future-pull contamination** — for each chunk and each constraint, ask: *"Is any design element here driven by features, scale, or systems that aren't in V1 scope?"* This catches what Tech-D's V1/future-pull sub-classification missed during DISCOVER.
-
-**Severity guidance for future-pull contamination findings:**
-
-- **CRITICAL** — the future-pull element materially shapes the chunk's architecture. Example: a "core/ has no Claude-runtime-specific imports" constraint shapes how every module in `core/` is structured.
-- **DISCUSS** — the future-pull element adds friction without shaping. Example: choosing structlog now instead of stdlib `logging` adds an extra V1 dependency with no V1-specific benefit.
-- **MINOR** — small choices with future-pull rationale that don't propagate.
-
-**Expectation:** by the time RED-TEAM runs, future-pull contamination should be rare because Tech-D's sub-classification caught it inline. If RED-TEAM finds many instances, that is itself a signal that Tech-D's sub-classification is being skipped in DISCOVER — not just a sign that RED-TEAM is doing its job.
-
-### Severity classification
-
-- **CRITICAL** — must be addressed before proceeding. Examples: a contradiction between two chunks, a missing dependency that would invalidate a chunk's design, a constraint that conflicts with the chosen approach.
-- **DISCUSS** — worth talking through. The operator decides whether to act. Examples: scope creep that's borderline, a missing concern that may or may not matter for MVP.
-- **MINOR** — noting for awareness. No action required, but recorded. Examples: opinion-based concerns, future risks not relevant to current scope.
-
-### Operator response per finding
-
-- **Accept** — modify the chunk to address the finding. Record the change.
-- **Dismiss** — record the finding and the operator's reason for dismissing. Future readers should see why this concern was raised and rejected.
-- **Defer** — record as a known issue for V2. Not in MVP scope.
-
-### Exit criteria
-
-All CRITICAL findings must be either Accepted (chunk modified) or Dismissed with explicit reason. DISCUSS and MINOR findings are recorded regardless. Operator approves before phase exits.
+**Tech-C as anti-sycophancy:** the technique's job is to switch the LLM out of collaborative mode and into adversarial mode for one phase. Without the mode shift, the LLM keeps building toward what's already on the page. With it, the LLM tries to break what's been concluded — and the friction surfaces exactly the kind of issues Tech-B and Tech-D were supposed to catch but didn't.
 
 ---
 
