@@ -57,7 +57,7 @@ If the proposed source doesn't fit one of these five, treat the specific as pref
 Tightens the existing `(source: …)` field; no new field is introduced.
 
 - **External:** `(source: <category> — <specific citation>)` — e.g., `(source: regulator — SOC2 CC6.1: logical access controls)`.
-- **Preference:** no `source` field. Record under the WIP ledger's "Parked shapes" subsection instead, with the outcome-question the shape raises. (Ledger format defined in `shared/checkpoint-protocol.md`.)
+- **Preference:** no `source` field. Record under the WIP ledger's "Parked shapes" subsection instead, with the outcome-question the shape raises. (Ledger format defined in `checkpoint-protocol.md`.)
 
 ### Operator-facing prompt
 
@@ -137,7 +137,7 @@ This fights the inverse failure mode: dismissing a good existing tool because th
 
 ---
 
-## Technique B — Alternative framings (2-3 times per Phase 1)
+## Technique B — Alternative framings (2-3 times per the consuming skill's discovery phase)
 
 **Skill-specific framing of what Tech-B challenges:**
 
@@ -188,7 +188,7 @@ Don't write: "4. Use a spreadsheet" or "4. Just don't build it" as a no-build pl
 
 **When to fire:** Once per skill flow, as a dedicated red-team phase. Not optional. Not skippable. Even single-chunk simple problems get a red-team pass.
 
-**Where the mechanics live:** The *mechanics* of running a red-team pass — mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), and exit criteria — are defined once in `shared/red-team-protocol.md`. Consult that file for the operational details. Tech-C in this file covers the underlying *technique* (why red-teaming counters sycophancy); the protocol file covers the *how*.
+**Where the mechanics live:** The *mechanics* of running a red-team pass — mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), and exit criteria — are defined once in `red-team-protocol.md`. Consult that file for the operational details. Tech-C in this file covers the underlying *technique* (why red-teaming counters sycophancy); the protocol file covers the *how*.
 
 **Where the check categories live:** The list of *what* the red-team checks for is skill-specific — it names the kinds of conclusions the upstream phase produced. Each consuming skill's `SKILL.md` defines its own check list in its red-team phase section:
 
