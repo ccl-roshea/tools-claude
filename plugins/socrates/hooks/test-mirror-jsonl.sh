@@ -22,14 +22,14 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 hook="$script_dir/mirror-jsonl.sh"
 
 # Track all tempdirs so the trap can clean every case, even on failure.
-tmpdirs=()
-cleanup() { for d in "${tmpdirs[@]:-}"; do [[ -n "$d" ]] && rm -rf "$d"; done; }
-trap cleanup EXIT
+# Use a single parent dir so cleanup is one rm -rf, avoiding subshell-array
+# pitfalls (mk_tmp runs inside $(...) and cannot mutate a parent-shell array).
+TMP_ROOT="$(mktemp -d)"
+trap 'rm -rf "$TMP_ROOT"' EXIT
 
 mk_tmp() {
   local d
-  d="$(mktemp -d)"
-  tmpdirs+=("$d")
+  d="$(mktemp -d -p "$TMP_ROOT")"
   git -C "$d" init -q
   git -C "$d" config user.email test@example.com
   git -C "$d" config user.name test
