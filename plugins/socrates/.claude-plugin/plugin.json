@@ -1,0 +1,8 @@
+{
+  "name": "socrates",
+  "description": "Two-skill plugin for Socratic discovery + solution shaping. Pressure-tests problem framing, decomposes large problems into executor-sized chunks, and dispatches them downstream.",
+  "version": "1.0.0",
+  "author": {
+    "name": "ro"
+  }
+}

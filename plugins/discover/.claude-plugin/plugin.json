@@ -1,8 +1,0 @@
-{
-  "name": "discover",
-  "description": "Socratic idea discovery and chunking. Pressure-tests problem framing, decomposes large problems into executor-sized chunks, and dispatches them downstream.",
-  "version": "1.0.0",
-  "author": {
-    "name": "ro"
-  }
-}

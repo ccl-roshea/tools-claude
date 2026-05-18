@@ -9,10 +9,10 @@
   },
   "plugins": [
     {
-      "name": "discover",
+      "name": "socrates",
       "version": "1.0.0",
       "description": "Socratic idea discovery and chunking. Pressure-tests problem framing, decomposes large problems into executor-sized chunks, and dispatches them downstream.",
-      "source": "./plugins/discover"
+      "source": "./plugins/socrates"
     }
   ]
 }
