@@ -149,7 +149,14 @@ install-plugins:
         name="$(basename "$plugin")"
         echo "Installing plugin: $name@{{marketplace_name}}"
         claude plugin install "$name@{{marketplace_name}}" || true
-        claude plugin enable "$name@{{marketplace_name}}" || true
+        # Modern `claude plugin install` auto-enables, so `enable` typically returns
+        # "already enabled". Swallow only that specific case; surface any other error.
+        enable_output="$(claude plugin enable "$name@{{marketplace_name}}" 2>&1)" || true
+        if echo "$enable_output" | grep -q "already enabled"; then
+            echo "  (already enabled by install)"
+        else
+            [ -n "$enable_output" ] && echo "$enable_output"
+        fi
     done
 
 # Uninstall plugins from this repo and remove the marketplace registration
