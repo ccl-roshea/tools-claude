@@ -4,81 +4,89 @@
     {
       "id": 1,
       "prompt": "I want to deploy agents for my team that can communicate",
-      "expected_output": "The skill conducts thorough Socratic discovery on a vague problem statement. Constraints-vs-choices classification fires whenever specifics surface. Most of the 8 standard discovery items for this kind of problem are explored. Phase 3.5 (RESEARCH) actively searches and surfaces existing multi-agent frameworks (AutoGen, LangGraph, Claude Agent SDK) as build-vs-buy candidates. The final artifact reflects what the operator actually wants, not what they typed.",
+      "expected_output": "The skill conducts thorough Socratic discovery on a vague problem statement. Tech-D's verifiability rule fires whenever specifics surface — the skill asks for the external source (regulator, contract, deployed system, prior empirical result, or factual measurement) and either locks the specific in as a constraint with citation or parks it as a shape against an outcome-question. Most of the 8 standard discovery items for this kind of problem are explored. The /discover RESEARCH phase performs a shallow existence-check on outcomes (rigorous build-vs-buy lives in /solution). The final artifact reflects what the operator actually wants, not what they typed.",
       "files": [],
       "expectations": [
         "Phase 1 (DISCOVER) executes — the skill asks at least one clarifying question before moving on",
-        "Technique D fires at least once: when any specific implementation detail (named technology, protocol, pattern, or library) surfaces in the conversation, the skill asks whether it's a constraint or a choice",
+        "Tech-D fires at least once: when any specific implementation detail (named technology, protocol, pattern, or library) surfaces in the conversation, the skill asks for the external source per Tech-D's verifiability rule (regulator, contract, deployed system, prior empirical result, or factual measurement)",
+        "When the operator cannot cite an external source, the specific is parked as a shape under '## Parked shapes' with an outcome-question — not silently accepted as a constraint",
         "The semantics of 'an agent' are explored (autonomous LLM loop vs. scheduled job vs. chat bot vs. shared skill)",
         "Team scale is explored (rough size: e.g., 3 people vs. 30 vs. 300)",
-        "Deploy target is explored (local vs. cloud vs. hosted vs. specific provider)",
+        "Deploy target is explored (locality / isolation / who can reach it); specific platforms named by the operator (AWS, k8s, Vercel) are parked as shapes unless externally sourced",
         "The semantics of 'available for the entire team' are explored (discoverable how? invocable how? shared state?)",
-        "The semantics of 'communicate with each other' are explored (message bus vs. RPC vs. shared memory vs. event-driven)",
+        "The semantics of 'communicate with each other' are explored (sync vs. async, who initiates, what the consumer expects); specific protocols named by the operator (REST, message bus, gRPC) are parked as shapes unless externally sourced",
         "Sync vs. async and conversation-state persistence is explored",
         "At least one of: identity, auth, observability, cost accounting is explored",
         "Internal-tooling vs. product-feature vs. research-artifact framing is explored",
-        "At least 5 of the 8 standard discovery items above (rows 3-10) are explored",
-        "Phase 3.5 (RESEARCH) executes with at least one WebSearch tool invocation",
-        "The research phase surfaces at least one of: AutoGen, LangGraph, Claude Agent SDK as a candidate",
-        "Each surfaced candidate is evaluated against at least 2 of: functionality match, license, cost, maintenance, lock-in, integration burden",
-        "Phase 4 (ARTIFACT) produces a discovery artifact at docs/socrates/discover/<slug>.md following the template (header, framing, constraints, chunks, red-team findings, research outcomes, discovery log)"
+        "At least 5 of the 8 standard discovery items above are explored",
+        "The /discover RESEARCH phase performs at least one shallow existence-check surfacing a plausible existing tool/framework against an outcome (e.g., AutoGen, LangGraph, Claude Agent SDK) — flagged for /solution to evaluate, not scored in /discover",
+        "Phase 4 (ARTIFACT) produces a discovery artifact at docs/socrates/discover/<slug>.md following the template (outcomes, parked shapes, open axes, externally-sourced constraints with source annotations, discovery log)"
       ]
     },
     {
       "id": 2,
       "prompt": "Build me a todo app",
-      "expected_output": "Full discovery, red-team, and research run even though the problem is small. Chunking is NOT proposed (single-chunk problem). Phase 3.5 surfaces existing todo apps as build-vs-buy candidates and classifies at least one as Adopt-fully or Inspire. Single-chunk artifact produced.",
+      "expected_output": "Full discovery and red-team run even though the problem is small. The /discover RESEARCH phase performs a shallow existence-check and surfaces at least one existing todo app against the outcome (flagged for /solution to evaluate). Discovery artifact records outcomes, parked shapes, and any externally-sourced constraints. Chunk decomposition does not happen in /discover (chunking moved to /solution post-PR 2).",
       "files": [],
       "expectations": [
         "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
-        "Phase 2 (CHUNK) executes",
-        "Phase 2 concludes that the problem is single-chunk and does NOT propose decomposition into multiple chunks",
+        "The skill does NOT propose chunk decomposition during /discover (chunking is /solution's responsibility post-PR 2)",
         "Phase 3 (RED-TEAM) executes and announces the mode shift to red-team explicitly",
         "Phase 3 produces at least one finding of any severity (CRITICAL, DISCUSS, or MINOR)",
-        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
-        "Phase 3.5 surfaces at least 2 distinct existing todo apps or solutions as candidates (e.g., Todoist, TickTick, Linear, Things, Microsoft To Do, plain text file, Apple Reminders)",
-        "At least one of the surfaced candidates is classified as Adopt-fully or Inspire",
-        "Phase 4 (ARTIFACT) produces a discovery artifact with exactly one chunk section (or a 'single chunk — no decomposition needed' annotation)",
-        "The artifact's Research outcomes section records the specific candidates considered and the rationale for each classification"
+        "The /discover RESEARCH phase performs at least one shallow existence-check (WebSearch invocation acceptable but not required — existence-check may use prior knowledge)",
+        "The existence-check surfaces at least one existing todo app or solution as a candidate flagged for /solution (e.g., Todoist, TickTick, Linear, Things, Microsoft To Do, plain text file, Apple Reminders) — without scoring it",
+        "Phase 4 (ARTIFACT) produces a discovery artifact with outcomes, parked shapes, and any externally-sourced constraints — NOT with chunk sections (chunks are written by /solution)",
+        "If the operator named a specific technology (e.g., 'React', 'Postgres') without citing an external source, the technology is parked as a shape, not recorded as a constraint"
       ]
     },
     {
       "id": 3,
       "prompt": "We need a platform with auth, billing, a marketplace, and analytics",
-      "expected_output": "The skill recognizes a multi-subsystem problem early and proposes chunking. At least 3 chunks identified with dependencies. Phase 3.5 surfaces well-known managed alternatives (Auth0/Clerk for auth, Stripe for billing) and classifies at least one as Adopt-fully or Adopt-partially.",
+      "expected_output": "The /discover skill explores outcomes for each subsystem and parks named technologies as shapes unless externally sourced. The /discover RESEARCH phase performs a shallow existence-check surfacing well-known managed alternatives (Auth0/Clerk for auth, Stripe for billing) flagged for /solution to evaluate. Chunk decomposition with dependencies does not happen in /discover — that work moves to /solution's CHUNK phase, which consumes /discover's outcomes + shape decisions.",
       "files": [],
       "expectations": [
-        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
-        "Phase 2 (CHUNK) executes and proposes chunking (does NOT declare single-chunk)",
-        "Chunking is proposed within the first ~5 turns of Phase 2 (i.e., the skill recognizes multi-subsystem signals quickly)",
-        "At least 3 distinct chunks are identified",
-        "Each proposed chunk has explicit dependency annotation (None, or 'depends on Chunk N')",
-        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation per chunk OR an overall problem search",
-        "Phase 3.5 surfaces Auth0 OR Clerk OR another managed auth provider as a candidate for the auth chunk",
-        "Phase 3.5 surfaces Stripe OR another managed billing provider as a candidate for the billing chunk",
-        "At least one chunk has a candidate classified as Adopt-fully or Adopt-partially",
-        "If a candidate is classified as Adopt-fully, the corresponding chunk is restructured (replaced with an evaluate/install/integrate chunk)",
-        "Phase 4 (ARTIFACT) produces a multi-chunk discovery artifact with execution order computed (topological sort with parallelism notes)"
+        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question per subsystem (auth, billing, marketplace, analytics)",
+        "The skill does NOT propose chunk decomposition during /discover — chunking moved to /solution's CHUNK phase post-PR 2",
+        "Outcome questions are surfaced for each subsystem (e.g., 'who is authenticating?', 'what currencies / regions for billing?', 'who lists on the marketplace?', 'what analytics dimensions matter?')",
+        "Named technologies that surface (e.g., 'OAuth', 'Stripe', 'Snowflake') trigger Tech-D's verifiability rule — the skill asks for the external source and parks them as shapes if none is cited",
+        "The /discover RESEARCH phase performs shallow existence-checks against each subsystem outcome and surfaces at least Auth0/Clerk (auth) and Stripe (billing) as candidates flagged for /solution to evaluate (not scored here)",
+        "Phase 4 (ARTIFACT) produces a discovery artifact with outcomes per subsystem, parked shapes (including any named technologies), and any externally-sourced constraints",
+        "The artifact's parked shapes section preserves the existence-check candidates for /solution's SHAPE-DISCOVER and RESEARCH phases to evaluate"
       ]
     },
     {
       "id": 4,
       "prompt": "Build a REST API using Express with Postgres and deploy to AWS ECS",
-      "expected_output": "The skill treats this as an over-specified prompt. Technique D challenges multiple specifics as constraints-vs-choices. Technique B offers alternative framings across the full complexity spectrum, including a credible no-build frame. Phase 3.5 considers managed/serverless alternatives like Supabase, Render, Railway, Fly.io.",
+      "expected_output": "The skill treats this as an over-specified prompt. Tech-D's verifiability rule fires on every named specific (REST, Express, Postgres, AWS ECS), asking for the external source — and each specific is parked as a shape unless the operator cites one of the five external categories. Tech-B fires with alternative framings across the full complexity spectrum including a credible no-build frame. The /discover RESEARCH phase performs a shallow existence-check; rigorous build-vs-buy evaluation (Supabase, Render, Railway, Fly.io, Neon) happens in /solution's RESEARCH phase.",
       "files": [],
       "expectations": [
         "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
-        "Technique D challenges 'Express' as a constraint-or-choice",
-        "Technique D challenges 'Postgres' as a constraint-or-choice",
-        "Technique D challenges 'AWS ECS' as a constraint-or-choice",
-        "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) are challenged via Technique D",
-        "Technique B (alternative framings) fires at least once during Phase 1",
-        "Technique B presents exactly 4 framings: a complex frame, a middle-build frame, a low-build frame, and a no-build frame",
-        "Technique B's option 4 (no-build frame) is a credible no-code path the operator could actually take — not just 'a smaller version of frame 1'",
-        "Phase 3.5 (RESEARCH) executes with at least one WebSearch invocation",
-        "Phase 3.5 surfaces at least one managed/serverless alternative such as Supabase, Render, Railway, Fly.io, Neon, Vercel, or PlanetScale",
-        "At least one of the surfaced alternatives is evaluated against the chunk's constraints (functionality match, cost, lock-in, etc.)",
-        "Each evaluated candidate is assigned a classification (Adopt fully / Adopt partially / Reject / Inspire) with a specific reason — not a vague 'doesn't fit' rejection"
+        "Tech-D's verifiability rule fires on 'Express' — the skill asks for the external source (regulator, contract, deployed system, prior empirical result, or factual measurement)",
+        "Tech-D's verifiability rule fires on 'Postgres' — the skill asks for the external source",
+        "Tech-D's verifiability rule fires on 'AWS ECS' — the skill asks for the external source",
+        "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) trigger Tech-D's verifiability rule",
+        "When the operator cannot cite an external source for a specific, the skill parks it under '## Parked shapes' with an outcome-question — it does NOT lock it in as a constraint",
+        "Tech-B (alternative framings) fires at least once during Phase 1",
+        "Tech-B presents exactly 4 framings: a complex frame, a middle-build frame, a low-build frame, and a no-build frame",
+        "Tech-B's option 4 (no-build frame) is a credible no-code path the operator could actually take — not just 'a smaller version of frame 1'",
+        "The /discover RESEARCH phase performs at least one shallow existence-check surfacing a managed/serverless alternative (e.g., Supabase, Render, Railway, Fly.io, Neon, Vercel, PlanetScale) flagged for /solution to evaluate — without performing the rigorous 6-criterion scoring here",
+        "Phase 4 (ARTIFACT) produces a discovery artifact whose '## Parked shapes' section contains the named specifics (Express, Postgres, AWS ECS) with outcome-questions, ready for /solution's SHAPE-DISCOVER to resolve"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "[/solution smoke test] Given a synthetic discovery.md with outcomes 'sub-100ms p95 latency' and 'support 10k concurrent users' and parked shapes '[Redis caching layer]' and '[Postgres read replicas]' — run /solution's SHAPE-DISCOVER phase.",
+      "expected_output": "/solution's SHAPE-DISCOVER phase reads the discovery artifact, walks the parked-shapes list, and runs Tech-D's preference-path classification on each (constraint / candidate / default-to-test). Tech-B fires 1-2x with alternative shape framings across the complexity spectrum. The eventual solution artifact's Discovery → Solution mapping table contains a row for every outcome, and the Parked shapes resolution table contains a row for every parked shape.",
+      "files": [],
+      "expectations": [
+        "Phase 0 (SHAPE-DISCOVER) executes — the skill reads the discovery artifact and the parked-shapes ledger before doing anything else",
+        "For each parked shape ('Redis caching layer', 'Postgres read replicas'), Tech-D's classification fires: constraint (lock in with external-source citation) / candidate (test against alternatives) / default-to-test (run Tech-B's no-build framing)",
+        "Tech-B fires at least once during SHAPE-DISCOVER with 4 shape framings spanning the complexity spectrum (Complex / Middle / Low / No-build, where No-build = adopt existing tool)",
+        "The solution artifact's '## Discovery → Solution mapping' table contains a row for the 'sub-100ms p95 latency' outcome mapped to ≥1 chunk whose problem statement qualitatively names the outcome (per G5)",
+        "The solution artifact's '## Discovery → Solution mapping' table contains a row for the 'support 10k concurrent users' outcome mapped to ≥1 chunk whose problem statement qualitatively names the outcome (per G5)",
+        "The solution artifact's '## Parked shapes resolution' table contains a row for 'Redis caching layer' with a Resolution value of constraint / candidate / dropped (per G6)",
+        "The solution artifact's '## Parked shapes resolution' table contains a row for 'Postgres read replicas' with a Resolution value of constraint / candidate / dropped (per G6)",
+        "If any parked shape is marked 'Dropped', the row gives a specific reason (not 'TBD', not 'not needed')"
       ]
     }
   ]

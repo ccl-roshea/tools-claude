@@ -1,6 +1,6 @@
-# Evaluation Methodology for `/discover` Sessions
+# Evaluation Methodology for `/discover` and `/solution` Sessions
 
-A reusable scorecard for assessing the quality of a `/discover` session beyond the structural smoke tests in `evals/evals.json`.
+A reusable scorecard for assessing the quality of a `/discover` or `/solution` session beyond the structural smoke tests in `evals/evals.json`. D1–D7 apply to `/discover` sessions; D8–D9 add `/solution`-specific cross-artifact checks.
 
 ## Why this exists
 
@@ -16,19 +16,21 @@ For any session evaluation:
 - **Exported artifact** at `docs/socrates/discover/<slug>.md`
 - **Skill documentation contemporaneous with the session** — pin the version from the session date. Files: `SKILL.md`, all of `references/`, `LIMITATIONS.md`, `evals/evals.json`. Protocols evolve; auditing against current docs when the session predates them produces false negatives.
 
-## The seven dimensions
+## The dimensions
 
-Each dimension is grounded in something explicit from the skill's own design documents.
+Each dimension is grounded in something explicit from the skill's own design documents. D1–D7 apply to `/discover` sessions. For `/solution` sessions, additionally apply D8 and D9 (cross-artifact contract gates).
 
 | # | Dimension | Source of truth | Scope |
 |---|-----------|-----------------|-------|
 | D1 | Phase execution and ordering | `SKILL.md` (named phases), `evals/evals.json` structural checks | Procedure compliance |
-| D2 | Artifact-time gates 1–4 | `references/artifact-gates.md` | Output integrity |
-| D3 | Anti-sycophancy: Tech-D firing on specifics | `references/anti-sycophancy.md`, `LIMITATIONS.md §1, §8` | Anti-drift discipline |
-| D4 | Anti-sycophancy: Tech-B alternative framings | `references/anti-sycophancy.md`, `evals/evals.json` test 4 | Frame integrity |
-| D5 | Research rigor (Phase 3.5) | `references/research-protocol.md` | Build-vs-buy honesty |
-| D6 | Chunk decomposition quality | `references/chunking-guidelines.md` | Executor-readiness |
+| D2 | Artifact-time gates 1–4 | `../references/artifact-gates.md` (`/discover`) / `../../solution/references/solution-gates.md` G1–G4 (`/solution`) | Output integrity |
+| D3 | Anti-sycophancy: Tech-D firing on specifics | `../../../shared/anti-sycophancy.md` (verifiability rule), `LIMITATIONS.md §1, §8` | Anti-drift discipline |
+| D4 | Anti-sycophancy: Tech-B alternative framings | `../../../shared/anti-sycophancy.md`, `evals/evals.json` test 4 | Frame integrity |
+| D5 | Research rigor (`/solution` RESEARCH; `/discover` does shallow existence-check only) | `../../solution/references/research-protocol.md`, `../references/research-protocol.md` | Build-vs-buy honesty |
+| D6 | Chunk decomposition quality (`/solution`) | `../../solution/SKILL.md` (CHUNK phase) | Executor-readiness |
 | D7 | Operator load and friction | `LIMITATIONS.md §3` (Path B baseline = 26 turns) | Cost/value tradeoff |
+| D8 | Outcome-coverage gate enforcement (`/solution` only) | `../../solution/references/solution-gates.md` G5 | Cross-artifact contract |
+| D9 | Parked-shapes resolution completeness (`/solution` only) | `../../solution/references/solution-gates.md` G6 | Cross-artifact contract |
 
 ## Grading anchors
 
@@ -57,7 +59,7 @@ Every grade requires **at least one specific evidence reference** (file + line, 
 
 ### D2 — Artifact-time gates
 
-Run all four gates from `references/artifact-gates.md` against the **written artifact** (not the assembled draft, since the draft isn't preserved).
+For `/discover` sessions, run all four gates from `../references/artifact-gates.md` against the **written artifact** (not the assembled draft, since the draft isn't preserved). For `/solution` sessions, run G1–G4 from `../../solution/references/solution-gates.md` (shape-analogs of the discovery gates) against the written solution artifact.
 
 - **Gate 1 (Constraints provenance):** every line under `## Confirmed constraints` has `[V1]` or `[future-pull, V1-justified: <reason>]` label AND `(source: …)` annotation.
 - **Gate 2 (Tested choices alternatives):** every line under `## Tested choices` lists ≥1 alternative with specific rejection reason.
@@ -73,7 +75,7 @@ Run all four gates from `references/artifact-gates.md` against the **written art
 This is the dimension `evals.json` cannot test mechanically. The most expensive audit.
 
 **Procedure:**
-1. **Enumerate every specific** introduced in the transcript, source-tagged: operator-introduced vs. skill-introduced ("strawman default"). Specifics include named technologies, libraries, protocols, scale numbers, behavioral defaults, policy quotes (the six categories from `references/anti-sycophancy.md`).
+1. **Enumerate every specific** introduced in the transcript, source-tagged: operator-introduced vs. skill-introduced ("strawman default"). Specifics include named technologies, libraries, protocols, scale numbers, behavioral defaults, policy quotes (the six categories from `../../../shared/anti-sycophancy.md`).
 2. For each specific, check whether Tech-D fired — visibly (asked operator) or silently (recorded in phase-exit ledger or in artifact's `[V1]` / `[future-pull, V1-justified: …]` / `[V2-driven, deferred]` labels).
 3. Build a coverage matrix: rows = specifics, columns = (introduced-by, classified?, classification, source).
 4. Flag specifics that escaped classification entirely.
@@ -90,7 +92,7 @@ This is the dimension `evals.json` cannot test mechanically. The most expensive 
 **Procedure:**
 1. Find Tech-B invocations in transcript (look for "four ways to think about this", or numbered framings 1–4 with complexity-spectrum labels).
 2. Spec calls for 2–3 firings: turn 1 (mandatory after Phase 0), at major-direction-emergence, and before move from DISCOVER to CHUNK. Verify count.
-3. For each invocation, verify it presents 4 framings spanning the complexity spectrum AND includes a *credible* no-build option (not "just don't build it", not "use a spreadsheet" — see `references/anti-sycophancy.md` "weak no-build" anti-pattern).
+3. For each invocation, verify it presents 4 framings spanning the complexity spectrum AND includes a *credible* no-build option (not "just don't build it", not "use a spreadsheet" — see `../../../shared/anti-sycophancy.md` "weak no-build" anti-pattern).
 4. Verify each frame is qualitatively distinct, not "smaller version of frame 1" (per `evals.json` test 4).
 
 **Scoring:** A = all firings have credible 4-option spectrum; B = firings present but no-build is forced; C = fewer than 2 firings or weak frames; F = no Tech-B firing visible.
@@ -99,7 +101,7 @@ This is the dimension `evals.json` cannot test mechanically. The most expensive 
 
 **Procedure:**
 1. Count Phase 3.5 candidate evaluations (look for `Task()` dispatches with research prompts, `WebSearch`, `WebFetch`).
-2. For each candidate, verify all six evaluation criteria from `references/research-protocol.md` were considered: functionality match (%), license, cost, maintenance, lock-in, integration burden.
+2. For each candidate, verify all six evaluation criteria from `../../solution/references/research-protocol.md` were considered: functionality match (%), license, cost, maintenance, lock-in, integration burden.
 3. Verify each candidate received a classification (Adopt fully / Adopt partially / Reject / Inspire) with a *specific* reason — not "doesn't fit our needs".
 4. Verify the **reverse sunk-cost check** fired before Reject classifications: did the skill apply Tech-D to "we want to build this" when a candidate matched?
 5. **Spot-audit** 3 candidates in detail (especially the lighter rejections — they're the most likely to be pattern-matched out).
@@ -128,18 +130,46 @@ This is the dimension `evals.json` cannot test mechanically. The most expensive 
 
 **Scoring:** A = ≤26 turns with low correction ratio (<20%); B = 26–50 turns, mostly agent-driven; C = 50+ turns OR correction ratio >40%; F = operator carrying the session (>60% corrections or frequent unanswered pivots).
 
+### D8 — Outcome-coverage gate enforcement (`/solution` only)
+
+This dimension audits whether `/solution` honored the cross-artifact contract that no outcome from `/discover` is silently lost. Source of truth: `../../solution/references/solution-gates.md` G5.
+
+**Procedure:**
+1. Read the upstream discovery artifact at `docs/socrates/discover/<slug>.md` and enumerate every bullet under `## Outcomes`.
+2. Read the solution artifact's `## Discovery → Solution mapping` table.
+3. Verify every discovery outcome appears as a row in the mapping table (mechanical check from G5).
+4. For each mapping row, read the named chunk's `Problem statement` and verify the outcome (or a clear referent) appears qualitatively — a mapping row that names a chunk by number where the chunk's problem statement doesn't mention the outcome is bookkeeping, not coverage.
+5. Flag any silent drops (outcome present in discovery.md, absent from mapping table) and any qualitatively-failing rows.
+
+**Scoring:** A = all outcomes mapped with qualitative coverage in the named chunk; B = all outcomes mapped, one or two qualitatively-thin rows; C = one outcome dropped or multiple qualitative failures; F = multiple outcomes dropped silently.
+
+### D9 — Parked-shapes resolution completeness (`/solution` only)
+
+This dimension audits the second cross-artifact contract: every shape `/discover` parked has an explicit resolution in `/solution`. Source of truth: `../../solution/references/solution-gates.md` G6.
+
+**Procedure:**
+1. Enumerate parked shapes from both `docs/socrates/discover/<slug>.md` (`## Parked shapes`) and, if it still exists, the WIP ledger at `docs/socrates/discover/.wip/<slug>.wip.md`.
+2. Read the solution artifact's `## Parked shapes resolution` table.
+3. Verify every parked shape appears as a row in the resolution table with one of the allowed `Resolution` values (constraint / candidate / dropped, per G6).
+4. For `Dropped` resolutions, verify a specific reason is given — not "TBD" or "not needed".
+5. Flag any parked shapes that vanished without an entry.
+
+**Scoring:** A = all parked shapes resolved with allowed values and concrete reasons; B = all shapes present, one or two thin "Dropped" reasons; C = one shape missing or multiple thin Dropped reasons; F = multiple shapes vanish without resolution.
+
 ## Parallel subagent dispatch plan
 
-Per `general-purpose` subagent dispatched per dimension. Dispatched as one batch of 6 parallel tool calls in a single message.
+Per `general-purpose` subagent dispatched per dimension. Dispatched as one batch of 6 parallel tool calls (8 for `/solution` sessions) in a single message.
 
 | Subagent | Covers | Primary input |
 |----------|--------|---------------|
 | A | D1 + D2 | exported artifact + grep over transcript |
 | B | D6 | exported artifact (chunk sections) |
 | C | D3 | full transcript scan + artifact constraints list |
-| D | D4 | transcript (Phase 1 turns) |
+| D | D4 | transcript (Phase 1 / SHAPE-DISCOVER turns) |
 | E | D5 | transcript (Task() dispatches, research turns) + artifact research section |
 | F | D7 | full transcript turn count + classification |
+| G | D8 (`/solution` only) | discovery.md outcomes + solution.md `Discovery → Solution mapping` table |
+| H | D9 (`/solution` only) | discovery.md + WIP parked shapes + solution.md `Parked shapes resolution` table |
 
 Each subagent:
 - Reads the dimension's source-of-truth file in `references/` (or `LIMITATIONS.md`)
@@ -150,11 +180,11 @@ The orchestrator (main thread) reads all 6 reports and writes a unified `evaluat
 
 ## Output deliverables
 
-This methodology lives at `plugins/discover/skills/discover/evals/methodology.md` (alongside `evals.json`). Per-session evaluation reports live at `plugins/discover/skills/discover/evals/reports/<session-slug>.md`. The session transcript itself stays where the session generated it (`docs/socrates/discover/<slug>/<session-id>.jsonl` in whichever repo the session ran in).
+This methodology lives at `plugins/socrates/skills/discover/evals/methodology.md` (alongside `evals.json`). Per-session evaluation reports live at `plugins/socrates/skills/discover/evals/reports/<session-slug>.md`. The session transcript itself stays where the session generated it (`docs/socrates/discover/<slug>/<session-id>.jsonl` or `docs/socrates/solution/<slug>/<session-id>.jsonl` in whichever repo the session ran in).
 
 Each session report contains:
 
-- Per-dimension grade (D1–D7) with cited evidence (artifact + transcript line refs)
+- Per-dimension grade (D1–D7 for `/discover` sessions; D1–D9 for `/solution` sessions) with cited evidence (artifact + transcript line refs)
 - A "did well / did not" synthesis
 - For each limitation in `LIMITATIONS.md`: whether this session reproduced it
 - Optionally: the auditor's hypotheses from a pre-audit read, with confirm/refute notes from the audit
