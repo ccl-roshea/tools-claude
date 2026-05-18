@@ -173,7 +173,7 @@ If EXTERNAL: lock in with `(source: <category> — <specific citation>)` and app
 
 **Do not skip this.** The Path A test demonstrated that adopting specifics without verifiability checks produces shallow architectures. Locking in a shape because it "feels like a constraint" or because the operator stated it confidently is the failure mode this rule exists to prevent.
 
-**Per-fire visibility (high-stakes specifics).** For most firings, Tech-D resolves silently and the result surfaces in the next phase-exit ledger (or under `## Parked shapes` if peeled back). But for **high-stakes specifics**, show the result inline in the same turn rather than batching. Definition of high-stakes: specifics that, if wrong, would invalidate multiple downstream chunks. Concretely:
+**Per-fire visibility (high-stakes specifics).** For most firings, Tech-D resolves silently and the result surfaces in the next phase-exit ledger (or under `## Parked shapes` if peeled back). But for **high-stakes specifics**, show the result inline in the same turn rather than batching. Definition of high-stakes: specifics that, if wrong, would invalidate downstream solutioning work (chunks live in /solution post-PR2). Concretely:
 
 - **Named foundational technology** that the rest of the design will sit on top of (database, framework, deployment target, language).
 - **Behavioral default that affects every operation** of the agent or system being designed (e.g., "default-ON consultation," "always confirm before write," "X is the source of truth").
@@ -191,7 +191,7 @@ All other Tech-D firings resolve silently and appear in the next phase-exit ledg
 Fire 2-3 times per session:
 1. **Mandatory turn 1, immediately after Phase 0 completes** — fire the 4-option frame *before* any other discovery question.
 2. When a major architectural direction emerges later in Phase 1.
-3. Before you propose moving from DISCOVER to CHUNK.
+3. Before you propose moving from DISCOVER to RED-TEAM.
 
 **Action:** present 4 framings of the entire problem:
 
@@ -216,7 +216,7 @@ Watch for:
 
 When any signal fires, propose:
 
-> "I think [area] is sufficiently explored. Want to go deeper, or should I move on to [next area / chunking]?"
+> "I think [area] is sufficiently explored. Want to go deeper, or should I move on to [next area / red-team]?"
 
 The operator decides. You don't terminate unilaterally.
 
