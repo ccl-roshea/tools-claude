@@ -18,10 +18,18 @@ These are gating only if the skill is being shared with others. For solo use, Te
 
 (Both addressed in PR 1, 2026-05-15.)
 
-- [ ] **Recursive /discover end-to-end test.** First real recursive run will surface integration issues; do this when the next genuinely-multi-chunk problem comes up.
-
 ## Future capability (deferred per spec)
 
 - [ ] **Per-node executor dispatch.** The original spec named this as the most differentiating long-term feature. Currently the artifact recommends an executor per chunk as a human-readable annotation; there's no automated routing. Build when there are multiple specialist executors worth dispatching to.
 - [ ] **Parallel dispatch.** Currently chunks run sequentially even when independent. Worth building when operator can context-switch between multiple in-flight /superpowers sessions, OR when /superpowers can run autonomously enough to not need HITL per turn.
 - [x] **Cross-session resume.** ~~Currently a session that hits its budget and stops loses state.~~ Resolved by the JSONL-mirror hook: each Claude Code session that touches a discovery now writes its own `<session-id>.jsonl` into `docs/discovery/.wip/<slug>/`, and the WIP file's ledger entries provide the structured resume context. `/discover resume <slug>` reads the ledgers and continues; the new session's JSONL accumulates alongside the prior ones.
+
+## PR 3 candidates
+
+Forward-looking work surfaced by PR 2 that should be considered for the next iteration.
+
+- [ ] **Multi-domain support / expert registry / domain-aware routing.** The plugin currently treats all problems with one generic Socratic frame. Real domain expertise (security, infra, ML, frontend, etc.) would require a registry of domain experts and routing of CHUNK questions to the right one. Build when cross-domain problems become the common case.
+- [ ] **Per-node executor dispatch automation (beyond /superpowers).** Pairs with the long-standing executor-dispatch item above, but specifically: automate the dispatch step so the operator doesn't manually copy chunk prompts into /superpowers. Requires a stable dispatch interface across executors.
+- [ ] **HIPAA scaffolding / PHI primitives.** Domain primitives for healthcare problems — PHI-aware question templates, BAA-aware build-vs-buy filters, encryption-at-rest defaults baked into the artifact gates. Currently no domain has special-case scaffolding.
+- [ ] **Eval mode automation for the new behaviors.** Refresh `evals/evals.json` beyond the partial fix in Task 13 to cover PR 2's new behaviors (session-id JSONL matching, /solution standalone error path, plugin-root LIMITATIONS placement). Today's evals are structural smoke tests; the new behaviors need at least one positive and one negative case each.
+- [ ] **Migration tooling for existing `docs/discovery/` artifacts to `docs/socrates/discover/`.** PR 1 changed the artifact path convention. Operators with existing `docs/discovery/<slug>/` directories from earlier sessions have no automated way to migrate. Build a small `socrates migrate` script when the install base is large enough to matter.

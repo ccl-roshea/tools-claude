@@ -74,6 +74,8 @@ These are real gaps in the current `/discover` skill, observed during the valida
 
 ## 10. JSONL transcript hook is cwd-gated and single-WIP only
 
+**Status:** addressed in PR 2, 2026-05-15. Session-id matching across discover/.wip/ and solution/.wip/. See docs/plans/2026-05-15-discover-socratic-tightening-pr2-design.md §7.
+
 **Observed:** The plugin's `mirror-jsonl.sh` hook fires on every Claude Code `Stop` and `SessionEnd`, but it only acts when exactly one `*.wip.md` file exists under `<cwd>/docs/socrates/discover/.wip/`. Zero or two-plus WIPs → no-op (the latter logs to stderr).
 
 **Pattern:** This is the simplest disambiguation rule, but it means recursive discovery (multiple chunks discovered in parallel from the same project root) cannot rely on the auto-mirror — it would skip every turn because the WIP set is ambiguous. The current skill flow does in-line sub-decomposition rather than recursive `/discover`, so the constraint doesn't bite the default flow.
@@ -87,3 +89,11 @@ These are real gaps in the current `/discover` skill, observed during the valida
 **Pattern:** A chunk that the agent borderline-flags but the operator considers fine still requires an explicit override on record. Previously the operator could decline the recursion prompt and move on with no record; now the override goes into the artifact.
 
 **Status:** Intentional. The visibility is the point. If operators routinely override at CHUNK exit, the signals may need re-tuning — but the override-with-record creates the data needed to know that.
+
+## 12. /solution requires upstream discovery.md — no graceful handling if invoked standalone
+
+**Observed:** The `/solution` skill assumes an existing `docs/socrates/discover/<slug>/discovery.md` produced by `/discover`. There is no fallback path for invoking `/solution` against a slug that has no upstream discovery artifact.
+
+**Pattern:** Operator must run `/discover` first; `/solution` errors clearly if `discovery.md` is missing for the given slug. This keeps the plugin's two-skill pipeline coherent (discovery feeds solution) but means `/solution` cannot be used as a standalone planning aid.
+
+**Mitigation:** None planned for PR 2. Standalone `/solution` invocation would require an operator-provided problem statement and a synthesized minimal discovery artifact — out of scope for the current pipeline. Operators who want lightweight solution-only planning should use `/superpowers` directly.
