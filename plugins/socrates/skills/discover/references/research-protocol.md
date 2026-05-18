@@ -1,174 +1,48 @@
-# Research Protocol (Build-vs-Buy)
+# Research Protocol (Shallow Existence Check)
 
-> Phase names (DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the research protocol only.
+> Phase names (PREMISE CHECK, DISCOVER, RED-TEAM) and the overall flow are defined in `../SKILL.md`. This file expands the discovery-portion existence check only. The rigorous build-vs-buy evaluation (per-chunk candidate scoring, classification, soft limits) lives in `/solution`'s own research protocol.
 
-Phase 3.5 of the skill. After red-team and before artifact commit, actively research existing tools that might satisfy chunks. Replaces training-data intuition with current web evidence.
+## Why this file exists
 
-## Why this phase exists
+`/discover` is outcome-focused. It does not chunk, it does not pick shapes, and it does not run a rigorous build-vs-buy evaluation. But the *existence question* — "is there already an obvious tool that reaches this outcome?" — is part of pressure-testing the outcomes themselves. If a discovered outcome is trivially served by an existing tool the operator hasn't considered, that is an outcome-level signal worth surfacing before `/solution` ever runs.
 
-Phase 3 (red-team) checks "is there an existing tool?" using only the LLM's training data. Training data has cutoff issues and recency problems. The LLM also tends to reject existing tools without rigorous evaluation. The Path A test demonstrated this: AutoGen, LangGraph, Microsoft Agent Framework, and Claude Agent SDK were all named, then all rejected in favor of build-it-yourself, with no actual evaluation.
+This file scopes that shallow check. It exists so the agent has a written floor for "should I mention the existing tool" vs. "should I rigorously evaluate it" — the former belongs in `/discover`, the latter does not.
 
-This phase replaces "I think there might be a tool" with "I searched and evaluated three candidates."
+## When the shallow existence check fires
 
-## Search strategy
+The check can fire informally in two places:
 
-### Per-chunk search
+1. **During Phase 0 PREMISE CHECK.** The no-build path enumeration already surfaces existing tools when they are obvious ("use Plane's MCP directly", "improve the existing markdown POC"). That is the existence check operating in its first natural home. No additional protocol needed.
+2. **During Phase 2 RED-TEAM.** If, while reviewing the discovered outcomes, an obvious existing tool would reach an outcome without any building, surface it as a RED-TEAM finding. Severity is usually DISCUSS — the operator should know the tool exists before `/solution` starts shape-discovery on a redundant build.
 
-For each chunk, run at least one targeted search. The query is constructed from the chunk's problem statement and confirmed constraints. Examples:
+The check is *shallow* in both places: name the tool, name what outcome it would reach, ask whether the operator has considered it. Do not score it, do not classify it, do not write a candidate evaluation. The deep evaluation is `/solution`'s job.
 
-- Chunk: "Auth for a B2B SaaS app, multi-tenant, SSO required"
-  Query: `"multi-tenant SSO auth provider B2B SaaS"` and follow-ups for top results
+## What "shallow" means concretely
 
-- Chunk: "Background job runner with retry and observability"
-  Query: `"background job queue Python retry observability"`
+A shallow existence check produces output like this, recorded as a RED-TEAM DISCUSS finding:
 
-- Chunk: "Real-time collaboration cursor + presence"
-  Query: `"real-time collaboration cursor presence library"`
+> "Existence check: outcome '[name]' could plausibly be reached by adopting [tool / service / library], which already does [what it does]. I am not scoring it here — that's `/solution`'s job. But before we cement the outcome as a build target: has the operator considered this option, and is there an external source that rules it out?"
 
-### Overall problem search
+That is the whole protocol. It produces a question, not a recommendation, and not a scored evaluation.
 
-In addition to per-chunk searches, run one **whole-problem search**. Sometimes the right answer is to skip all chunks and adopt one platform. Example:
+A shallow existence check does NOT include:
+- Per-chunk searches (no chunks exist yet at /discover).
+- A candidate scoring rubric.
+- A classification verdict.
+- Soft limits on per-session research time.
+- Detailed cost / license / lock-in evaluation.
 
-- Problem: "I want a team agent platform"
-  Query: `"team agent platform Claude" OR "multi-agent framework"` — surfaces AutoGen, LangGraph, Claude Agent SDK, etc.
+All of the above live in `/solution`'s research protocol, where shape-discovery and chunking have produced the structure that makes scoring meaningful.
 
-If the whole-problem search finds a strong match, propose adopting it across multiple chunks. The chunk structure may collapse.
+## Handoff to `/solution`
 
-### Tools to use
+If the shallow check surfaces a candidate tool that the operator wants to evaluate seriously, record it in the discovery artifact as part of the relevant RED-TEAM finding — but do NOT evaluate it. `/solution`'s RESEARCH phase will pick it up and run the rigorous build-vs-buy evaluation with proper candidate scoring.
 
-- **WebSearch** — primary discovery. Use for finding candidates.
-- **WebFetch** — fetch specific pages (homepage, pricing, docs) to evaluate candidates.
-- **`mcp__plugin_context7_context7__resolve-library-id`** + **`mcp__plugin_context7_context7__query-docs`** — when evaluating a specific library, get current authoritative docs.
-
-### When search results look thin
-
-If the first search returns weak results:
-1. Refine the query — add domain terms, remove specifics that may be too narrow.
-2. Try alternative framings — "tool" vs. "library" vs. "framework" vs. "service".
-3. Search for the *category* — "what are the leading X solutions in 2026?"
-
-If after 2-3 refinements still no good candidates: that's a real signal there's no obvious existing tool. Move on. Don't search forever.
-
-## Evaluation criteria
-
-For each candidate, evaluate against ALL of:
-
-### 1. Functionality match (%)
-
-What percentage of the chunk's requirements does this candidate cover? Be specific — list what it does and what it doesn't. Don't round up.
-
-### 2. License compatibility
-
-- Open source license — MIT/Apache/BSD are usually fine, GPL/AGPL may have implications
-- Commercial — pricing model, lock-in clauses
-- Patent grants and contributor terms
-- Compatibility with the operator's company policies (note as a constraint to verify if unknown)
-
-### 3. Cost
-
-- Free? Paid? Freemium?
-- If paid: pricing model (per-user, per-request, per-MB, flat)
-- For freemium: where does the free tier end? Is the free tier sustainable for the operator's expected scale?
-- Include hidden costs: hosting if self-hosted, training time, integration burden
-
-### 4. Maintenance status
-
-- Last release date
-- Open issues, PR turnaround
-- Contributor activity (single maintainer? Active community?)
-- Recent breaking changes
-- Clear roadmap?
-
-A tool with active maintenance is much more valuable than one with marginally better functionality but stale maintenance.
-
-### 5. Lock-in / dependency risk
-
-- How hard is it to swap out later?
-- Does it require significant rewrites of *your* code to integrate?
-- Are there standard interfaces (e.g., OAuth, S3 API, OpenAPI) that make replacement easier?
-- Is the tool itself dependent on a single vendor that could disappear?
-
-### 6. Integration burden
-
-- Auth requirements (API keys, OAuth, mTLS)
-- Data format expectations
-- Runtime requirements (Python version, Docker, K8s)
-- Network/firewall implications
-- Documentation quality
-
-## Classification
-
-Each candidate is classified into exactly one of four buckets:
-
-### Adopt fully
-
-The candidate covers the entire chunk's scope. The chunk is *replaced* with a much smaller "evaluate, install, configure, integrate" chunk. The original build-from-scratch chunk is deleted.
-
-Example: chunk was "build OAuth provider"; candidate is Auth0; chunk becomes "integrate Auth0 — set up tenant, configure callbacks, wire to app."
-
-### Adopt partially
-
-The candidate covers part of the chunk's scope. The chunk *shrinks* to cover only the gap. The artifact records what the existing tool covers vs. what's still being built.
-
-Example: chunk was "build agent orchestration"; candidate is LangGraph; chunk becomes "build agent orchestration on top of LangGraph (using LangGraph for state machine and tool routing; building custom: persistence layer, multi-tenancy, billing-aware rate limiting)."
-
-### Reject
-
-The candidate doesn't fit. The candidate's name, version, and rejection reason are recorded in the artifact. **This is important** — future readers should see which alternatives were considered and why they were rejected. Without this, every future engineer will re-ask the same question.
-
-Reasons should be specific:
-- "Auth0 free tier ends at 7,500 users; we need to support 50k+ at MVP"
-- "Temporal requires running a separate cluster; ops budget doesn't allow"
-- "AutoGen is Python-only; our backend is TypeScript"
-
-Vague reasons are red flags: "doesn't fit our needs" is not a rejection reason — it's a placeholder.
-
-### Inspire
-
-Don't adopt, but the candidate has architecture or interface ideas worth borrowing. Note as a reference link in the chunk's notes for the executor.
-
-## Reverse sunk-cost check
-
-Before classifying any candidate as Reject, apply Technique D's verifiability rule to the operator's stated preference for building (see `anti-sycophancy.md` Reverse sunk-cost subsection):
-
-> "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts (pricing, lock-in, integration burden), not preference itself."
-
-If the operator can cite an external source, record the rejection with the citation. Otherwise the operator must articulate specific functional gaps or constraint conflicts; without either, the rejection is suspect — find a real reason or reconsider Adopt/Adopt partially.
-
-## Soft limits
-
-Don't research forever:
-
-- **Per chunk:** evaluate ~3-5 candidates. After that, classify the rest as Reject (not evaluated, no obvious fit) and move on.
-- **Per session:** ~30 minutes of research total. Beyond that, the operator should call it.
-- **Stop early when:** a clear winner emerges (Adopt fully) — don't keep evaluating just for completeness.
-
-## Output format
-
-Findings get folded into the artifact in Phase 4. Each finding includes:
-
-```markdown
-- **<Tool name>** — Adopt fully / Adopt partially / Reject / Inspire
-  - URL: <link>
-  - Functionality match: <%>
-  - Cost: <free / paid / pricing>
-  - License: <license + any concerns>
-  - Maintenance: <active / stable / stale>
-  - Lock-in: <low / medium / high>
-  - Integration burden: <low / medium / high>
-  - Reason for classification: <specific>
-```
-
-Then per-chunk outcome:
-
-```markdown
-- **Outcome:** <chunk modified to ... | chunk eliminated | chunk replaced with integration chunk | chunk unchanged, build custom>
-```
+The discovery artifact records the existence-check finding; `/solution` records the evaluation.
 
 ## Anti-patterns
 
-- ❌ **Searching once, skimming the first result, declaring "no good options."** Always evaluate at least 2-3 candidates against the criteria.
-- ❌ **Vague rejection reasons.** "Doesn't fit" is a placeholder. Specify what doesn't fit.
-- ❌ **Skipping the reverse sunk-cost check.** When you find a candidate that matches the chunk and the operator says "let's build anyway," apply Technique D's verifiability rule before recording Reject — externally sourced (mandate / contract / regulator / factual constraint) → record rejection with citation; otherwise treat as preference and require specific functional gaps or constraint conflicts.
-- ❌ **Pricing-page hand-waving.** If a candidate is paid, check the actual pricing page. Don't guess.
-- ❌ **Researching forever.** Soft limits exist for a reason. After 3 candidates without a clear winner, move on.
+- ❌ **Running a rigorous evaluation inside /discover.** Scoring candidates, classifying verdicts, evaluating cost/license/lock-in — all of that is `/solution`'s job. `/discover` only asks the existence question.
+- ❌ **Skipping the existence question entirely.** If an obvious tool exists and the operator hasn't considered it, the outcome is half-discovered. Surface the question even if the answer is "yes, considered, ruled out" — record the ruling reason.
+- ❌ **Treating the existence check as a Phase of its own.** It isn't. It rides on Phase 0's no-build enumeration and Phase 2's RED-TEAM. No separate phase, no separate ledger.
+- ❌ **Refusing to name a tool because "we haven't researched it properly yet."** Naming the tool *is* the check. Proper research is `/solution`'s job; the check exists precisely to flag the question for `/solution` to answer.
