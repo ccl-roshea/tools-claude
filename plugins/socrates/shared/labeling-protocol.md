@@ -30,7 +30,7 @@ The `§` prefix prevents collision with in-content numbering (numbered list item
 ## Numbering rules
 
 1. **Document order.** Counters increment top-down; sub-counters reset per parent section.
-2. **Per-response scope.** Counters reset every turn. Labels are TOC-of-this-message, not persistent IDs across the session. The WIP file's structured ledgers (per `references/checkpoint-protocol.md`) remain the durable cross-turn references.
+2. **Per-response scope.** Counters reset every turn. Labels are TOC-of-this-message, not persistent IDs across the session. The WIP file's structured ledgers (per `checkpoint-protocol.md`) remain the durable cross-turn references.
 3. **Parallel question counter.** `§Q1`, `§Q2` are independent of `§N` so the section count does not dilute when questions accumulate, and questions are visually easy to scan for.
 4. **Multi-paragraph questions count as one `§Q`.** Setup paragraphs, conditional guidance ("if A → B; if X → Y"), and the actual ask collapse into a single `§Q`. The question is the atom.
 5. **Always on.** Every response gets labels — including a one-question turn (`§Q1 …`). Predictability is the point; the operator never wonders whether labels are present.

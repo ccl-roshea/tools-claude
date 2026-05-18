@@ -61,7 +61,7 @@ Every grade requires **at least one specific evidence reference** (file + line, 
 
 For `/discover` sessions, run all four gates from `../references/artifact-gates.md` against the **written artifact** (not the assembled draft, since the draft isn't preserved). For `/solution` sessions, run G1–G4 from `../../solution/references/solution-gates.md` (shape-analogs of the discovery gates) against the written solution artifact.
 
-- **Gate 1 (Constraints provenance):** every line under `## Confirmed constraints` has `[V1]` or `[future-pull, V1-justified: <reason>]` label AND `(source: …)` annotation.
+- **Gate 1 (Constraints provenance):** every line under `## External constraints` has `[V1]` or `[future-pull, V1-justified: <reason>]` label AND `(source: …)` annotation.
 - **Gate 2 (Tested choices alternatives):** every line under `## Tested choices` lists ≥1 alternative with specific rejection reason.
 - **Gate 3 (Open choices survival justification):** every entry under `### Open choices` has a "deferred because: …" one-liner.
 - **Gate 4 (Empty future-pull justification):** every `[future-pull, V1-justified: <reason>]` has a non-placeholder, concrete V1-impact reason (not "TBD", not "needed for V1", not "may be required").
@@ -150,7 +150,7 @@ This dimension audits the second cross-artifact contract: every shape `/discover
 **Procedure:**
 1. Enumerate parked shapes from both `docs/socrates/discover/<slug>.md` (`## Parked shapes`) and, if it still exists, the WIP ledger at `docs/socrates/discover/.wip/<slug>.wip.md`.
 2. Read the solution artifact's `## Parked shapes resolution` table.
-3. Verify every parked shape appears as a row in the resolution table with one of the allowed `Resolution` values (constraint / candidate / dropped, per G6).
+3. Verify every parked shape appears as a row in the resolution table with one of the allowed `Resolution` values (`Resolved` / `Dropped` / `Carried forward as open shape`, per G6 and the solution-artifact template).
 4. For `Dropped` resolutions, verify a specific reason is given — not "TBD" or "not needed".
 5. Flag any parked shapes that vanished without an entry.
 

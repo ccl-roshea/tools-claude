@@ -35,7 +35,7 @@ Absence of an external source is not "soft constraint" or "operator strong prefe
 
 - **In `/discover`:** peel back to the outcome the shape serves and park it in the WIP ledger's Parked shapes subsection with the outcome-question. (See the /discover SKILL.md Phase 1 spec and "Peel-back path (preference): park the shape" below for the operator-facing prompt and ledger format.)
 - **In `/solution`:** classify the parked shape as one of:
-  - **candidate-shape** — evaluate against alternatives via Tech-D's tested-choice path (the shape is one of several plausible designs; pick by comparing).
+  - **candidate** — evaluate against alternatives via Tech-D's tested-choice path (the shape is one of several plausible designs; pick by comparing).
   - **default-to-test** — run Tech-B's no-build framing against it (the shape may not need to exist at all; pressure-test by constructing the no-build alternative).
 
   /solution's input set for SHAPE-DISCOVER is /discover's parked-shapes ledger entries.
@@ -82,7 +82,7 @@ After an external source is cited, do NOT record yet. First sub-classify by scop
 
 The agent MUST run sub-classification on every external constraint, not only ones that "feel" V2-ish. Future-pull constraints often look reasonable on first encounter; they reveal themselves only when the question is asked explicitly.
 
-These recording formats match the artifact template (see `references/artifact-template.md`); operators following Tech-D produce strings that drop directly into the "Confirmed constraints" section without reformatting.
+These recording formats match the artifact template (see `references/artifact-template.md`); operators following Tech-D produce strings that drop directly into the "External constraints" section without reformatting.
 
 ### Peel-back path (preference): park the shape — /discover specialization
 
@@ -92,7 +92,7 @@ V1/future-pull does NOT apply on the preference path. The shape itself is not cl
 2. Record an entry in the WIP ledger's "Parked shapes" subsection with the shape, the turn it surfaced, the outcome-question, and who introduced it (operator vs. skill).
 3. Surface the outcome-question to the operator inline: *"Parking [X] — the outcome-question I'm tracking against it is [Q]. Does that capture what you actually want to know?"*
 
-A parked shape can be revived later as a tested choice once its outcome-question is answered (handled by the ledger's `resolved` field). What it cannot do in /discover Phase 1 is escape unresolved or get promoted to constraint without a source citation. The parked-shapes ledger is consumed by `/solution`'s SHAPE-DISCOVER phase as its candidate-shape input set.
+A parked shape can be revived later as a tested choice once its outcome-question is answered (handled by the ledger's `resolved` field). What it cannot do in /discover Phase 1 is escape unresolved or get promoted to constraint without a source citation. The parked-shapes ledger is consumed by `/solution`'s SHAPE-DISCOVER phase as its candidate input set.
 
 ### Example (good — external lock-in)
 

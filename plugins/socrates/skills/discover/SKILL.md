@@ -244,7 +244,7 @@ Anti-pattern guards:
 ### What you track internally
 
 Maintain a running summary in your own working memory:
-- Confirmed constraints (with sources/reasons)
+- External constraints (with sources/reasons)
 - Tested choices (with alternatives considered)
 - Themes/concerns that have emerged
 - Areas explored vs. not yet explored

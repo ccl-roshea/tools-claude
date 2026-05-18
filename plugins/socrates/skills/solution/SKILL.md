@@ -239,7 +239,7 @@ Read `../../shared/red-team-protocol.md` for the mode-shift announcement, severi
 6. **Outcome coverage** — every outcome from the discovery artifact's `## Outcomes` section is addressed by ≥1 chunk's problem statement. Walk the discovery outcomes list and tick each off against the chunk list. Uncovered outcomes are CRITICAL findings.
 7. **Existence question** (shallow build-vs-buy preview) — for each chunk, take 30 seconds to ask: "Is there an existing tool that satisfies this whole chunk?" If yes, flag for Phase 3 RESEARCH to evaluate rigorously. This is a preview, not the full evaluation.
 8. **Future-pull contamination of shapes** — is any shape decision driven by V2 features or hypothetical scale rather than V1 needs? Apply the same V1/future-pull lens Tech-D applies to constraints. Future-pull shapes get challenged: V1-justify or drop.
-9. **Parked-shape resolution completeness** — every entry in /discover's parked-shapes ledger has a resolution path in this session's shape decisions (resolved / carried-forward-as-tested-choice / dropped-with-reason). Walk the parked-shapes ledger and tick each off. Unresolved parked shapes are CRITICAL findings (Phase 4 G6 will also enforce mechanically).
+9. **Parked-shape resolution completeness** — every entry in /discover's parked-shapes ledger has a resolution path in this session's shape decisions, recorded with one of the template's allowed Resolution values (`Resolved` / `Dropped` / `Carried forward as open shape`). Walk the parked-shapes ledger and tick each off. Unresolved parked shapes are CRITICAL findings (Phase 4 G6 will also enforce mechanically).
 
 **Step 3: present findings as a numbered list** per `../../shared/red-team-protocol.md` §3. Include reasoning, not just assertions.
 

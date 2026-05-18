@@ -59,7 +59,7 @@ Unclassified specifics that surfaced this phase (P):
 Want to address the unclassified item now, or proceed to <TO>?
 ```
 
-- The "Constraints" line format mirrors the labels Tech-D produces (`[V1]`, `[future-pull, V1-justified: ...]`, `[V2-driven, deferred]`). `<category>` MUST be one of the five from Tech-D's verifiability rule — `regulator`, `contract`, `deployed system`, `prior empirical result`, `factual measurement` — per `references/anti-sycophancy.md`. Operator-preference shapes do NOT belong in Constraints; they go to the `## Parked shapes` subsection (see below) and the strict source-citation form is what Gate 1 validates against.
+- The "Constraints" line format mirrors the labels Tech-D produces (`[V1]`, `[future-pull, V1-justified: ...]`, `[V2-driven, deferred]`). `<category>` MUST be one of the five from Tech-D's verifiability rule — `regulator`, `contract`, `deployed system`, `prior empirical result`, `factual measurement` — per `anti-sycophancy.md`. Operator-preference shapes do NOT belong in Constraints; they go to the `## Parked shapes` subsection (see below) and the strict source-citation form is what Gate 1 validates against.
 - The "Unclassified specifics" line is load-bearing: if this list is non-empty at phase exit and the operator chooses to proceed anyway, each unclassified specific is automatically carried into RED-TEAM as a CRITICAL finding.
 - The ledger is shown to the operator before the phase-boundary commit, and the operator's decision (proceed / address unclassified items first) is recorded in the next ledger entry under "Constraints" or "Tested choices" as appropriate.
 
@@ -126,7 +126,7 @@ When invoked as `/discover resume <slug>`:
 3. Read the `## Premise check` and `## Ledgers` sections. Do **not** read the JSONLs in `docs/socrates/discover/.wip/<slug>/` — they are large and the structured ledger entries are the canonical resume context.
 4. Tell the operator:
 
-   > "Resuming `<slug>` from Phase `<phase>`. Confirmed constraints: [list from latest ledger]. Tested choices: [list from latest ledger]. Continuing where we left off."
+   > "Resuming `<slug>` from Phase `<phase>`. External constraints: [list from latest ledger]. Tested choices: [list from latest ledger]. Continuing where we left off."
 
 5. Resume the Socratic flow from the current phase's entry state. Do not re-ask anything covered by the ledger entries.
 

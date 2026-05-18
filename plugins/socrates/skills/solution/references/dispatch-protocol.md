@@ -37,7 +37,7 @@ Copy from the artifact's chunk section. This is paste-ready by design.
 ### 2. Constraints (inherited + chunk-specific)
 
 Combine:
-- All "Confirmed constraints" from the artifact's top-level section (these apply to every chunk)
+- All `[Constraint]` lines from the artifact's top-level `## Shape decisions` section (these apply to every chunk — filter the section to lines starting with `[Constraint]`)
 - All chunk-specific constraints from this chunk's section
 
 Format as a bullet list under a "## Constraints (do not re-open)" heading. The "do not re-open" framing tells /superpowers these are settled.

@@ -11,7 +11,7 @@
     {
       "name": "socrates",
       "version": "1.0.0",
-      "description": "Socratic idea discovery and chunking. Pressure-tests problem framing, decomposes large problems into executor-sized chunks, and dispatches them downstream.",
+      "description": "Two-skill plugin for Socratic discovery + solution shaping. Pressure-tests problem framing, decomposes large problems into executor-sized chunks, and dispatches them downstream.",
       "source": "./plugins/socrates"
     }
   ]
