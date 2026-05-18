@@ -1,77 +1,74 @@
 ---
 name: discover
 description: >
-  Socratic idea discovery and chunking — runs upstream of /superpowers.
-  Pressure-tests the user's problem framing, applies the verifiability
-  rule to surface untested assumptions (parking shape-decisions for
-  solutioning), decomposes large problems into executor-sized chunks
-  with dependencies, actively researches existing tools (build-vs-buy),
-  and sequentially dispatches each chunk to /superpowers or another
-  executor. Especially valuable when the user is unsure what they want,
-  presents an ambitious or multi-subsystem goal, OR when the prompt
-  looks tight but contains specifics that may be untested preferences
-  rather than externally-sourced constraints (e.g., "build a REST API
-  using Express with Postgres on AWS ECS" — every named technology
-  needs an external source citation or it gets parked as a shape
-  before downstream work locks it in).
+  Socratic outcome discovery — runs upstream of /solution and
+  /superpowers. Pressure-tests the user's problem framing, applies
+  the verifiability rule to surface untested assumptions (parking
+  shape-decisions against their outcome-questions for later
+  solutioning), and red-teams the resulting outcomes. Produces a
+  discovery artifact (outcomes + parked shapes + open axes + external
+  constraints) that /solution consumes. Especially valuable when the
+  user is unsure what they want, presents an ambitious or
+  multi-subsystem goal, OR when the prompt looks tight but contains
+  specifics that may be untested preferences rather than
+  externally-sourced constraints (e.g., "build a REST API using
+  Express with Postgres on AWS ECS" — every named technology needs an
+  external source citation or it gets parked as a shape before
+  downstream work locks it in).
 when_to_use: >
-  Use before /superpowers in any of these situations: (1) the user has
-  a vague or ambitious idea ("I want to build a platform for X"); (2)
-  the user says they're not sure what they want, or the problem
-  statement is one or two sentences; (3) the problem looks like it
-  could span multiple subsystems or domains; (4) the prompt is
-  over-specified — names specific technologies, protocols, or stacks
-  that may have been typed out of habit rather than chosen
-  deliberately; (5) the user is starting a new project, ambitious
-  feature, or platform build. Skip this skill for narrow well-scoped
-  bug fixes, single-function changes, or maintenance tasks where the
-  problem is genuinely tight.
+  Use before /solution (and before /superpowers) in any of these
+  situations: (1) the user has a vague or ambitious idea ("I want to
+  build a platform for X"); (2) the user says they're not sure what
+  they want, or the problem statement is one or two sentences; (3) the
+  problem looks like it could span multiple subsystems or domains;
+  (4) the prompt is over-specified — names specific technologies,
+  protocols, or stacks that may have been typed out of habit rather
+  than chosen deliberately; (5) the user is starting a new project,
+  ambitious feature, or platform build. Skip this skill for narrow
+  well-scoped bug fixes, single-function changes, or maintenance
+  tasks where the problem is genuinely tight.
 allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate WebSearch WebFetch"
 ---
 
-# Discover — Socratic Discovery + Chunking
+# Discover — Socratic Outcome Discovery
 
-You are running the `/discover` skill. Your job is to take a user's problem statement (any vagueness, any specificity) and produce a discovery artifact that downstream tools like /superpowers can consume.
+You are running the `/discover` skill. Your job is to take a user's problem statement (any vagueness, any specificity) and produce a *discovery artifact* — outcomes, parked shapes, open axes, and externally-sourced constraints — that downstream tools like `/solution` (which handles chunking, build-vs-buy research, and dispatch) can consume.
 
-You do NOT plan. You do NOT execute. You do the part that is currently missing upstream of /superpowers: pressure-test the framing, apply the verifiability rule to specifics (lock in externally-sourced constraints, park shape-preferences against their outcome-questions), research existing solutions, decompose into executor-sized chunks, and dispatch each chunk in dependency order.
+You do NOT plan. You do NOT chunk. You do NOT execute. You do the part that is currently missing upstream of /solution: pressure-test the framing, apply the verifiability rule to specifics (lock in externally-sourced constraints, park shape-preferences against their outcome-questions), and red-team the resulting outcomes. Chunking, build-vs-buy research, and dispatch live in `/solution`.
 
 ## Reference files
 
 When you need detailed guidance, read the relevant reference file:
 
-- `references/anti-sycophancy.md` — Techniques B, C, D with examples and prompts
-- `references/chunking-guidelines.md` — When to chunk, how to chunk, edge cases
-- `references/research-protocol.md` — Build-vs-buy search and evaluation
-- `references/artifact-template.md` — The output document format
-- `references/dispatch-protocol.md` — How to launch /superpowers per chunk
-- `references/checkpoint-protocol.md` — WIP file format, phase-boundary commits, resume, completion. Note: the per-turn JSONL transcript is mirrored automatically by the plugin's hook; the agent does not write turns by hand.
-- `references/labeling-protocol.md` — Addressable `§X.Y.Z` labels for every response
+- `../../shared/anti-sycophancy.md` — Techniques B, C, D with examples and prompts (shared across socrates skills)
+- `../../shared/red-team-protocol.md` — Mode-shift announcement, severity classification, finding format, operator response patterns (shared mechanics; per-skill check list is inlined below)
+- `../../shared/checkpoint-protocol.md` — WIP file format, phase-boundary commits, resume, completion. Note: the per-turn JSONL transcript is mirrored automatically by the plugin's hook; the agent does not write turns by hand.
+- `../../shared/labeling-protocol.md` — Addressable `§X.Y.Z` labels for every response
+- `references/artifact-template.md` — The discovery artifact format (outcomes, parked shapes, open axes, constraints)
+- `references/artifact-gates.md` — Discovery-time write gates
+- `references/research-protocol.md` — Shallow existence-check (the rigorous build-vs-buy lives in /solution)
 
 You should read these on demand, not all at once at session start — except for `labeling-protocol.md` (see next section).
 
 ## Response labeling
 
-Every response uses the labeling protocol from `references/labeling-protocol.md` — `§X.Y.Z` inline on section headings, sub-headings, list items, and inline classifications; `§Q1`, `§Q2` for questions to the operator. Always on, including one-question turns.
+Every response uses the labeling protocol from `../../shared/labeling-protocol.md` — `§X.Y.Z` inline on section headings, sub-headings, list items, and inline classifications; `§Q1`, `§Q2` for questions to the operator. Always on, including one-question turns.
 
 This is the one reference file you should read once at session start (it is short) rather than on demand — the protocol applies to every response from turn 1 onward.
 
-## The seven phases
+## The three phases
 
 You execute the following phases in order. Within each phase you can loop, but you don't skip ahead. Each phase has explicit entry and exit criteria.
 
 0. **PREMISE CHECK** — One mandatory turn at session start. Restate the operator's highest-level outcome and ask whether a no-build path could reach it.
 1. **DISCOVER** — Socratic exploration with continuous Technique D (verifiability rule with V1/future-pull sub-classification on the lock-in path) and 2-3 invocations of Technique B (alternative framings, 4-option spectrum). First Tech-B firing is at turn 1, immediately after Phase 0.
-2. **CHUNK** — Decompose into executor-sized chunks if needed; compute execution order. Includes mandatory chunk-overload-signal check and per-chunk audit before exit.
-3. **RED-TEAM** — Adversarial pass on the conclusions (Technique C), including future-pull contamination check.
-4. **RESEARCH** (Phase 3.5) — Active build-vs-buy research; restructure chunks based on findings.
-5. **ARTIFACT** — Run write-time gates (see `references/artifact-gates.md`); write and commit the discovery document if gates pass.
-6. **DISPATCH** — Sequentially launch /superpowers for each chunk.
+2. **RED-TEAM** — Adversarial pass on the discovered outcomes (Technique C), including future-pull contamination check and parked-shape coverage check.
 
-The flow is: premise → gather understanding → decompose → attack → research → write → execute. Each phase narrows commitment from "open exploration" to "executor-ready problem statements." At every phase exit through ARTIFACT, the agent surfaces a structured ledger to the operator (see `references/checkpoint-protocol.md`) before advancing.
+The flow is: premise → gather understanding → attack. Each phase narrows commitment from "open exploration" to "outcome-clean, parked-shape-cataloged discovery document." At every phase exit, the agent surfaces a structured ledger to the operator (see `../../shared/checkpoint-protocol.md`) before advancing. Chunking, build-vs-buy research, artifact composition for executor dispatch, and dispatch itself all live in `/solution`, which the operator runs after `/discover` completes.
 
 ## Session startup
 
-Read `references/checkpoint-protocol.md` for the full WIP file format and phase-boundary commit commands. The raw session transcript (JSONL) is captured automatically by the plugin's hook into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` — the agent does not record turns by hand.
+Read `../../shared/checkpoint-protocol.md` for the full WIP file format and phase-boundary commit commands. The raw session transcript (JSONL) is captured automatically by the plugin's hook into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` — the agent does not record turns by hand.
 
 **New session** (plain invocation):
 - Begin with Phase 0 (PREMISE CHECK). Do not derive the slug or create the WIP file until after Phase 0 is recorded — the slug derivation may use the restated outcome from Phase 0 step 1.
@@ -79,7 +76,7 @@ Read `references/checkpoint-protocol.md` for the full WIP file format and phase-
 - If `docs/socrates/discover/.wip/` already contains `.wip.md` files, note them to the operator BEFORE Phase 0: "Found in-progress session(s): `<slug>` (Phase: X). Run `/discover resume <slug>` to resume, or continue for a new session." (Phase 0 does not run until the operator confirms a new session.)
 
 **Resume** (`/discover resume <slug>`):
-- Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `references/checkpoint-protocol.md` (read YAML + `## Premise check` + `## Ledgers`; do not read the JSONLs).
+- Read the WIP file for `<slug>`. Follow the resume reconstruction steps in `../../shared/checkpoint-protocol.md` (read YAML + `## Premise check` + `## Ledgers`; do not read the JSONLs).
 - Continue from the recorded phase. Do not re-ask questions covered by the ledger entries.
 
 ## Phase 0: PREMISE CHECK
@@ -107,7 +104,7 @@ Use this exact shape:
 >
 > In Phase 1 each will be put on trial: what outcome does it serve? Want to flag any as definitely-external (regulator, contract, deployed system, prior empirical result, factual measurement)? If so, cite the source and I'll lock it in now. Otherwise I'll park them all for Phase 1."
 
-If the operator pre-authorizes any shape with a concrete external source, lock it in as a constraint per the verifiability rule in `references/anti-sycophancy.md` Tech-D. All other shape-phrases get recorded under "Parked shapes" in the WIP ledger (see `references/checkpoint-protocol.md`) with `parked_at_turn: 0` and an outcome-question to be answered in Phase 1.
+If the operator pre-authorizes any shape with a concrete external source, lock it in as a constraint per the verifiability rule in `../../shared/anti-sycophancy.md` Tech-D. All other shape-phrases get recorded under "Parked shapes" in the WIP ledger (see `../../shared/checkpoint-protocol.md`) with `parked_at_turn: 0` and an outcome-question to be answered in Phase 1.
 
 **Caps to prevent friction:**
 
@@ -154,7 +151,7 @@ Then proceed per the operator's choice.
 
 **Entry:** User pastes a problem statement. The statement may be a single sentence or multiple paragraphs. It may be vague ("I want to deploy agents for my team") or over-specified ("Use Express, Postgres, deploy to ECS"). Both are valid inputs.
 
-**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves. Surface the phase-exit ledger (constraints, tested choices, unclassified specifics) per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: CHUNK`.
+**Exit:** The operator agrees that discovery is sufficient, OR you propose moving on and the operator approves. Surface the phase-exit ledger (constraints, tested choices, unclassified specifics) per `../../shared/checkpoint-protocol.md`. Commit the WIP file with `phase: RED-TEAM`.
 
 ### What you do in this phase
 
@@ -162,7 +159,7 @@ Ask one question at a time. Socratic style — probe the framing, surface assump
 
 ### Continuous: Technique D (verifiability rule — peel back shapes)
 
-Read `references/anti-sycophancy.md` for the full Tech-D protocol — the five external-source categories, source-citation format, V1/future-pull sub-classification, and worked examples. Re-read it whenever the rule is about to fire and you are not certain of the categories.
+Read `../../shared/anti-sycophancy.md` for the full Tech-D protocol — the five external-source categories, source-citation format, V1/future-pull sub-classification, and worked examples. Re-read it whenever the rule is about to fire and you are not certain of the categories.
 
 **Trigger:** any time a specific implementation detail appears in the conversation — from the operator's prompt, an answer they give, or a suggestion you make.
 
@@ -172,7 +169,7 @@ Read `references/anti-sycophancy.md` for the full Tech-D protocol — the five e
 
 > "[X] surfaced. What's the external source? Specifically: is there a (regulator, contract, deployed system, prior empirical result, factual measurement) that mandates this? If yes, cite it and I'll record as constraint. If no, this is a design preference — I'll park it with the outcome-question it raises."
 
-If EXTERNAL: lock in with `(source: <category> — <specific citation>)` and apply V1/future-pull sub-classification per `references/anti-sycophancy.md`. If PREFERENCE: do not classify the shape itself. Surface the outcome-question and add an entry under `## Parked shapes` in the WIP ledger (see `references/checkpoint-protocol.md` for the YAML format).
+If EXTERNAL: lock in with `(source: <category> — <specific citation>)` and apply V1/future-pull sub-classification per `../../shared/anti-sycophancy.md`. If PREFERENCE: do not classify the shape itself. Surface the outcome-question and add an entry under `## Parked shapes` in the WIP ledger (see `../../shared/checkpoint-protocol.md` for the YAML format).
 
 **Do not skip this.** The Path A test demonstrated that adopting specifics without verifiability checks produces shallow architectures. Locking in a shape because it "feels like a constraint" or because the operator stated it confidently is the failure mode this rule exists to prevent.
 
@@ -207,7 +204,7 @@ Fire 2-3 times per session:
 >
 > Which resonates, or is the answer a mix?"
 
-**Critical:** all four options must be plausible, concrete paths the operator could actually take. Option 4 (no-build) is not a formality; it is a credible alternative the operator must be able to evaluate seriously. If you cannot construct a credible no-build frame for the problem, re-state the outcome at a higher level and try again. See `references/anti-sycophancy.md` Tech-B section for full guidance.
+**Critical:** all four options must be plausible, concrete paths the operator could actually take. Option 4 (no-build) is not a formality; it is a credible alternative the operator must be able to evaluate seriously. If you cannot construct a credible no-build frame for the problem, re-state the outcome at a higher level and try again. See `../../shared/anti-sycophancy.md` Tech-B section for full guidance.
 
 ### Soft signals for "propose moving on"
 
@@ -253,11 +250,11 @@ Maintain a running summary in your own working memory:
 - Areas explored vs. not yet explored
 - Soft-signal counters per area
 
-You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured. This running summary feeds the phase-exit ledger defined in `references/checkpoint-protocol.md`: at phase boundaries, the ledger formalizes the constraints, tested choices, and unclassified specifics surfaced from your working memory.
+You don't need to surface this summary every turn — but you can show it when proposing to move on, so the operator sees what you've captured. This running summary feeds the phase-exit ledger defined in `../../shared/checkpoint-protocol.md`: at phase boundaries, the ledger formalizes the constraints, tested choices, and unclassified specifics surfaced from your working memory.
 
 ### Checkpoint discipline
 
-The plugin's hook mirrors the raw session JSONL into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` after every turn — automatically, with no agent action required. Your only checkpoint duty is at phase boundaries: surface the phase-exit ledger, append it to the WIP file's `## Ledgers` section, update the YAML `phase` field, and commit. See `references/checkpoint-protocol.md` for the exact format and commit command.
+The plugin's hook mirrors the raw session JSONL into `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` after every turn — automatically, with no agent action required. Your only checkpoint duty is at phase boundaries: surface the phase-exit ledger, append it to the WIP file's `## Ledgers` section, update the YAML `phase` field, and commit. See `../../shared/checkpoint-protocol.md` for the exact format and commit command.
 
 ### Discovery axes to consider
 
@@ -282,321 +279,60 @@ If the user has answered the operator's prompt with rich detail that already cov
 - ❌ **Over-asking.** If you've explored an area and the answers are repetitive, propose moving on. Don't dig forever.
 - ❌ **Skipping Technique B.** Without alternative framings, the conversation drifts toward the first frame that emerged. Fire B at turn 1, then at convergence points.
 - ❌ **Filler no-build frame.** A no-build option you don't believe in is worse than no option — it makes the prompt look like it covered alternatives when it didn't. If the no-build frame feels forced, re-state the outcome at a higher level.
-- ❌ **Classifying a shape as constraint without an external source citation.** Default to peel-back. Only lock in when the operator can cite a concrete external source from one of the five categories in `references/anti-sycophancy.md`. "Operator stated it confidently" is not a source.
+- ❌ **Classifying a shape as constraint without an external source citation.** Default to peel-back. Only lock in when the operator can cite a concrete external source from one of the five categories in `../../shared/anti-sycophancy.md`. "Operator stated it confidently" is not a source.
 - ❌ **Accepting a parked shape's outcome-question as "obvious."** Every parked entry has its outcome-question recorded explicitly in the `## Parked shapes` ledger. Implicit outcome-questions get forgotten and the shape silently re-enters the design.
 - ❌ **Letting a parked shape escape Phase 1 without an outcome-question filled in.** Before exiting Phase 1, every entry under `## Parked shapes` must have a non-empty `outcome_question`. A parked shape with no outcome-question is just a deleted constraint with no record of what it was meant to serve.
 
-## Phase 2: CHUNK
+## Phase 2: RED-TEAM (outcomes)
 
-**Entry:** Discovery is complete. You have a refined problem statement, confirmed constraints, tested choices, and a sense of the problem's scope.
+**Entry:** Phase 1 DISCOVER is complete. The operator has approved moving on. You have a refined outcome statement, externally-sourced constraints, tested choices, parked shapes with outcome-questions, and a sense of the unexplored axes.
 
-**Exit:** Chunk structure approved by operator (or "no chunking needed" approved). Surface the phase-exit ledger per `references/checkpoint-protocol.md` (the ledger now also includes the per-chunk audit results from Step 5b). Commit the WIP file with `phase: RED-TEAM`.
-
-### What you do in this phase
-
-Read `references/chunking-guidelines.md` for full signals and examples.
-
-**Step 1: assess.** Decide whether the problem needs chunking. Apply the guideline-based signals:
-
-Signals for chunking:
-- Multiple independent subsystems emerged
-- Mixed tech domains
-- More than ~3-5 distinct design decisions
-- Natural dependency boundaries
-- The operator signaled decomposition
-
-Signals against chunking:
-- Single domain, single concern
-- Tight coupling — every part depends on every other part
-- Small scope (fewer than ~3 distinct decisions)
-
-**Step 2: if no chunking needed:** declare a single-chunk problem and move to Phase 3. The artifact will still be the full template; it'll just have one chunk section.
-
-**Step 3: if chunking needed:** propose chunks.
-
-For each chunk, define:
-- Name (short, descriptive)
-- Scope (2-3 sentences — what's in, what's out)
-- Constraints (which top-level constraints apply, plus any chunk-specific ones)
-- Open choices (what the executor will resolve)
-- Dependencies (which other chunks this depends on, and *what specific decision/output* it needs from them)
-- Recommended executor (usually `/superpowers:brainstorming`)
-
-Then compute the execution order via topological sort. Note parallelism (which chunks at each level can run in parallel).
-
-**Step 4: present the proposal:**
-
-> "This looks like it should be N chunks. Here's how I'd split it:
->
-> 1. **[Chunk name]** — [scope]. Dependencies: none.
-> 2. **[Chunk name]** — [scope]. Dependencies: Chunk 1 (specifically: [what]).
-> ...
->
-> Execution order: 1, then 2 and 3 in parallel.
->
-> Does this split make sense, or would you draw the lines differently?"
-
-**Step 5: chunk-overload signal check (mandatory).** For each proposed chunk, count how many of these signals fire:
-
-1. **Open-choice density:** the "Open choices" list has 3+ independent items.
-2. **Lingering vagueness:** the problem statement still feels vague or multi-faceted when read aloud — a fresh /superpowers session would still need clarification on basic intent.
-3. **Sub-domain spread:** the chunk spans multiple sub-domains (e.g., "Portal" = UX + auth + APIs).
-4. **Red-team flag:** Phase 3 has not yet run, but if your own draft red-team thinking flags this chunk as scope-creep-prone or with unresolved untested specifics, count it.
-
-If 2 or more signals fire on a chunk, you MUST present a sub-decomposition in-line, before moving on:
-
-> "Chunk N as written has [list signals that fired]. Here's how I'd split it into 2-3 sub-chunks: [proposal]. Want me to apply this split, or override and keep it as one chunk?"
-
-The operator may override. If they override, record the override in the artifact under that chunk's section as a one-liner: *"This chunk was flagged for split (signals: X, Y); operator overrode with reason: Z."*
-
-If 0-1 signals fire on a chunk, do not surface the check — proceed silently to Step 6. Don't ask "should we split?" on chunks that look fine; that's operator fatigue. The point is to act on chunks that genuinely need it.
-
-Do NOT punt this to dispatch-time. The signals are checked here, the action is taken here.
-
-**Step 5b: per-chunk audit (mandatory).** This audit runs at the same workflow point as Step 5's signal check, but unconditionally — whether or not Step 5's signals fired. For each chunk, the agent reads the chunk back to itself and writes the answers to the WIP file:
-
-1. *"Could this chunk be split into 2-3 chunks with cleaner boundaries? If yes, propose. If no, justify."*
-2. *For each open choice in this chunk: "Is this genuinely more answerable with executor context than now? If yes, why? If no, resolve it."*
-
-**Outcomes for open choices:**
-
-- **Survives self-challenge** → the open choice stays under "Open choices (for the executor to resolve)" in the artifact, AND a one-liner survival justification is recorded with it (e.g., *"deferred because the SDK's `requests` adapter may already cover retry; verifying in-chunk is cheaper than re-litigating here"*).
-- **Does not survive** → the agent resolves it now, in this phase. The result moves to "Tested choices" if alternatives were considered, or to "Constraints" if it turns out to be a derived constraint. Removed from "Open choices."
-
-The audit's outputs (split-or-not justification, per-open-choice survival justifications) feed directly into the artifact-time gates (see `references/artifact-gates.md`).
-
-**Step 6: iterate** with the operator until they approve. They may merge chunks, split further, reorder, or rename.
-
-### Anti-patterns
-
-- ❌ **Chunking just because the problem looks complex.** Apply the signals. Tight coupling is a reason NOT to chunk.
-- ❌ **Vague dependency annotations.** "Depends on Chunk 1" is not enough. Specify what's needed: "Depends on Chunk 1 (specifically: the API contract from the communication design)."
-- ❌ **Forgetting parallelism.** Even when running sequentially in MVP, note which chunks could parallelize.
-
-## Phase 3: RED-TEAM
-
-**Entry:** Chunks are defined (or single chunk confirmed).
-
-**Exit:** All CRITICAL findings addressed. Operator approves. Surface the phase-exit ledger per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: RESEARCH`.
+**Exit:** All CRITICAL findings addressed. Operator approves. Surface the phase-exit ledger per `../../shared/checkpoint-protocol.md`. The discovery artifact is then written (see "Closing" below).
 
 ### What you do in this phase
 
-Read `references/anti-sycophancy.md` for full Technique C protocol.
+Read `../../shared/red-team-protocol.md` for the mode-shift announcement template, severity classification (CRITICAL / DISCUSS / MINOR), finding format, and operator response patterns (Accept / Dismiss / Defer). Read `../../shared/anti-sycophancy.md` Tech-C section for the underlying technique. This Phase 2 red-team operates on the *discovered outcomes* — not on chunks, not on shape choices. Chunk-level and shape-level red-teaming lives in `/solution`.
 
-**Step 1: announce mode shift.** Tell the operator explicitly:
+**Step 1:** Run the mode-shift announcement per `../../shared/red-team-protocol.md` §1. Substitute "the discovered outcomes" for the generic placeholder, e.g.:
 
-> "Switching to red-team mode. I'm going to try to break what we've concluded. For each finding I'll note severity: CRITICAL (must address before proceeding), DISCUSS (worth talking through), or MINOR (noting for awareness)."
+> "Switching to red-team mode. I'm going to try to break the outcomes we've discovered. For each finding I'll note severity: CRITICAL (must address before proceeding), DISCUSS (worth talking through), or MINOR (noting for awareness)."
 
-**Step 2: systematically check** for each chunk (or the single problem):
+**Step 2: systematically check the outcomes** against the following list. Each check is outcome-level only — do not check chunks (no chunks exist yet) and do not check shape choices (shapes are parked, not chosen).
 
-1. Contradictions between chunks or between constraints
-2. Untested specifics — assumptions not classified by Technique D
-3. Missing concerns — auth, observability, error handling, cost, performance, deployment, testing, security, data lifecycle
-4. Scope creep — chunks bigger than they need to be
-5. Dependency gaps — would chunk N actually need information from chunk M that isn't captured?
-6. Existence question — is there an existing tool? (shallow check; Phase 3.5 does the active research)
-7. Stop-the-clock check — what would happen if we stopped here?
-8. **Future-pull contamination** — is any design element (constraint or choice) driven by features, scale, or systems that aren't in V1 scope? See severity guidance in `references/anti-sycophancy.md` Tech-C section.
+1. **Contradictions between outcomes** — does any outcome contradict another? (E.g., "fully automated" and "human-in-the-loop on every operation".)
+2. **Untested outcome-axes** — are there outcome-level assumptions that were never exposed during DISCOVER and never tested with Tech-D? (Not "shape was never classified" — the parked-shape ledger captures that. This is *outcome*-level — an unspoken assumption about purpose, audience, or value.)
+3. **Missing outcome dimensions** — review the discovery axes (purpose, scale, lifecycle, identity, trust, operability). For each, is the outcome-level question answered? Missing dimensions become DISCUSS findings unless the operator has explicit reason to defer.
+4. **Future-pull contamination of outcomes** — is any outcome statement driven by V2 features, future scale, or systems that aren't in V1 scope? An outcome contaminated by V2 features pulls V2 shapes into V1 solutioning. See severity guidance in `../../shared/anti-sycophancy.md` Tech-C section.
+5. **Stop-the-clock check** — what happens if the operator stops after `/discover` and never runs `/solution`? Are the discovered outcomes themselves valuable enough to act on (manually, via existing tools, via a different team) — or does value only materialize after solutioning? This check surfaces whether `/discover` produced a standalone artifact or merely a stepping-stone.
+6. **Parked-shape coverage** — every entry in the WIP `## Parked shapes` ledger has a non-empty `outcome_question` field. A parked shape with no outcome-question is just a deleted constraint with no record of what it was meant to serve, and downstream `/solution` cannot evaluate it.
 
-**Step 3: present findings as a numbered list** with severity per finding. Include reasoning. Examples:
+**Step 3: present findings as a numbered list** per `../../shared/red-team-protocol.md` §3. Include reasoning, not just assertions.
 
-> **Finding 1 [CRITICAL]:** Chunk 2 (Portal) depends on Chunk 1 (Communication model), but Chunk 1's "Open choices" doesn't include the API contract that Chunk 2 needs. If we run Chunk 1's /superpowers session and it doesn't surface the API contract, Chunk 2 will be blocked.
->
-> **Finding 2 [DISCUSS]:** We classified "Azure" as a constraint but never asked about cost tier. If the team is on a free Azure tier, Container Apps may not be available. Worth confirming.
->
-> **Finding 3 [MINOR]:** The chunking puts auth as part of Chunk 2 (Portal) rather than its own chunk. This is fine for MVP but if multiple chunks need auth, it'll be hard to factor out later.
+**Step 4: the operator picks Accept / Dismiss / Defer** per `../../shared/red-team-protocol.md` §4 for each finding. Record the response on the finding.
 
-**Step 4: operator addresses each finding:**
-- **Accept** — modify the chunk to address the finding. Record the change.
-- **Dismiss** — record the finding and the operator's reason. Future readers should see why this concern was raised and rejected.
-- **Defer** — record as known issue for V2. Not in MVP scope.
-
-**Step 5: exit when** all CRITICAL findings are Accepted (chunk modified) or Dismissed (with explicit reason). DISCUSS and MINOR findings are recorded regardless of action.
+**Step 5: exit** when all CRITICAL findings are Accepted (artifact updated) or Dismissed (with specific reason), per `../../shared/red-team-protocol.md` §5. DISCUSS findings need a recorded response; MINOR findings are recorded without requiring a response.
 
 ### Anti-patterns
 
-- ❌ **Skipping the mode shift announcement.** The operator needs to know you're now adversarial, not collaborative.
-- ❌ **Mild findings only.** If everything is MINOR, you're not actually red-teaming. Push harder. Find at least one DISCUSS or CRITICAL — if there genuinely isn't one, the framing is exceptionally clean (rare).
-- ❌ **Letting CRITICAL findings be dismissed without specific reason.** "Operator said it's fine" isn't enough. Record what reason they gave.
-
-## Phase 3.5: RESEARCH (build-vs-buy)
-
-**Entry:** Red-team complete. Chunks pressure-tested.
-
-**Exit:** All chunks classified for build-vs-buy. Operator approves classifications. Chunks restructured. Surface the phase-exit ledger per `references/checkpoint-protocol.md`. Commit the WIP file with `phase: ARTIFACT`.
-
-### What you do in this phase
-
-Read `references/research-protocol.md` for full search strategy, evaluation criteria, and classification rules.
-
-**Step 1: search per chunk.** For each chunk, run at least one targeted search using `WebSearch`. Construct queries from the chunk's problem statement and constraints. Refine if results are thin.
-
-**Step 2: search the whole problem.** Run one additional overall search: "is there a tool that does this entire problem?" Sometimes the right answer is to skip all chunks and adopt one platform.
-
-**Step 3: evaluate candidates.** For each candidate, use `WebFetch` (and context7 if it's a library) to evaluate against the criteria:
-- Functionality match (%)
-- License compatibility
-- Cost
-- Maintenance status
-- Lock-in / dependency risk
-- Integration burden
-
-**Step 4: classify** each candidate into one of four buckets:
-- **Adopt fully** — chunk is replaced with an integration chunk
-- **Adopt partially** — chunk shrinks to cover the gap
-- **Reject** — record candidate name and *specific* rejection reason
-- **Inspire** — note as reference link, build custom
-
-**Step 5: reverse sunk-cost check.** Before classifying any candidate as Reject, apply Technique D's verifiability rule (see `references/anti-sycophancy.md` Reverse sunk-cost subsection):
-
-> "Is 'we want to build this ourselves' externally sourced — a mandate, contract, regulator requirement, or factual constraint that prevents adopting [tool name]? If yes, cite the source and we record the rejection. If no, this is a preference — the bar for rejecting [tool name] must be specific functional gaps or constraint conflicts, not preference itself."
-
-If the operator can't cite an external source AND can't articulate specific functional gaps or constraint conflicts, the rejection is suspect.
-
-**Step 6: respect soft limits.** Per chunk, ~3-5 candidates max. Per session, ~30 minutes total research. Stop early when a clear winner emerges.
-
-**Step 7: present findings** to operator and get approval per classification.
-
-**Step 8: restructure chunks** based on adoptions:
-- Adopt fully: replace the chunk with a much smaller integration chunk
-- Adopt partially: shrink the chunk to cover only the gap
-- Reject: chunk unchanged
-- Inspire: chunk unchanged, note added
-
-### Anti-patterns
-
-- ❌ **One search, skim first result, declare "no good options."** Always evaluate at least 2-3 candidates against the criteria.
-- ❌ **Vague rejection reasons.** "Doesn't fit our needs" is a placeholder. Specify what doesn't fit.
-- ❌ **Skipping the reverse sunk-cost check.** When a candidate matches and operator says "let's build anyway," apply Technique D.
-- ❌ **Pricing-page hand-waving.** Check actual pricing pages for paid candidates.
-- ❌ **Researching forever.** Soft limits exist. After 3 candidates without a clear winner, move on.
-
-## Phase 4: ARTIFACT
-
-**Entry:** Red-team complete, research done, chunks finalized.
-
-**Exit:** Artifact written to `docs/socrates/discover/<topic>.md` and committed.
-
-### What you do in this phase
-
-Read `references/artifact-template.md` for the full template and section guidance.
-
-**Step 1: choose a topic slug.** Derive a kebab-case identifier from the refined problem statement. Examples: `team-agent-platform`, `auth-redesign`, `cart-graphql-migration`. Confirm with operator if ambiguous.
-
-**Step 2: write the artifact.** Use the template from `references/artifact-template.md`. Fill in every section:
-
-- Header (date, status, chunk count)
-- Execution order (with parallelism notes)
-- Framing (refined statement + original + key reframes)
-- Confirmed constraints
-- Tested choices
-- Each chunk (with self-contained problem statement, constraints, open choices, dependencies, recommended executor)
-- Red-team findings (addressed, accepted risks, dismissed)
-- Research outcomes (per chunk and overall)
-- Discovery log (collapsed `<details>` block — only key exchanges)
-
-**Step 3: review for self-containment.** Each chunk's problem statement must be self-contained. Test mentally: if you copied that section alone into a fresh /superpowers session, would the executor have enough? If not, expand it before saving.
-
-**Step 4a: run artifact-time gates.** Before writing, run the four self-validation gates defined in `references/artifact-gates.md` against the assembled draft. If any gate fails, do NOT write. Surface the failures to the operator (grouped by gate name), enter the fixup loop (returning to the relevant phase as needed), and re-run all four gates after each fixup. Only proceed to Step 4b when all gates pass.
-
-**Step 4b: write to file** at `docs/socrates/discover/<topic-slug>.md`. Create the `docs/socrates/discover/` directory if it doesn't exist.
-
-**Step 5: stage the artifact:**
-
-```bash
-git add docs/socrates/discover/<topic-slug>.md
-```
-
-**Step 5b: finalize the session transcript.** Follow the completion steps in `references/checkpoint-protocol.md`. Move the JSONL transcript directory out of `.wip/` and remove the WIP file, then commit everything together:
-
-```bash
-git mv docs/socrates/discover/.wip/<topic-slug> docs/socrates/discover/<topic-slug>
-git rm docs/socrates/discover/.wip/<topic-slug>.wip.md
-git add docs/socrates/discover/<topic-slug>/
-git commit -m "docs(discover): add artifact and transcript for <topic>"
-```
-
-**Step 6: tell the operator** the artifact is written, with the file path. Ask if they want to review it before dispatch.
-
-### Anti-patterns
-
-- ❌ **Skipping sections that "don't apply."** Write `None` instead of deleting. Consistency matters.
-- ❌ **Pasting full transcripts into the discovery log.** Only key exchanges that shaped the framing. Keep it tight.
-- ❌ **Forgetting to commit.** The artifact is the durable output. Always commit.
-- ❌ **Skipping the artifact gates.** The gates run BEFORE the write, every time. A "looks fine" assessment does not substitute for the four checks.
-
-## Phase 5: DISPATCH
-
-**Entry:** Artifact committed. Operator approved or skipped review.
-
-**Exit:** All chunks have been through /superpowers (or operator stops dispatch).
-
-### What you do in this phase
-
-Read `references/dispatch-protocol.md` for full sequential dispatch logic, prompt composition, and decision extraction.
-
-**Step 1: announce dispatch.** Tell the operator:
-
-> "Dispatching N chunks in execution order. I'll launch chunk 1 first; you'll interact with /superpowers normally. When that chunk completes, I'll capture the key decisions and feed them forward to chunk 2."
-
-**Step 2: for each chunk in execution order:**
-
-a. **Compose the dispatch prompt.** Combine:
-- The chunk's problem statement (verbatim from artifact)
-- A "## Constraints (do not re-open)" section with all top-level constraints + chunk-specific constraints
-- The chunk's "Open choices (for the executor to resolve)" section
-- An "## Upstream decisions (from completed chunks)" section IF this chunk has dependencies — populated from the prior chunks' /superpowers outputs
-
-b. **Launch via Agent tool:**
-- `subagent_type`: `general-purpose`
-- `description`: `"Plan chunk <N>: <chunk name>"`
-- `prompt`: the composed prompt
-- `run_in_background`: `false` (operator must interact)
-
-c. **Wait for completion.** The operator drives the /superpowers session. The agent returns when /superpowers' brainstorm + writing-plans sub-flow finishes.
-
-d. **Extract decisions.** Read the design doc and plan that /superpowers produced (in `docs/superpowers/specs/` and `docs/superpowers/plans/`). Summarize key decisions for downstream chunks: architecture choices, tech stack, API contracts, data models. Format into a "## Upstream decisions" section ready to feed into the next dependent chunk.
-
-e. **Update the artifact.** Add a link to the chunk's design doc and plan in the chunk's section. Optionally add a "Decisions made" subsection. Commit the artifact update.
-
-f. **Move to the next chunk** in execution order.
-
-**Step 3: when all chunks are complete,** tell the operator:
-
-> "All N chunks dispatched. Each chunk has a design doc and an implementation plan. The discovery artifact has been updated with links. The operator can now run /superpowers:executing-plans (or subagent-driven-development) on each plan independently."
-
-### Handling chunking-was-wrong
-
-If during a chunk's /superpowers session, the operator discovers that the chunking is wrong (e.g., "we can't design Chunk 2 because Chunk 1's constraints are wrong" or "chunks 2 and 3 should have been one chunk"):
-
-1. The operator interrupts /superpowers (just stops the session and tells you).
-2. You stop the dispatch loop.
-3. The operator updates the discovery artifact: revise chunks, dependencies, execution order. Add a "Revisions" section noting what changed and why.
-4. You resume dispatch from the affected chunk. Earlier chunks that already completed don't re-run unless the operator explicitly says so.
-
-This is operator-driven. Don't auto-resume.
-
-### Handling skip
-
-If, mid-dispatch, the operator says "skip this chunk":
-1. Mark in artifact: `Status: skipped — <reason>`
-2. Don't dispatch
-3. Re-evaluate downstream chunks: do they still depend on this chunk's outputs? If so, what's the new plan?
-
-### Anti-patterns
-
-- ❌ **Backgrounding /superpowers.** It's interactive — operator must interact. Always foreground.
-- ❌ **Running in a worktree.** /superpowers' artifacts need to be in the main tree.
-- ❌ **Forgetting to feed upstream decisions.** Each dependent chunk needs prior chunks' decisions or it'll re-litigate.
-- ❌ **Auto-resuming after a chunking-was-wrong revision.** Revisions are operator-driven. Don't automate around their control.
+- ❌ **Skipping the mode-shift announcement.** The operator needs to know you're now adversarial, not collaborative. See `../../shared/red-team-protocol.md` §1.
+- ❌ **Red-teaming shapes instead of outcomes.** Shapes are parked — they get red-teamed in `/solution`. If a finding is about "we picked the wrong tool / pattern / framework," it does not belong in this phase. Re-cast it as an outcome-level finding ("the outcome we recorded for [parked shape] is wrong / missing / contradictory") or save it for `/solution`.
+- ❌ **Mild findings only.** If every finding is MINOR, you are reviewing, not red-teaming. Push harder. See `../../shared/red-team-protocol.md` §3.
+- ❌ **Letting CRITICAL findings be dismissed without specific reason.** "Operator said it's fine" is insufficient. See `../../shared/red-team-protocol.md` §4.
+- ❌ **Adding chunks during red-team.** Chunking lives in `/solution`. If a finding suggests the problem should be decomposed, record that as a DISCUSS finding noting decomposition is needed; don't draft chunks here.
 
 ---
 
 ## Closing
 
-When all phases complete and dispatch is done, the operator has:
-- A committed discovery artifact at `docs/socrates/discover/<topic>.md`
-- Per-chunk design docs and implementation plans (produced by /superpowers)
-- A clear hand-off point: each plan can be executed independently
+When Phase 2 RED-TEAM exits, write the discovery artifact:
 
-Your job is done. /superpowers and its execution sub-skills handle the rest.
+1. Choose a topic slug if not already chosen at WIP creation (kebab-case identifier derived from the refined outcome statement).
+2. Run the artifact-time gates from `references/artifact-gates.md` against the assembled discovery draft. If any gate fails, do NOT write — surface failures grouped by gate name, fix up, and re-run all gates.
+3. Once gates pass, write the discovery artifact to `docs/socrates/discover/<topic-slug>.md` using the template at `references/artifact-template.md`. The artifact captures *outcomes, parked shapes, open axes, and externally-sourced constraints* — not chunks, not build-vs-buy, not dispatch.
+4. Finalize the session per `../../shared/checkpoint-protocol.md`: move the JSONL transcript directory out of `.wip/`, remove the WIP file, commit the artifact + transcript together.
+
+Then tell the operator:
+
+> "Outcomes captured at `docs/socrates/discover/<topic-slug>.md`. To proceed to solutioning (shape-discovery, chunking, build-vs-buy research, dispatch), run `/solution <topic-slug>`."
+
+Handoff is operator-driven. Do not auto-dispatch `/solution`, and do not auto-launch `/superpowers`. Your job ends when the discovery artifact is committed and the handoff message is given.
