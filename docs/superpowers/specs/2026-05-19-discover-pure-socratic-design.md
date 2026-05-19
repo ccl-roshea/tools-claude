@@ -128,11 +128,16 @@ The pressure-tested outcomes the operator wants. *What*, not *how*.
 
 ### `/solution` changes
 
+**The Socratic method extends into `/solution`** — applied to the *solution* space, not the *claim* space. `/discover` already validated the problem; `/solution` now pressure-tests proposed solutions. Concretely:
+
+- *"Do you really need to build this?"* survives in `/solution` as Tech-B's No-build framing (Phase 0 SHAPE-DISCOVER, currently line 140 of `solution/SKILL.md`). This question is preserved; it just lives at the right phase (after the problem is validated, before the build commits).
+- The same Socratic patterns that `/discover` uses on problem claims (mirror, test with cases, walk premises, parallel cases) are *also* appropriate when `/solution` is evaluating a shape decision — e.g., when the operator says "I want event-driven," `/solution` can Maieutically test with cases ("what about a case where you need synchronous read-after-write?") rather than just enumerating alternatives. This deeper Socratic alignment of `/solution` is out of scope for this spec but called out as a future direction: today `/solution` uses Tech-D classification and Tech-B enumeration as its primary tools, and that's preserved here unchanged.
+
 Phase 0 SHAPE-DISCOVER opening (currently lines 71–95 of `solution/SKILL.md`):
 
 - Drop step 2 ("Read the parked-shapes section from the discovery artifact … The parked-shapes list is the input set for Phase 0 SHAPE-DISCOVER"). After this rework, there is no parked-shapes section to read.
 - Replace with: at SHAPE-DISCOVER turn 1, after reading the discovery artifact (framing + outcomes), open by asking the operator: *"Here's the validated problem and outcomes. What preferences, constraints, or specific shapes do you want to bring into solutioning?"* Tech-D fires on whatever surfaces — this is where Tech-D belongs.
-- Tech-B 4-option shape spectrum firing at SHAPE-DISCOVER turn 1 (currently line 130 mandatory) becomes turn 2 instead (after the elicitation turn). All other Tech-B / Tech-D mechanics unchanged.
+- Tech-B 4-option shape spectrum firing at SHAPE-DISCOVER turn 1 (currently line 130 mandatory) becomes turn 2 instead (after the elicitation turn). The No-build framing — *"outcomes reached by adopting an existing tool / workflow change. No new code."* — is the explicit form of "do you really need to build this?" at the solution level. All other Tech-B / Tech-D mechanics unchanged.
 
 `/solution` Phase 2 RED-TEAM check 9 (parked-shape resolution completeness, line 242) is dropped — there is no parked-shapes ledger to walk anymore. The other 8 checks remain.
 
