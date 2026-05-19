@@ -32,7 +32,7 @@ The skill reference is `plugins/socrates/skills/discover/SKILL.md`. The artifact
 
 2. Start a fresh Claude Code session in this repository and run `/discover <prompt>`. Do not intervene except to answer the agent's Socratic questions naturally, as a real operator would.
 
-3. Once the session completes (artifact written to `docs/socrates/discover/<slug>.md`), export the session transcript. The plugin mirrors it automatically to `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` during the session; after artifact commit it moves to `docs/socrates/discover/<slug>/`.
+3. Once the session completes (artifact written to `docs/socrates/discover/<slug>.md`), export the session transcript. The plugin mirrors it automatically to `docs/socrates/discover/.wip/<slug>/<session-id>.jsonl` during the session; after artifact commit it moves to `docs/socrates/discover/<slug>/<session-id>.jsonl` (same slug as the artifact file, in a sibling directory).
 
 4. Open the test case's `expectations` list. For each expectation, check whether it is satisfied in the transcript or artifact. Each expectation is binary: observable in the record or not.
 

@@ -86,7 +86,7 @@ Look back at the three pattern examples above. Each turn from the teacher is *sh
 
 Match that length in operator-facing turns. Target: **1–4 sentences per turn, asking one question**. Specifically:
 
-- **No multi-paragraph elaborations.** If a turn is more than ~4 sentences, you're exposition-ing instead of asking. Cut it.
+- **No multi-paragraph elaborations.** If a turn is more than ~4 sentences, it's exposition, not a Socratic question. Cut it.
 - **No restating the same idea multiple ways.** Once is enough. "You're saying X. Is that right?" — not "You're saying X, which is to say Y, in other words Z..."
 - **No preambles.** Skip "Great question. Let me think about this. Before I dig in...". Get straight to the mirror or question.
 - **Labels stay light.** The labeling protocol mandates `§X.Y.Z` labels on response structure. For a single-question turn, `§Q1` alone is sufficient. Don't generate nested `§1.1.1.1` subsections inside a short turn — that's visual weight without information.
