@@ -48,22 +48,6 @@ These are real gaps in the current `/discover` skill, observed during the valida
 
 **Implication:** any historical references to "Phase 5's chunk-complexity assessment" or "operator-driven recursion at dispatch" describe behavior that no longer exists. New limitation candidates introduced by the in-line sub-decomposition flow are documented in section 10.
 
-## 7. Phase 0 may add a turn that doesn't surface a real alternative
-
-**Observed:** Hypothetical for tightly-scoped problems where the operator genuinely has considered no-build alternatives and ruled them out.
-
-**Pattern:** The mandatory premise check is one extra turn at session start. For problems where the operator has already done the no-build analysis, this can feel like dead weight.
-
-**Mitigation:** The operator can use the "Don't ask me this" override path (recorded in the WIP, not silently bypassed). The override creates a single audit point — operators who routinely override get a visible record they can self-audit if too many premise checks are being skipped.
-
-## 8. Per-fire visibility is limited to high-stakes specifics
-
-**Observed:** By design — Tech-D fires silently for most classifications and visibly only for high-stakes specifics (named foundational technology, behavioral defaults that affect every operation, future-pull-V1-justified items).
-
-**Pattern:** Subtle drift in low-stakes items still relies on the per-phase ledger to catch. If the operator skips the ledger acknowledgement turn (or proceeds without reviewing it), low-stakes drift can ship into the artifact.
-
-**Mitigation:** The ledger surfaces "Unclassified specifics" as a load-bearing line — anything not classified is shown explicitly. Operators who skip the ledger entirely will trip the artifact gates, since unclassified items won't have the labels the gates require.
-
 ## 9. Artifact gates are in-prompt self-validation
 
 **Observed:** The four gates in `references/artifact-gates.md` are agent-driven self-validation, not external tooling.
@@ -97,3 +81,7 @@ These are real gaps in the current `/discover` skill, observed during the valida
 **Pattern:** Operator must run `/discover` first; `/solution` errors clearly if `discovery.md` is missing for the given slug. This keeps the plugin's two-skill pipeline coherent (discovery feeds solution) but means `/solution` cannot be used as a standalone planning aid.
 
 **Mitigation:** None planned for PR 2. Standalone `/solution` invocation would require an operator-provided problem statement and a synthesized minimal discovery artifact — out of scope for the current pipeline. Operators who want lightweight solution-only planning should use `/superpowers` directly.
+
+## 13. `/discover`'s convergence is agent-judgment only
+
+Under the Socratic rework, `/discover` exits the dialogue when the agent detects convergence (problem stable across 2-3 turns, operator confirming rather than refining, or productive aporia) and the operator approves the readback. There is no structural counter (the soft-signal visible counter was removed) and no automated convergence test. If the agent's convergence judgment is poor (exits too early or digs too long), the operator must steer manually. Mitigation: the readback turn is mandatory and the operator can always say "keep digging."

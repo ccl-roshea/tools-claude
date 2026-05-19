@@ -33,3 +33,12 @@ Forward-looking work surfaced by PR 2 that should be considered for the next ite
 - [ ] **HIPAA scaffolding / PHI primitives.** Domain primitives for healthcare problems — PHI-aware question templates, BAA-aware build-vs-buy filters, encryption-at-rest defaults baked into the artifact gates. Currently no domain has special-case scaffolding.
 - [ ] **Eval mode automation for the new behaviors.** Refresh `evals/evals.json` beyond the partial fix in Task 13 to cover PR 2's new behaviors (session-id JSONL matching, /solution standalone error path, plugin-root LIMITATIONS placement). Today's evals are structural smoke tests; the new behaviors need at least one positive and one negative case each.
 - [ ] **Migration tooling for existing `docs/discovery/` artifacts to `docs/socrates/discover/`.** PR 1 changed the artifact path convention. Operators with existing `docs/discovery/<slug>/` directories from earlier sessions have no automated way to migrate. Build a small `socrates migrate` script when the install base is large enough to matter.
+
+## Post-Socratic-rework follow-ups (2026-05-19)
+
+The Socratic rework (spec: `docs/superpowers/specs/2026-05-19-discover-pure-socratic-design.md`) deferred:
+
+- [ ] **Fresh end-to-end smoke test under the new `/discover`.** The PR2 smoke test is now superseded. Run the three test cases from `evals.json` (vague, over-specified, self-aporia) and capture results in `evals/reports/2026-05-19-discover-socratic-smoke-test.md`.
+- [ ] **Deeper Socratic alignment of `/solution`.** Today `/solution` uses Tech-D classification and Tech-B 4-option enumeration as its primary tools — those are the same constructs we stripped from `/discover` for being non-Socratic. A follow-up could apply Maieutic / Reductio / Parallel-case patterns to shape decisions in `/solution` as well. Scoped as a separate spec.
+- [ ] **LLM-grader for shape-language detection.** The Socratic eval has a `framing_must_not_contain_shape_language` artifact check that currently relies on a heuristic word list. An LLM grader would catch shape-language phrased in non-obvious ways (e.g., "a system that does X via Y" where Y is a shape).
+- [ ] **Migration tooling for in-progress legacy WIPs.** `/discover resume <slug>` currently asks the operator to choose abandon-or-extract-and-ship for legacy WIPs. A small `socrates migrate-wip <slug>` could automate the extract path (read Framing + Outcomes from the WIP's existing ledger entries, write the new minimal artifact).
