@@ -129,6 +129,20 @@ The problem statement is stable when:
 
 When you detect convergence, surface the readback: *"I think the problem is stable. Here's what I'll write down: [refined problem] / [outcomes]. Want to keep digging or wrap?"*
 
+## Response length and tone
+
+Look back at the three pattern examples above. Each turn from the teacher is *short*: a single mirror or a single question, typically one or two sentences. The student does the heavy thinking; the teacher does the precise prompting.
+
+Match that length in operator-facing turns. Target: **1–4 sentences per turn, asking one question**. Specifically:
+
+- **No multi-paragraph elaborations.** If a turn is more than ~4 sentences, you're exposition-ing instead of asking. Cut it.
+- **No restating the same idea multiple ways.** Once is enough. "You're saying X. Is that right?" — not "You're saying X, which is to say Y, in other words Z..."
+- **No preambles.** Skip "Great question. Let me think about this. Before I dig in...". Get straight to the mirror or question.
+- **Labels stay light.** The labeling protocol mandates `§X.Y.Z` labels on response structure. For a single-question turn, `§Q1` alone is sufficient. Don't generate nested `§1.1.1.1` subsections inside a short turn — that's visual weight without information.
+- **Readback turns may be slightly longer.** At convergence, the readback surfaces the proposed Framing + Outcomes — those are artifact contents, not exposition. A readback of 5–8 sentences is fine; a turn that explains *why* you're reading back is not.
+
+The Socratic method is a discipline of restraint. If a turn feels like it's earning its length by being thorough, it's probably padding.
+
 ## Anti-patterns
 
 - ❌ **Offering alternative framings of the problem.** ("Maybe the real problem is X, or Y, or Z?") The operator picks one of yours and now they're refining *your* framing instead of theirs. The whole point of Socratic dialogue is that the refinement is the operator's. Use cases, premise-walking, or parallel cases — never alternatives.
@@ -138,6 +152,7 @@ When you detect convergence, surface the readback: *"I think the problem is stab
 - ❌ **Naming the contradiction.** When Reductio lands the operator in aporia, hold the silence. Naming the contradiction lets the operator argue with the framing instead of with the bind.
 - ❌ **Asking questions whose answers won't change anything.** If the next answer can't refine the framing, you're padding. Move toward convergence.
 - ❌ **Over-mirroring.** Mirroring the operator's exact words back without testing them ("So you're saying X is the problem?" repeated turn after turn) is performative. Mirror once to confirm the starting point, then test.
+- ❌ **Verbose elaboration.** Multi-paragraph turns that explain context, alternatives, or your own reasoning. The Socratic teacher asks; they do not lecture. If a turn exceeds 4 sentences, it is almost certainly padding — cut it.
 ````
 
 - [ ] **Step 2: Verify the file was created**
@@ -528,6 +543,18 @@ If `docs/socrates/discover/.wip/` already contains `.wip.md` files, note them BE
 
 5. **Write the artifact.** Run the gates from `references/artifact-gates.md`. If they pass, write `docs/socrates/discover/<topic-slug>.md` per `references/artifact-template.md`. Finalize the WIP per `../../shared/checkpoint-protocol.md` (move JSONL transcript out of `.wip/`, remove WIP file, commit artifact + transcript together).
 
+### Response length and tone
+
+Each operator-facing turn is **one Socratic question**, plus at most a one-sentence mirror or transition. Target turn length is **1–4 sentences**. See `references/socratic-patterns.md` "Response length and tone" section — the example exchanges in that file model the actual target length.
+
+- No multi-paragraph elaborations. If a turn exceeds ~4 sentences, it's exposition, not Socratic dialogue.
+- No restating the same idea multiple ways. Once is enough.
+- No preambles ("Great question. Let me think about this..."). Get to the mirror or question.
+- Labels (`§X.Y.Z`) stay light. For a single-question turn, `§Q1` alone is sufficient — do not generate nested `§1.1.1.1` subsections inside a short turn.
+- Readback turns may be slightly longer because they surface the proposed Framing + Outcomes (the artifact contents). A readback of 5–8 sentences is fine; explaining *why* you're reading back is not.
+
+The Socratic method is a discipline of restraint. Brevity is correctness.
+
 ### What you do NOT do
 
 - Do not enumerate alternative framings of the problem ("maybe the real problem is X, or Y, or Z?"). The operator picks one of yours and now they're refining your framing instead of theirs.
@@ -538,6 +565,7 @@ If `docs/socrates/discover/.wip/` already contains `.wip.md` files, note them BE
 - Do not present axes to the operator as a checklist. Axes are teacher-side reminders in `references/socratic-patterns.md`.
 - Do not run a structured red-team pass. The readback turn (step 4) is the entire convergence check.
 - Do not ask the operator for sources, citations, or external-vs-preference classifications. Those questions belong in `/solution` where they evaluate *shapes against a validated problem*.
+- Do not produce multi-paragraph turns. One question, brief mirror if needed, done.
 
 ### Anti-patterns
 
@@ -552,6 +580,7 @@ If `docs/socrates/discover/.wip/` already contains `.wip.md` files, note them BE
 - ❌ Over-mirroring (mirroring without testing).
 - ❌ Listing axes to the operator.
 - ❌ Running a structured red-team or classification pass.
+- ❌ Verbose elaboration (multi-paragraph turns, multiple restatements, exposition before the question).
 
 ### Checkpoint discipline
 
@@ -863,10 +892,12 @@ The existing schema uses `id` / `prompt` / `expected_output` / `files` / `expect
     {
       "id": 1,
       "prompt": "I want to deploy agents for my team that can communicate",
-      "expected_output": "The skill opens by mirroring the stated problem in the operator's language, then asks Socratic questions (Maieutic / Reductio / Parallel-case) to test what the operator means by 'agent', 'communicate', and 'team'. The agent does not classify phrases as shape-language, does not enumerate alternative framings, does not announce a red-team mode shift, and does not run any premise check. The final discovery artifact has only Framing (with Original statement + Key reframes) + Outcomes + Discovery log — no External constraints, no Parked shapes, no Open axes, no Red-team findings.",
+      "expected_output": "The skill opens by mirroring the stated problem in the operator's language, then asks Socratic questions (Maieutic / Reductio / Parallel-case) to test what the operator means by 'agent', 'communicate', and 'team'. Each turn is short — 1 to 4 sentences asking one question, no multi-paragraph elaborations. The agent does not classify phrases as shape-language, does not enumerate alternative framings, does not announce a red-team mode shift, and does not run any premise check. The final discovery artifact has only Framing (with Original statement + Key reframes) + Outcomes + Discovery log — no External constraints, no Parked shapes, no Open axes, no Red-team findings.",
       "files": [],
       "expectations": [
         "Turn 1 mirrors the operator's stated problem in their own language before asking any Socratic question (e.g., 'Let me restate: you're saying X. Is that right?')",
+        "Each operator-facing turn is 1–4 sentences asking one question (excluding the readback turn, which may be slightly longer because it surfaces the proposed Framing + Outcomes). No turn contains multi-paragraph elaborations or multiple restatements of the same idea.",
+        "Label structure stays light — single-question turns use §Q1 alone and do not nest §1.1.1.1 subsections inside short replies",
         "The agent never enumerates 2+ alternative framings of the problem in a single turn (no 'Maybe the real problem is X, or Y, or Z?' patterns)",
         "When 'agent' appears as a specific shape, the agent asks a Socratic question about what it gives the operator (e.g., 'tell me about agents — what does that give you?') rather than classifying it as shape-language",
         "The agent does not say 'Tech-D', 'Tech-B', 'external source', 'preference', 'parked shape', 'shape-language', 'classification', 'V1-justified', or 'future-pull' in any operator-facing turn",

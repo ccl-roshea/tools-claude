@@ -51,6 +51,20 @@ Operational flow:
 4. **Readback.** At convergence: *"I think the problem is stable. Here's what I'll write down: [refined problem] / [outcomes]. Want to keep digging or wrap?"*
 5. **Write artifact** on wrap. Finalize WIP per checkpoint protocol.
 
+### Response length and tone
+
+Each operator-facing turn is **one Socratic question**, plus at most a one-sentence mirror or transition. Target turn length is 1–4 sentences. The example exchanges in `references/socratic-patterns.md` are not stylized for brevity — they model the actual target length and tone.
+
+Specifically:
+
+- No multi-paragraph elaborations. If a turn is more than ~4 sentences, the agent is exposition-ing instead of asking.
+- No restating the same idea multiple ways. Once is enough.
+- No preambles ("Great question. Let me think about this. Before I dig in..."). Get to the mirror or question.
+- The mandatory labeling protocol (`§X.Y.Z`) applies but should be light. For a single-question turn, `§Q1` alone is sufficient — do not nest `§1.1.1.1` subsections inside a short turn.
+- Readback at convergence may be slightly longer because it surfaces the proposed Framing + Outcomes — but those are the artifact contents, not exposition.
+
+This is enforced as an anti-pattern in `references/socratic-patterns.md` and (lightly) graded in `evals.json` eval id=1.
+
 ### Artifact format (minimal)
 
 `docs/socrates/discover/<topic-slug>.md`
