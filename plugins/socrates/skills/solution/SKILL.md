@@ -1,32 +1,31 @@
 ---
 name: solution
 description: >
-  Socratic shape-evaluation downstream of /discover. Pressure-tests
-  parked shapes from /discover's discovery artifact against the
-  discovered outcomes (Tech-D classification of parked shapes as
-  constraint / candidate / default-to-test; Tech-B alternative shape
-  framings across the complexity spectrum). Chunks the chosen shapes
+  Socratic shape-evaluation downstream of /discover. Elicits shapes,
+  preferences, and constraints from the operator against the validated
+  problem from /discover, pressure-tests them (Tech-D classification of
+  each shape as constraint / candidate / default-to-test; Tech-B
+  alternative shape framings across the complexity spectrum, including
+  the No-build framing — "do you really need to build this?"). Chunks the chosen shapes
   into executor-sized work units, red-teams the shape decisions and
   chunk structure, runs rigorous build-vs-buy research per chunk, and
   sequentially dispatches /superpowers per chunk. Produces a solution
   artifact at `docs/socrates/solution/<slug>.md` that maps every
-  discovered outcome to its addressing chunk(s) and resolves every
-  parked shape.
+  discovered outcome to its addressing chunk(s).
 when_to_use: >
   Use after /discover produces a discovery artifact at
   `docs/socrates/discover/<slug>.md`. /solution consumes that artifact
-  plus the parked-shapes ledger from /discover's WIP and produces a
-  solution artifact + per-chunk dispatch. Skip /solution if the
+  (validated problem from /discover) and elicits shapes from the operator,
+  then produces a solution artifact + per-chunk dispatch. Skip /solution if the
   operator wants to handle shape-discovery and chunking manually and
   go straight to /superpowers — but the cost is the loss of structured
-  shape-evaluation and parked-shape resolution. /solution is
-  operator-driven (no auto-handoff from /discover).
+  shape-evaluation. /solution is operator-driven (no auto-handoff from /discover).
 allowed-tools: "Read Write Edit Bash(git *) Agent TaskCreate TaskUpdate WebSearch WebFetch"
 ---
 
 # Solution — Socratic Shape Evaluation, Chunking, Research, and Dispatch
 
-You are running the `/solution` skill. Your job is to take the discovery artifact `/discover` produced (outcomes, parked shapes, externally-sourced constraints, open axes) and turn it into a chunked, build-vs-buy-researched, dispatchable plan — and then sequentially dispatch `/superpowers` per chunk in execution order.
+You are running the `/solution` skill. Your job is to take the discovery artifact `/discover` produced (validated problem, outcomes, externally-sourced constraints) and turn it into a chunked, build-vs-buy-researched, dispatchable plan — and then sequentially dispatch `/superpowers` per chunk in execution order.
 
 You do NOT re-do outcome discovery. The outcomes are settled by upstream `/discover`; your job is to evaluate the shapes that those outcomes imply, not to re-litigate the outcomes themselves. If shape evaluation surfaces an outcome gap, you invoke a *scoped sub-skill* `/discover` against that one dimension (see "Sub-skill /discover invocation" below) — you do not absorb the outcome work into /solution.
 
@@ -34,12 +33,12 @@ You do NOT re-do outcome discovery. The outcomes are settled by upstream `/disco
 
 When you need detailed guidance, read the relevant reference file:
 
-- `../../shared/anti-sycophancy.md` — Techniques B, C, D with examples and prompts (skill-agnostic at the rule level; /solution-specific framings called out inline). Tech-D's PREFERENCE path in /solution classifies each parked shape as **candidate** (evaluate alternatives) or **default-to-test** (run Tech-B's no-build framing against it).
+- `../../shared/anti-sycophancy.md` — Techniques B, C, D with examples and prompts (skill-agnostic at the rule level; /solution-specific framings called out inline). Tech-D's PREFERENCE path in /solution classifies each operator-elicited shape as **candidate** (evaluate alternatives) or **default-to-test** (run Tech-B's no-build framing against it).
 - `../../shared/chunking-guidelines.md` — Phase 1 CHUNK heuristics, the mandatory chunk-overload signal check, and the per-chunk audit.
 - `../../shared/red-team-protocol.md` — Mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), exit criteria. The /solution-specific check list is inlined below in Phase 2.
 - `../../shared/checkpoint-protocol.md` — WIP file format (including the `session_id` YAML field), phase-boundary commits, resume, completion. The plugin's hook mirrors the per-turn JSONL automatically; the agent does not write turn blocks by hand.
 - `references/research-protocol.md` — Phase 3 RESEARCH (full 6-criteria build-vs-buy evaluation, reverse sunk-cost check).
-- `references/solution-artifact-template.md` — The solution artifact format (shape decisions, chunks, discovery→solution mapping, parked-shape resolution).
+- `references/solution-artifact-template.md` — The solution artifact format (shape decisions, chunks, discovery→solution mapping).
 - `references/solution-gates.md` — Phase 4 write-time gates that must pass before the solution artifact is written.
 - `references/dispatch-protocol.md` — Phase 5 DISPATCH (sequential /superpowers per chunk, prompt composition, decision extraction, revision handling).
 
@@ -55,14 +54,14 @@ This is the one reference file you should read once at session start (it is shor
 
 You execute the following phases in order. Within each phase you can loop, but you don't skip ahead. Each phase has explicit entry and exit criteria.
 
-0. **SHAPE-DISCOVER** — Read /discover's discovery artifact + parked-shapes ledger. For each parked shape, run Tech-D's PREFERENCE-path classification: constraint (lock in with citation) / candidate (test against alternatives) / default-to-test (run Tech-B's no-build framing on it). Fire Tech-B 1–2× with alternative *shape* framings across the complexity spectrum (Complex / Middle / Low / No-build, where No-build = adopt existing tool).
+0. **SHAPE-DISCOVER** — Read /discover's discovery artifact. Elicit shapes from the operator (turn 1). For each operator-elicited shape, run Tech-D's PREFERENCE-path classification: constraint (lock in with citation) / candidate (test against alternatives) / default-to-test (run Tech-B's no-build framing on it). Fire Tech-B at turn 2 with alternative *shape* framings across the complexity spectrum (Complex / Middle / Low / No-build, where No-build = adopt existing tool).
 1. **CHUNK** — Decompose the chosen shapes into executor-sized work units. Per-chunk audit + chunk-overload signal check at phase exit.
 2. **RED-TEAM (shapes only)** — Adversarial pass on shape decisions and chunk structure. Outcome-level red-teaming was done by /discover; this phase does *not* re-litigate outcomes.
 3. **RESEARCH (build-vs-buy)** — Per-chunk and whole-problem build-vs-buy with the 6-criteria evaluation. Reverse sunk-cost check fires here.
 4. **ARTIFACT** — Run the write-time gates. If they pass, write `docs/socrates/solution/<slug>.md`.
 5. **DISPATCH** — Sequential `/superpowers` per chunk in execution order. Decisions from completed chunks feed downstream chunks.
 
-The flow is: input the discovery → evaluate shapes → decompose → attack → research → commit → execute. Each phase narrows commitment from "parked shapes" to "researched, red-teamed, gates-passed solution artifact" to "dispatched per-chunk plans." At every phase exit, the agent surfaces a structured ledger to the operator (see `../../shared/checkpoint-protocol.md`) before advancing.
+The flow is: input the discovery → elicit and evaluate shapes → decompose → attack → research → commit → execute. Each phase narrows commitment from "operator-elicited shapes" to "researched, red-teamed, gates-passed solution artifact" to "dispatched per-chunk plans." At every phase exit, the agent surfaces a structured ledger to the operator (see `../../shared/checkpoint-protocol.md`) before advancing.
 
 ## Session startup
 
@@ -71,7 +70,7 @@ Read `../../shared/checkpoint-protocol.md` for the full WIP file format and phas
 **New session** (`/solution <slug>`):
 
 1. Read the discovery artifact at `docs/socrates/discover/<slug>.md`. If absent, tell the operator: "No discovery artifact at `docs/socrates/discover/<slug>.md`. Run `/discover` first, then `/solution <slug>`." Halt.
-2. Read the parked-shapes section from the discovery artifact (and, if the WIP file `docs/socrates/discover/.wip/<slug>.wip.md` still exists, also read its `## Parked shapes` ledger). The parked-shapes list is the input set for Phase 0 SHAPE-DISCOVER.
+2. The discovery artifact no longer carries a parked-shapes ledger (per the Socratic rework: shapes are elicited fresh in `/solution`, not carried forward from `/discover`). If the artifact happens to be in the legacy format and contains a `## Parked shapes` section (i.e., it predates the rework), read it as a *starting hint* for the operator-elicitation turn — not as authoritative input. Otherwise proceed without a parked-shapes ledger.
 3. Read the labeling protocol from `../../shared/labeling-protocol.md` once.
 4. Create the WIP file at `docs/socrates/solution/.wip/<slug>.wip.md` with YAML frontmatter:
 
@@ -92,19 +91,36 @@ Read `../../shared/checkpoint-protocol.md` for the full WIP file format and phas
 **Resume** (`/solution resume <slug>`):
 
 - Read the WIP file at `docs/socrates/solution/.wip/<slug>.wip.md`. Follow the resume reconstruction steps in `../../shared/checkpoint-protocol.md` (read YAML + ledger sections; do not read the JSONLs).
-- Continue from the recorded phase. Do not re-classify parked shapes already in the ledger.
+- Continue from the recorded phase. Do not re-classify shapes already in the ledger.
 
 ## Phase 0: SHAPE-DISCOVER
 
-**Entry:** New /solution session. Discovery artifact has been read; parked-shapes list extracted; WIP file created with `session_id`.
+**Entry:** New /solution session. Discovery artifact has been read; WIP file created with `session_id`.
 
-**Exit:** Every parked shape has a classification (constraint / candidate / default-to-test) recorded in the WIP ledger; Tech-B has fired at least once on shape framings; the operator approves moving to CHUNK. Surface the phase-exit ledger per `../../shared/checkpoint-protocol.md`.
+**Exit:** Every operator-elicited shape has a classification (constraint / candidate / default-to-test) recorded in the WIP ledger; Tech-B has fired at turn 2; the operator approves moving to CHUNK. Surface the phase-exit ledger per `../../shared/checkpoint-protocol.md`.
 
 ### What you do in this phase
 
-You walk the parked-shapes list one entry at a time and run Tech-D on each. **You do not re-classify shapes that /discover already locked in as constraints** — those carry forward into the solution artifact unchanged (see Phase 4 G1). You classify the *unresolved* parked shapes (the ones with `resolved: false` in the parked-shapes ledger).
+SHAPE-DISCOVER opens with an **operator-elicitation turn**, then walks any elicited shapes one entry at a time and runs Tech-D on each.
 
-**Per-parked-shape protocol.** For each entry in the parked-shapes list:
+**Elicitation turn (mandatory, turn 1).** After reading the discovery artifact (`## Framing` + `## Outcomes`), open by surfacing the validated problem and asking the operator what shapes / preferences / constraints they want to bring into solutioning:
+
+> "Here's the validated problem and the outcomes from `/discover`:
+>
+> *[insert verbatim Framing]*
+>
+> *Outcomes:*
+> - [outcome 1]
+> - [outcome 2]
+> - …
+>
+> What shapes, preferences, or constraints do you want to bring into how we solve this? Anything from your original framing that you want to evaluate — named tools, patterns, architectural choices, non-negotiables — surface it now."
+
+The operator's reply seeds the shape-list. The agent THEN walks that list per the per-shape Tech-D protocol below. **No shapes carry forward from `/discover` automatically** — the validated problem is the only input.
+
+If the discovery artifact is in the legacy format (`## Parked shapes` section present), use those entries as starting hints in your elicitation prompt: *"Your original framing also mentioned [list legacy parked shapes]. Want to bring any of those in, or are they no longer relevant?"* — the operator decides.
+
+**Per-shape protocol.** For each shape in the operator-elicited list:
 
 1. Surface the shape, its `outcome_question`, and who introduced it (operator vs. skill). The outcome-question is what makes the shape evaluable — if the outcome-question is empty or vague, that itself is a CRITICAL precondition failure: stop and use the sub-skill /discover branch below to refine the outcome-question before proceeding.
 
@@ -127,7 +143,7 @@ You walk the parked-shapes list one entry at a time and run Tech-D on each. **Yo
 
 **Tech-B firings on shape framings.** In addition to per-shape Tech-D, fire Tech-B at least once during Phase 0 with alternative *shape* framings of the whole-problem solution:
 
-1. **Mandatory at SHAPE-DISCOVER turn 1**, immediately after reading the discovery artifact. Before walking the parked-shapes list, fire the 4-option shape spectrum.
+1. **Mandatory at SHAPE-DISCOVER turn 2**, immediately after the operator-elicitation turn. Fire the 4-option shape spectrum on the whole-problem solution shape. The No-build framing is the explicit form of "do you really need to build this?" at the solution level — keep it concrete.
 2. **Before proposing exit to CHUNK**, fire again if the shapes settled on look like a single shape-frame the conversation drifted into.
 
 Per `../../shared/anti-sycophancy.md` Tech-B (with /solution's shape-framing specialization), the 4 options are:
@@ -168,7 +184,7 @@ If, while evaluating a shape, you discover that the discovery artifact is missin
    ```
 
 3. The sub-skill /discover creates its own WIP under `docs/socrates/discover/.wip/<slug>-redisc-<dim>.wip.md` with its own `session_id`. The hook mirrors its JSONL to its own subdir. The parent /solution WIP is untouched.
-4. When the sub-skill returns, re-read the discovery artifact (the `## Re-discovery: ...` section is now appended) and resume the parked-shape evaluation with the new outcome in hand.
+4. When the sub-skill returns, re-read the discovery artifact (the `## Re-discovery: ...` section is now appended) and resume the shape evaluation with the new outcome in hand.
 5. Record the re-discovery in the /solution WIP under `## Re-discoveries` as: `dimension: <dim>, outcome: <answer>, used_in: <which shape evaluation>`.
 
 This branch may also fire from Phase 2 RED-TEAM if shape-red-teaming surfaces an unanswered outcome-level question; the protocol is identical.
@@ -176,10 +192,10 @@ This branch may also fire from Phase 2 RED-TEAM if shape-red-teaming surfaces an
 ### Anti-patterns
 
 - ❌ **Re-doing outcome discovery.** The outcomes are settled. If you find yourself re-asking the operator what they actually want, stop and use the sub-skill /discover branch. /solution does not absorb outcome work.
-- ❌ **Treating parked shapes as already-constraints.** A parked shape is *not* a constraint — it's a candidate with an outcome-question. Classify with Tech-D before recording in `## Shape decisions`. If you copy parked shapes forward without classification, Phase 4 G6 will fail.
+- ❌ **Treating operator-elicited shapes as already-constraints.** A shape elicited in turn 1 is *not* a constraint — it's a candidate. Classify with Tech-D before recording in `## Shape decisions`. "Operator stated it confidently" is not a source.
 - ❌ **Skipping Tech-B on shape framings.** Tech-B fires on shape framings at least once in Phase 0. Without it, the conversation drifts toward the first shape framing that emerged — usually the operator's Complex frame.
 - ❌ **Filler no-build shape frame.** A no-build option you don't believe in — "use a spreadsheet" without a credible path — is worse than no option. If the no-build shape frame feels forced, the outcome scoping may be wrong: surface and use sub-skill /discover.
-- ❌ **Leaving a parked shape unresolved at exit.** Every entry in the parked-shapes ledger gets a classification and a recorded resolution. Phase 4 G6 enforces this mechanically; catching it now is cheaper.
+- ❌ **Leaving an elicited shape unresolved at exit.** Every shape surfaced during the turn-1 elicitation (or during later dialogue) gets a classification and a recorded resolution before SHAPE-DISCOVER exits.
 
 ## Phase 1: CHUNK
 
@@ -209,7 +225,7 @@ Both checks happen at end of CHUNK, not at DISPATCH. By Phase 5, every chunk has
 
 ### Anti-patterns
 
-- ❌ **Chunking before SHAPE-DISCOVER exits.** You need shape decisions before you can scope chunks against them. Chunking on parked shapes (uncategorized) means chunking on candidates the operator hasn't picked from yet.
+- ❌ **Chunking before SHAPE-DISCOVER exits.** You need shape decisions before you can scope chunks against them. Chunking on uncategorized shapes means chunking on candidates the operator hasn't picked from yet.
 - ❌ **Skipping the chunk-overload check.** It's the cheapest defense against handing /superpowers a chunk that will go shallow. Run it on every chunk.
 - ❌ **Open choices without survival justification.** Phase 4 G3 will block the artifact write. Record the one-liner during the per-chunk audit, not later.
 - ❌ **Chunking by file structure, not by problem structure.** "Frontend chunk, backend chunk, database chunk" is often a false split — frontend and backend decisions are tightly coupled if they share a single data model. Cut by data ownership, failure domain, or external interface (see chunking-guidelines.md edge cases).
@@ -239,7 +255,6 @@ Read `../../shared/red-team-protocol.md` for the mode-shift announcement, severi
 6. **Outcome coverage** — every outcome from the discovery artifact's `## Outcomes` section is addressed by ≥1 chunk's problem statement. Walk the discovery outcomes list and tick each off against the chunk list. Uncovered outcomes are CRITICAL findings.
 7. **Existence question** (shallow build-vs-buy preview) — for each chunk, take 30 seconds to ask: "Is there an existing tool that satisfies this whole chunk?" If yes, flag for Phase 3 RESEARCH to evaluate rigorously. This is a preview, not the full evaluation.
 8. **Future-pull contamination of shapes** — is any shape decision driven by V2 features or hypothetical scale rather than V1 needs? Apply the same V1/future-pull lens Tech-D applies to constraints. Future-pull shapes get challenged: V1-justify or drop.
-9. **Parked-shape resolution completeness** — every entry in /discover's parked-shapes ledger has a resolution path in this session's shape decisions, recorded with one of the template's allowed Resolution values (`Resolved` / `Dropped` / `Carried forward as open shape`). Walk the parked-shapes ledger and tick each off. Unresolved parked shapes are CRITICAL findings (Phase 4 G6 will also enforce mechanically).
 
 **Step 3: present findings as a numbered list** per `../../shared/red-team-protocol.md` §3. Include reasoning, not just assertions.
 
@@ -294,8 +309,8 @@ Record the operator's response (and the rejection reason if build wins) under th
 
 ### What you do in this phase
 
-1. **Assemble the solution artifact draft** per `references/solution-artifact-template.md`. The template specifies sections (Execution order, Framing, Shape decisions, Chunks, Red-team findings, Research outcomes, Discovery → Solution mapping, Parked shapes resolution, Discovery log).
-2. **Run the write-time gates** from `references/solution-gates.md` against the draft. The gates check shape-decision provenance, tested-shape alternatives, open-shape justifications, future-pull justifications, outcome coverage, and parked-shape resolution completeness. If any gate fails, do NOT write — surface failures grouped by gate name, enter the fixup loop, and re-run all gates after each fix.
+1. **Assemble the solution artifact draft** per `references/solution-artifact-template.md`. The template specifies sections (Execution order, Framing, Shape decisions, Chunks, Red-team findings, Research outcomes, Discovery → Solution mapping, Discovery log).
+2. **Run the write-time gates** from `references/solution-gates.md` against the draft. The gates check shape-decision provenance, tested-shape alternatives, open-shape justifications, future-pull justifications, and outcome coverage. If any gate fails, do NOT write — surface failures grouped by gate name, enter the fixup loop, and re-run all gates after each fix.
 3. **Once all gates pass**, write the solution artifact to `docs/socrates/solution/<slug>.md`.
 4. **Finalize the session** per `../../shared/checkpoint-protocol.md` (adapt the discover-specific commit commands to the `docs/socrates/solution/` subdir): move the JSONL transcript directory out of `.wip/`, remove the WIP file, commit the artifact + transcript together.
 
