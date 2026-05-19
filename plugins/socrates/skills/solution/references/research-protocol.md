@@ -4,7 +4,7 @@
 
 Phase 3 of the skill. After RED-TEAM (Phase 2) and before ARTIFACT (Phase 4), actively research existing tools that might satisfy chunks. Replaces training-data intuition with current web evidence.
 
-`/discover` runs a *shallow* existence check during its own RED-TEAM (see `../../discover/references/research-protocol.md` for that scope); this protocol is the *rigorous* per-chunk and whole-problem build-vs-buy evaluation, with candidate scoring, classification, the reverse sunk-cost check, and soft session limits. The two protocols are deliberately separated: shallow scouting is part of pressure-testing outcomes; rigorous evaluation requires the chunks and shape decisions that only `/solution` produces.
+The research protocol previously had a shallow-scouting analog in `/discover`'s RED-TEAM phase; that phase was removed in the Socratic rework (2026-05-19). This file is now the only research protocol in the plugin. This protocol is the *rigorous* per-chunk and whole-problem build-vs-buy evaluation, with candidate scoring, classification, the reverse sunk-cost check, and soft session limits. Rigorous evaluation requires the chunks and shape decisions that only `/solution` produces.
 
 ## Why this phase exists
 

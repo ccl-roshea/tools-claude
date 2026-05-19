@@ -2,7 +2,7 @@
 
 > Phase names (SHAPE-DISCOVER, CHUNK, RED-TEAM, RESEARCH, ARTIFACT, DISPATCH) and the overall flow are defined in `../SKILL.md`. This file expands the solution-artifact format only.
 
-The output document the skill writes after Phase 4 ARTIFACT's write-time gates pass. Every solution session produces one artifact in this format. The artifact is *shape-and-chunk*: shape decisions (constraints / tested-shapes / open shapes), chunks (with dependencies and recommended executors), shape-level red-team findings, build-vs-buy research outcomes, and an explicit mapping from /discover's outcomes to the chunks that address them. Outcome discovery, outcome-level red-teaming, and the parked-shapes ledger inputs all live upstream in `/discover`'s discovery artifact, not here.
+The output document the skill writes after Phase 4 ARTIFACT's write-time gates pass. Every solution session produces one artifact in this format. The artifact is *shape-and-chunk*: shape decisions (constraints / tested-shapes / open shapes), chunks (with dependencies and recommended executors), shape-level red-team findings, build-vs-buy research outcomes, and an explicit mapping from /discover's outcomes to the chunks that address them. Outcome discovery, outcome-level pressure-testing via Socratic dialogue, and the validated problem all live upstream in `/discover`'s discovery artifact, not here.
 
 ## Filename and location
 
@@ -131,17 +131,6 @@ Did any single tool credibly satisfy the *whole* outcome set (not just one chunk
 
 Phase 4 G5 (outcome coverage) checks every row of this table has ≥1 chunk and every outcome from discovery.md `## Outcomes` appears as a row.
 
-## Parked shapes resolution
-
-| Parked shape (verbatim from discovery.md `## Parked shapes`) | Resolution | Where |
-|---|---|---|
-| `"real-time updates"` | Resolved: server-sent events | Chunk 2: shape decision `[Tested-shape] SSE for live cart updates` |
-| `"PostgreSQL"` | Resolved: external constraint | `## Shape decisions` line `[Constraint] PostgreSQL 16 (source: deployed system — billing service uses pg16)` |
-| `"Kafka"` | Dropped | Reason: no V1 outcome required eventing; deferred to V2 if scale outcomes change |
-| `"shadcn/ui"` | Carried forward as open shape | `## Shape decisions` line `[Open shape] UI component library — deferred because: executor will pick based on auth chunk's framework choice` |
-
-Resolution values are exactly one of: **Resolved: <how>** | **Dropped** | **Carried forward as open shape**. The `Where` column points to the line in this artifact that holds the resolution. Phase 4 G6 (parked-shapes resolution) checks every entry from discovery.md `## Parked shapes` has a row here.
-
 ## Discovery log (collapsed)
 
 <details>
@@ -189,7 +178,7 @@ Three label types correspond to the three SHAPE-DISCOVER outcomes plus carried-f
 - **[Tested-shape]** = operator picked this shape over enumerated alternatives during Phase 0 SHAPE-DISCOVER's Tech-D candidate path. ≥1 alternative is recorded with a specific rejection reason. Enforced by G2.
 - **[Open shape]** = deliberately deferred to the executor. Carries a one-liner survival justification (`deferred because: <reason>`). Enforced by G3.
 
-A parked shape that SHAPE-DISCOVER classified as **default-to-test** and the test resolved to "no shape needed" does NOT appear under `## Shape decisions` — it appears in the `## Parked shapes resolution` table with `Resolution: Dropped` and the reason. This is the asymmetry: Shape decisions records what *exists* in the solution; Parked shapes resolution records what *happened to each input*.
+A shape that SHAPE-DISCOVER classified as **default-to-test** and the test resolved to "no shape needed" does NOT appear under `## Shape decisions` — record the outcome in the WIP ledger under the relevant shape entry with `resolution: dropped: <reason>`.
 
 ### Chunks
 
@@ -214,12 +203,6 @@ Whole-problem research is the "did the whole solution collapse" check. If a sing
 The most load-bearing table in the artifact for downstream verification. Phase 4 G5 walks discovery.md's `## Outcomes` section line-by-line and checks each outcome appears as a row here AND that the row names ≥1 chunk. Missing rows OR rows with no chunk = G5 failure.
 
 The mapping does NOT require 1:1 — an outcome can be served by multiple chunks; a chunk can serve multiple outcomes. The bipartite coverage is what matters.
-
-### Parked shapes resolution
-
-The companion table to Shape decisions. Walks discovery.md's `## Parked shapes` ledger entry-by-entry; each entry appears as a row here with one of three resolutions: **Resolved**, **Dropped**, **Carried forward as open shape**. Phase 4 G6 enforces.
-
-A "Resolved" entry's `Where` column points to a specific line of this artifact — usually a `[Constraint]` or `[Tested-shape]` line under `## Shape decisions`, or a `[Open shape]` line if it became an open choice. A "Dropped" entry's `Where` column carries the dropping reason. A "Carried forward as open shape" entry's `Where` column points to the `[Open shape]` line in `## Shape decisions`.
 
 ### Discovery log
 

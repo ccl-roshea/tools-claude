@@ -172,8 +172,7 @@ If, while evaluating a shape, you discover that the discovery artifact is missin
      description="/discover scoped re-discovery on <dim>",
      prompt="""You are a /discover scoped re-discovery session.
        Read the discovery artifact at docs/socrates/discover/<slug>.md.
-       Interrogate dimension <dim> only — do NOT run a full PREMISE
-       CHECK, do NOT fire Tech-B's full 4-option framing, do NOT run a
+       Interrogate dimension <dim> only — do NOT fire Tech-B's full 4-option framing, do NOT run a
        full red-team. Use Tech-D's verifiability rule on any shapes
        that surface on this dimension.
        Output: a 1-3 sentence outcome answer for dimension <dim>.
@@ -239,7 +238,7 @@ Both checks happen at end of CHUNK, not at DISPATCH. By Phase 5, every chunk has
 
 ### What you do in this phase
 
-Read `../../shared/red-team-protocol.md` for the mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), and exit criteria. Read `../../shared/anti-sycophancy.md` Tech-C section for the underlying technique. This Phase 2 red-team operates on *shape decisions and chunk structure* — not on outcomes (those were red-teamed by `/discover` Phase 2). If a finding is about the outcomes themselves, surface it as an outcome gap and invoke sub-skill /discover (see Phase 0).
+Read `../../shared/red-team-protocol.md` for the mode-shift announcement, severity classification (CRITICAL / DISCUSS / MINOR), finding format, operator response patterns (Accept / Dismiss / Defer), and exit criteria. Read `../../shared/anti-sycophancy.md` Tech-C section for the underlying technique. This Phase 2 red-team operates on *shape decisions and chunk structure* — not on outcomes (those were pressure-tested by `/discover`'s Socratic dialogue). If a finding is about the outcomes themselves, surface it as an outcome gap and invoke sub-skill /discover (see Phase 0).
 
 **Step 1:** Run the mode-shift announcement per `../../shared/red-team-protocol.md` §1. Substitute "the shape decisions and chunks" for the generic placeholder:
 
@@ -269,7 +268,7 @@ If a finding from check 3 (missing concerns) or 6 (outcome coverage) traces to a
 ### Anti-patterns
 
 - ❌ **Skipping the mode-shift announcement.** The operator needs to know you're now adversarial. See `../../shared/red-team-protocol.md` §1.
-- ❌ **Red-teaming outcomes instead of shapes.** Outcomes were red-teamed by /discover. If a finding is "the outcome itself is wrong," that's an outcome gap — surface it and invoke sub-skill /discover. Do not absorb outcome work into /solution's red-team.
+- ❌ **Red-teaming outcomes instead of shapes.** Outcomes were pressure-tested by `/discover`'s Socratic dialogue. If a finding is "the outcome itself is wrong," that's an outcome gap — surface it and invoke sub-skill /discover. Do not absorb outcome work into /solution's red-team.
 - ❌ **Mild findings only.** If every finding is MINOR, you are reviewing, not red-teaming. Push harder. See `../../shared/red-team-protocol.md` §3.
 - ❌ **Letting CRITICAL findings be dismissed without specific reason.** "Operator said it's fine" is insufficient. See `../../shared/red-team-protocol.md` §4.
 - ❌ **Treating the existence question (check 7) as the full build-vs-buy.** This check is a preview — it flags chunks for Phase 3 RESEARCH. The rigorous 6-criteria evaluation happens in RESEARCH.
