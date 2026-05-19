@@ -1,73 +1,59 @@
 # Artifact-Time Gates
 
-> Phase names (PREMISE CHECK, DISCOVER, RED-TEAM) and the overall flow are defined in `../SKILL.md`. This file expands the discovery-artifact write-time validation only.
+> Phase names and the overall flow are defined in `../SKILL.md`. This file expands the discovery-artifact write-time validation only.
 
-Before writing the discovery artifact to `docs/socrates/discover/<slug>.md`, the agent runs three self-validation gates against the assembled draft. Any failure blocks the write and returns the agent to a fixup loop.
+Before writing the discovery artifact to `docs/socrates/discover/<slug>.md`, the agent runs two self-validation gates against the assembled draft. Any failure blocks the write and returns the agent to a fixup loop.
 
-The gates are agent-driven self-validation in the prompt — not external tooling. The agent reads its own draft, runs the three checks, and reports its conclusions to the operator before writing.
+The gates are agent-driven self-validation in the prompt — not external tooling. The agent reads its own draft, runs the two checks, and reports its conclusions to the operator before writing.
 
-Tested-shape alternatives are NOT gated here; that concern lives in `/solution`'s `solution-gates.md` because "tested shapes" are recorded in the solution artifact, not the discovery artifact.
+Shape decisions, constraint provenance, parked-shape resolution, and open-axis justifications are NOT gated here — those concerns belong in `/solution`'s `solution-gates.md`. `/discover`'s artifact contains *no shapes* by design.
 
-## Gate 1: External constraints provenance gate
+## Gate 1: Problem-language gate
 
-For each line under "## External constraints" in the assembled artifact draft, verify both:
+For each line in the `## Framing` and `## Outcomes` sections of the assembled artifact draft, verify the line contains no shape-language. Shape-language includes:
 
-- A label is present at the start of the line: either `[V1]` or `[future-pull, V1-justified: <reason>]`.
-- A source annotation is present in parens at the end of the line. The source MUST cite one of the five external categories from Tech-D's verifiability rule (see `../../shared/anti-sycophancy.md`): **regulator** (compliance framework + control), **contract** (commercial agreement + clause), **deployed system** (system + version), **prior empirical result** (experiment / POC / incident + where recorded), or **factual measurement** (measured value + when taken). Format: `(source: <category> — <specific citation>)`.
+- A named technology, library, framework, or product ("Postgres", "AWS", "Next.js", "Plane", "Notion").
+- A protocol or pattern ("REST", "GraphQL", "event-driven", "microservices").
+- An architectural choice expressed as a *how* ("monorepo", "serverless", "task graph", "JIT generation").
+- A non-functional shape framing ("first-class citizen", "comprehensive", "real-time").
 
-**Fails if:** any line lacks the label, lacks the source annotation, or carries a source that does not cite one of the five external categories (regulator, contract, deployed system, prior empirical result, factual measurement). A bare operator quote without an external category tag fails the gate — that input belongs in the `## Parked shapes` section, not in external constraints. Lines under a separate "Deferred (V2 only)" subsection are not checked here (those use the `[V2-driven, deferred]` label format and are not V1 constraints).
+External systems mentioned as nouns describing the world (e.g., "users can't authenticate to our Okta tenant") are acceptable — Okta is the world, not a proposed solution. The test: does removing the word leave the sentence describing the *problem* or describing a *proposed how*?
 
-## Gate 3: Open axes justification gate
+**Fails if:** any line in Framing or Outcomes contains shape-language as a proposed how. Common pattern: an outcome phrased "users should have [shape]" or "the system should [shape]" instead of "[underlying want]."
 
-For each entry under "## Open axes" in the assembled artifact draft, verify:
+## Gate 2: Verbatim original statement gate
 
-- A one-liner survival justification is present, in the format `<axis> — Deferred because: <one-liner>`.
+The `### Original statement` subsection contains the operator's input from session start, preserved verbatim.
 
-**Fails if:** any open axis lacks a deferral justification, or the justification is a placeholder ("TBD," "later," "in /solution") without a concrete reason for why deferral produces a better outcome than resolution-now.
-
-(Gate numbering preserves the historical G1/G3/G4 sequence; the historical middle gate — which checked tested shapes for recorded alternatives — moved to `/solution`'s gates because tested shapes are a solution-artifact concern.)
-
-## Gate 4: Empty future-pull justification gate
-
-For each line under "## External constraints" that uses the `[future-pull, V1-justified: <reason>]` label, verify:
-
-- The `<reason>` slot is non-empty and contains a concrete V1 impact statement (not a placeholder, not "TBD," not just "needed for V1").
-
-**Fails if:** any future-pull label has empty or placeholder justification text.
+**Fails if:** the Original statement is paraphrased, summarized, edited, or empty. This is a mechanical check — the agent compares against the first turn in the JSONL transcript.
 
 ## Failure handling
 
 When any gate fails, the agent does NOT write the artifact. Instead:
 
-1. **Surface the failures to the operator** as a single bulleted list, grouped by gate name. Format:
+1. **Surface the failures to the operator** as a bulleted list, grouped by gate name:
 
    ```text
    Artifact gate check failed. Issues:
 
-   External constraints provenance gate (2 failures):
-     - "Plane Cloud is the backend" — missing [V1]/[future-pull] label
-     - "Single primary operator" — missing source annotation
-
-   Open axes justification gate (1 failure):
-     - "Deploy target" — missing deferral justification
+   Problem-language gate (1 failure):
+     - Outcome "users should have a task graph" contains shape-language
+       ("task graph" is a proposed how). Reframe as the underlying want.
 
    Cannot write artifact until these are addressed.
    ```
 
-2. **Surface a fixup loop:** for each failure, return to the relevant phase or extend the per-phase ledger to record the missing information. Common fixups:
-   - Missing label → return to DISCOVER, run Tech-D's V1/future-pull sub-classification on the constraint, record the result.
-   - Missing source annotation → ask the operator (or check the transcript) for the source. If no external source exists, the item is not a constraint — move it to `## Parked shapes` with an outcome-question.
-   - Missing open-axis justification → ask the operator: *"Why are we deferring [axis] to /solution rather than answering it now? One sentence."*
-   - Empty future-pull justification → ask the operator: *"This constraint is labeled future-pull. What specifically about V1 requires it?"*
+2. **Surface a fixup loop:** for each failure, run one more Socratic peel on the offending phrase. Common fixups:
+   - Shape-language in Framing → ask: *"You wrote [phrase] in the problem statement. What is the underlying want that [phrase] is a proposed answer to?"* Replace with the underlying want.
+   - Shape-language in an Outcome → same peel; re-state the outcome at the *want* level.
+   - Verbatim Original statement missing or paraphrased → restore from the JSONL transcript turn 1.
 
-3. **Re-run all three gates after each fixup.** A single missed item won't be the only one; re-running catches cascade failures.
+3. **Re-run both gates after each fixup.**
 
-4. **Only after all gates pass:** proceed to write the artifact to `docs/socrates/discover/<slug>.md`.
+4. **Only after both gates pass:** proceed to write the artifact to `docs/socrates/discover/<slug>.md`.
 
 ## Anti-patterns
 
-- ❌ **Writing the artifact and then noting the failures.** Gates run BEFORE the write. The artifact must be gate-clean.
-- ❌ **Treating a gate failure as advisory.** Gates block the write. If the operator wants to override, the override is recorded in the artifact (e.g., a "Gate overrides" section noting which gate was bypassed and why), and the gate is re-run after recording the override.
-- ❌ **Lumping all failures into one generic complaint.** Group by gate name; cite the specific line that failed. The operator needs to know what to fix.
-- ❌ **Skipping gates when the draft "looks fine."** The whole point of gates is to catch what looks fine but isn't. Run them every time.
-- ❌ **Gating tested-shape alternatives here.** That gate (historical G2) moved to `/solution`'s `solution-gates.md`. The discovery artifact has no "tested shapes" section to gate — shapes are either parked (Tech-D peel-back) or locked in as external constraints (Tech-D verifiability), never "tested" at the /discover level.
+- ❌ **Writing the artifact and then noting the failures.** Gates run BEFORE the write.
+- ❌ **Treating a gate failure as advisory.** If the operator wants to override (e.g., the shape-word is genuinely the only way to phrase the world-fact), record the override explicitly in the artifact ("Note: [phrase] is a system-name, not a proposed how") and re-run gates against the override-acknowledged draft.
+- ❌ **Skipping gates when the draft "looks fine."** The whole point is to catch shape-language that snuck in during dialogue.
