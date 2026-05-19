@@ -4,84 +4,78 @@
     {
       "id": 1,
       "prompt": "I want to deploy agents for my team that can communicate",
-      "expected_output": "The skill conducts thorough Socratic discovery on a vague problem statement. Tech-D's verifiability rule fires whenever specifics surface — the skill asks for the external source (regulator, contract, deployed system, prior empirical result, or factual measurement) and either locks the specific in as a constraint with citation or parks it as a shape against an outcome-question. Most of the 8 standard discovery items for this kind of problem are explored. The final discovery artifact reflects what the operator actually wants, not what they typed. (Build-vs-buy / rigorous existence-check lives in /solution's RESEARCH phase, not /discover.)",
+      "expected_output": "The skill opens by mirroring the stated problem in the operator's language, then asks Socratic questions (Maieutic / Reductio / Parallel-case) to test what the operator means by 'agent', 'communicate', and 'team'. Each turn is short — 1 to 4 sentences asking one question, no multi-paragraph elaborations. The agent does not classify phrases as shape-language, does not enumerate alternative framings, does not announce a red-team mode shift, and does not run any premise check. The final discovery artifact has only Framing (with Original statement + Key reframes) + Outcomes + Discovery log — no External constraints, no Parked shapes, no Open axes, no Red-team findings.",
       "files": [],
       "expectations": [
-        "Phase 1 (DISCOVER) executes — the skill asks at least one clarifying question before moving on",
-        "Tech-D fires at least once: when any specific implementation detail (named technology, protocol, pattern, or library) surfaces in the conversation, the skill asks for the external source per Tech-D's verifiability rule (regulator, contract, deployed system, prior empirical result, or factual measurement)",
-        "When the operator cannot cite an external source, the specific is parked as a shape under '## Parked shapes' with an outcome-question — not silently accepted as a constraint",
-        "The semantics of 'an agent' are explored (autonomous LLM loop vs. scheduled job vs. chat bot vs. shared skill)",
-        "Team scale is explored (rough size: e.g., 3 people vs. 30 vs. 300)",
-        "Deploy target is explored (locality / isolation / who can reach it); specific platforms named by the operator (AWS, k8s, Vercel) are parked as shapes unless externally sourced",
-        "The semantics of 'available for the entire team' are explored (discoverable how? invocable how? shared state?)",
-        "The semantics of 'communicate with each other' are explored (sync vs. async, who initiates, what the consumer expects); specific protocols named by the operator (REST, message bus, gRPC) are parked as shapes unless externally sourced",
-        "Sync vs. async and conversation-state persistence is explored",
-        "At least one of: identity, auth, observability, cost accounting is explored",
-        "Internal-tooling vs. product-feature vs. research-artifact framing is explored",
-        "At least 5 of the 8 standard discovery items above are explored",
-        "At Closing (after Phase 2 RED-TEAM exits), a discovery artifact is written to docs/socrates/discover/<slug>.md following the template (outcomes, parked shapes, open axes, externally-sourced constraints with source annotations, discovery log)"
+        "Turn 1 mirrors the operator's stated problem in their own language before asking any Socratic question (e.g., 'Let me restate: you're saying X. Is that right?')",
+        "Each operator-facing turn is 1–4 sentences asking one question (excluding the readback turn, which may be slightly longer because it surfaces the proposed Framing + Outcomes). No turn contains multi-paragraph elaborations or multiple restatements of the same idea.",
+        "Label structure stays light — single-question turns use §Q1 alone and do not nest §1.1.1.1 subsections inside short replies",
+        "The agent never enumerates 2+ alternative framings of the problem in a single turn (no 'Maybe the real problem is X, or Y, or Z?' patterns)",
+        "When 'agent' appears as a specific shape, the agent asks a Socratic question about what it gives the operator (e.g., 'tell me about agents — what does that give you?') rather than classifying it as shape-language",
+        "The agent does not say 'Tech-D', 'Tech-B', 'external source', 'preference', 'parked shape', 'shape-language', 'classification', 'V1-justified', or 'future-pull' in any operator-facing turn",
+        "The agent does not announce a red-team mode shift, does not list severity-classified findings (CRITICAL / DISCUSS / MINOR), and does not run a structured 6-check adversarial pass",
+        "Convergence is signaled by the readback turn ('I think the problem is stable. Here's what I'd write: [refined problem] / [outcomes]. Want to keep digging or wrap?'), not by a phase-exit ledger surfacing structural categories",
+        "The discovery artifact contains exactly these sections: ## Framing, ### Original statement, ### Key reframes, ## Outcomes, ## Discovery log",
+        "The artifact does NOT contain: ## External constraints, ## Parked shapes, ## Open axes, ## Red-team findings",
+        "The Framing and Outcomes sections contain no named technologies / protocols / patterns / architectural choices as proposed *how* (system-name nouns describing the world are acceptable; proposed solutions are not)"
       ]
     },
     {
       "id": 2,
       "prompt": "Build me a todo app",
-      "expected_output": "Full discovery and red-team run even though the problem is small. Discovery artifact records outcomes, parked shapes, and any externally-sourced constraints. Chunk decomposition does not happen in /discover (chunking moved to /solution post-PR 2). Build-vs-buy evaluation (surfacing Todoist / Linear / Apple Reminders / plain text file etc.) lives in /solution's RESEARCH phase, not /discover.",
+      "expected_output": "The skill recognizes that 'todo app' is shape-language in the prompt and Socratically peels back to the underlying want (what tracking, for whom, why current methods fail). It does not classify 'todo app' as a parked shape — it asks the operator what an app would give them. The final artifact has Framing + Outcomes only; no chunk decomposition, no build-vs-buy evaluation.",
       "files": [],
       "expectations": [
-        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
-        "The skill does NOT propose chunk decomposition during /discover (chunking is /solution's responsibility post-PR 2)",
-        "Phase 2 (RED-TEAM) executes and announces the mode shift to red-team explicitly",
-        "Phase 2 produces at least one finding of any severity (CRITICAL, DISCUSS, or MINOR)",
-        "At Closing (after Phase 2 RED-TEAM exits), a discovery artifact is written with outcomes, parked shapes, and any externally-sourced constraints — NOT with chunk sections (chunks are written by /solution)",
-        "If the operator named a specific technology (e.g., 'React', 'Postgres') without citing an external source, the technology is parked as a shape, not recorded as a constraint"
+        "Turn 1 mirrors the stated problem (e.g., 'You're saying you want a todo app. Tell me what tracking you're missing right now')",
+        "The agent asks Socratic questions that peel the shape 'todo app' back to the underlying want, without ever labeling it as a shape",
+        "The agent does NOT propose chunk decomposition (chunking is /solution's responsibility)",
+        "The agent does NOT run a build-vs-buy / existence check (that lives in /solution's RESEARCH phase)",
+        "The agent does NOT announce a red-team mode shift",
+        "The discovery artifact's Framing is problem-language (e.g., 'operator is missing reliable per-task progress visibility across projects') — not 'operator wants a todo app'"
       ]
     },
     {
       "id": 3,
       "prompt": "We need a platform with auth, billing, a marketplace, and analytics",
-      "expected_output": "The /discover skill explores outcomes for each subsystem and parks named technologies as shapes unless externally sourced. Chunk decomposition with dependencies does not happen in /discover — that work moves to /solution's Phase 1 CHUNK, which consumes /discover's outcomes + parked shapes. Build-vs-buy evaluation (Auth0/Clerk for auth, Stripe for billing, etc.) lives in /solution's Phase 3 RESEARCH.",
+      "expected_output": "The skill recognizes that this is a multi-subsystem prompt and Socratically probes which subsystem represents the most pressing want — possibly surfacing that one subsystem is the real problem and the others are downstream assumptions. It does not enumerate the subsystems back as a checklist or classify them as parked shapes; it asks Socratic questions to test which subsystem the operator actually cannot live without. The artifact's Outcomes reflect what survived the dialogue, not the original four-subsystem framing.",
       "files": [],
       "expectations": [
-        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question per subsystem (auth, billing, marketplace, analytics)",
-        "The skill does NOT propose chunk decomposition during /discover — chunking moved to /solution's Phase 1 CHUNK post-PR 2",
-        "Outcome questions are surfaced for each subsystem (e.g., 'who is authenticating?', 'what currencies / regions for billing?', 'who lists on the marketplace?', 'what analytics dimensions matter?')",
-        "Named technologies that surface (e.g., 'OAuth', 'Stripe', 'Snowflake') trigger Tech-D's verifiability rule — the skill asks for the external source and parks them as shapes if none is cited",
-        "At Closing (after Phase 2 RED-TEAM exits), a discovery artifact is written with outcomes per subsystem, parked shapes (including any named technologies), and any externally-sourced constraints",
-        "The artifact's parked shapes section preserves the named technologies as input for /solution's Phase 0 SHAPE-DISCOVER and Phase 3 RESEARCH to evaluate"
+        "Turn 1 mirrors the stated problem (e.g., 'You're saying you need auth, billing, a marketplace, and analytics. Which of those, if it didn't work, would make the whole thing useless to you?')",
+        "The agent does NOT present the four subsystems back to the operator as a numbered list or checklist",
+        "The agent uses parallel-case or Maieutic to test which subsystem is the actual driver",
+        "The agent does NOT enumerate '4 ways to think about this problem' (Complex / Middle / Low / No-build framings)",
+        "The artifact does NOT contain a 'Parked shapes' section listing the four subsystems",
+        "The Outcomes section reflects what survived dialogue, possibly fewer than four subsystems"
       ]
     },
     {
       "id": 4,
       "prompt": "Build a REST API using Express with Postgres and deploy to AWS ECS",
-      "expected_output": "The skill treats this as an over-specified prompt. Tech-D's verifiability rule fires on every named specific (REST, Express, Postgres, AWS ECS), asking for the external source — and each specific is parked as a shape unless the operator cites one of the five external categories. Tech-B fires with alternative framings across the full complexity spectrum including a credible no-build frame. Build-vs-buy evaluation of managed/serverless alternatives (Supabase, Render, Railway, Fly.io, Neon) happens later in /solution's Phase 3 RESEARCH, not /discover.",
+      "expected_output": "Heavily over-specified prompt with four named technologies. The skill Socratically peels each named technology by asking what it gives the operator and what would change without it — without classifying them as shape-language or asking for external sources. The artifact's Framing is problem-language only (e.g., 'operator needs a server that responds to HTTP from clients X and serves data from store Y'); no named technologies in Framing or Outcomes.",
       "files": [],
       "expectations": [
-        "Phase 1 (DISCOVER) executes with at least one Socratic clarifying question",
-        "Tech-D's verifiability rule fires on 'Express' — the skill asks for the external source (regulator, contract, deployed system, prior empirical result, or factual measurement)",
-        "Tech-D's verifiability rule fires on 'Postgres' — the skill asks for the external source",
-        "Tech-D's verifiability rule fires on 'AWS ECS' — the skill asks for the external source",
-        "At least 2 of the 3 named specifics (Express, Postgres, AWS ECS) trigger Tech-D's verifiability rule",
-        "When the operator cannot cite an external source for a specific, the skill parks it under '## Parked shapes' with an outcome-question — it does NOT lock it in as a constraint",
-        "Tech-B (alternative framings) fires at least once during Phase 1",
-        "Tech-B presents exactly 4 framings: a complex frame, a middle-build frame, a low-build frame, and a no-build frame",
-        "Tech-B's option 4 (no-build frame) is a credible no-code path the operator could actually take — not just 'a smaller version of frame 1'",
-        "At Closing (after Phase 2 RED-TEAM exits), a discovery artifact is written whose '## Parked shapes' section contains the named specifics (Express, Postgres, AWS ECS) with outcome-questions, ready for /solution's Phase 0 SHAPE-DISCOVER to resolve"
+        "Turn 1 mirrors the stated problem and asks a Socratic question about the underlying want, without classifying any of the four named technologies",
+        "The agent asks at least one Socratic question of the form 'tell me about [tech] — what does that give you?' or 'how would you know if you were wrong about [tech]?' for at least one of the four named technologies",
+        "The agent does NOT say 'external source', 'Tech-D', 'parked shape', or 'shape-language'",
+        "The agent does NOT enumerate 4 framings (Complex / Middle / Low / No-build) of the problem",
+        "The Framing in the artifact does not contain 'REST', 'Express', 'Postgres', or 'AWS ECS' as proposed solutions",
+        "The Outcomes section does not contain any of the four named technologies as proposed how",
+        "If 'AWS' or another system-name nouns survives in Framing, it is as a description of the world (e.g., 'users authenticated through our existing AWS-hosted Okta tenant') — not as a proposed deployment target"
       ]
     },
     {
       "id": 5,
-      "prompt": "[/solution smoke test] Given a synthetic discovery.md with outcomes 'sub-100ms p95 latency' and 'support 10k concurrent users' and parked shapes '[Redis caching layer]' and '[Postgres read replicas]' — run /solution's SHAPE-DISCOVER phase.",
-      "expected_output": "/solution's SHAPE-DISCOVER phase reads the discovery artifact, walks the parked-shapes list, and runs Tech-D's preference-path classification on each (constraint / candidate / default-to-test). Tech-B fires 1-2x with alternative shape framings across the complexity spectrum. The eventual solution artifact's Discovery → Solution mapping table contains a row for every outcome, and the Parked shapes resolution table contains a row for every parked shape.",
+      "prompt": "[/solution smoke test] Given a synthetic discovery.md with Framing 'operator's team is missing per-task progress visibility across the M365 environment' and Outcomes ['team members can see what tasks are in flight without asking', 'task progress is visible without manual status meetings'] — run /solution's SHAPE-DISCOVER phase.",
+      "expected_output": "/solution's SHAPE-DISCOVER phase reads the discovery artifact (Framing + Outcomes only — no parked-shapes ledger to read). Turn 1 is an operator-elicitation: the agent surfaces the validated problem + outcomes and asks the operator what shapes, preferences, or constraints they want to bring in. Turn 2 fires Tech-B with the 4-option shape spectrum (Complex / Middle / Low / No-build), where No-build is the explicit form of 'do you really need to build this?'. The Discovery → Solution mapping table contains a row for every outcome (per G5). There is no parked-shapes resolution table and no G6 enforcement.",
       "files": [],
       "expectations": [
-        "Phase 0 (SHAPE-DISCOVER) executes — the skill reads the discovery artifact and the parked-shapes ledger before doing anything else",
-        "For each parked shape ('Redis caching layer', 'Postgres read replicas'), Tech-D's classification fires: constraint (lock in with external-source citation) / candidate (test against alternatives) / default-to-test (run Tech-B's no-build framing)",
-        "Tech-B fires at least once during SHAPE-DISCOVER with 4 shape framings spanning the complexity spectrum (Complex / Middle / Low / No-build, where No-build = adopt existing tool)",
-        "The solution artifact's '## Discovery → Solution mapping' table contains a row for the 'sub-100ms p95 latency' outcome mapped to ≥1 chunk whose problem statement qualitatively names the outcome (per G5)",
-        "The solution artifact's '## Discovery → Solution mapping' table contains a row for the 'support 10k concurrent users' outcome mapped to ≥1 chunk whose problem statement qualitatively names the outcome (per G5)",
-        "The solution artifact's '## Parked shapes resolution' table contains a row for 'Redis caching layer' with a Resolution value of exactly one of `Resolved` / `Dropped` / `Carried forward as open shape` (per G6 and the solution-artifact template)",
-        "The solution artifact's '## Parked shapes resolution' table contains a row for 'Postgres read replicas' with a Resolution value of exactly one of `Resolved` / `Dropped` / `Carried forward as open shape` (per G6 and the solution-artifact template)",
-        "If any parked shape is marked 'Dropped', the row gives a specific reason (not 'TBD', not 'not needed')"
+        "Phase 0 (SHAPE-DISCOVER) turn 1 is the operator-elicitation prompt: the agent surfaces the Framing + Outcomes and asks 'What shapes, preferences, or constraints do you want to bring into solutioning?'",
+        "The agent does NOT attempt to read a '## Parked shapes' section from the discovery artifact (the new artifact has none)",
+        "If the operator surfaces shapes during turn 1, Tech-D fires on each in turn",
+        "Phase 0 turn 2 (after elicitation) fires Tech-B with exactly 4 shape framings: Complex / Middle / Low / No-build, where No-build is the explicit form of 'do you really need to build this?'",
+        "The solution artifact's '## Discovery → Solution mapping' table contains a row for each outcome from the discovery artifact (per G5)",
+        "The solution artifact does NOT contain a '## Parked shapes resolution' table",
+        "The agent does NOT cite or check Gate 6 (parked-shapes resolution gate)"
       ]
     }
   ]
