@@ -6,7 +6,7 @@ Before writing the solution artifact to `docs/socrates/solution/<slug>.md`, the 
 
 The gates are agent-driven self-validation in the prompt — not external tooling. The agent reads its own draft, runs the six checks, and reports its conclusions to the operator before writing.
 
-G1–G4 are shape-analogs of `/discover`'s artifact gates, adapted to apply to the `## Shape decisions` section instead of `## External constraints` and `## Open axes`. G5 and G6 are NEW: they enforce the cross-artifact contract that no discovered outcome and no parked shape is silently lost between `/discover` and `/solution`.
+G1–G4 are shape-analogs of `/discover`'s artifact gates, adapted to apply to the `## Shape decisions` section. G5 is NEW: it enforces the cross-artifact contract that no discovered outcome is silently lost between `/discover` and `/solution`. (G6, the parked-shape resolution gate, was removed when `/discover` stopped producing a parked-shapes ledger.)
 
 ## Gate 1: Shape-decision provenance gate
 
@@ -103,7 +103,7 @@ Any line returned fails the gate.
 - Empty or placeholder text → ask the operator: *"This constraint is labeled future-pull. What specifically about V1 requires it?"* Record the answer.
 - Vague justification ("for scale") → ask for the V1 concrete (which tenant, which contract, which deployed system, which measurement).
 
-Likely vacuous when V1 trim was rigorous upstream in `/discover`. Run it anyway; the cost is two `grep`s, the benefit is catching the case where a future-pull label crept into a `[Constraint]` line during SHAPE-DISCOVER's reclassification of a parked shape.
+Likely vacuous when V1 trim was rigorous upstream in `/discover`. Run it anyway; the cost is two `grep`s, the benefit is catching the case where a future-pull label crept into a `[Constraint]` line during SHAPE-DISCOVER's reclassification.
 
 ## Gate 5: Outcome coverage gate (NEW)
 
@@ -141,49 +141,6 @@ awk '/^## Discovery → Solution mapping/,/^## /{
 - Mapping row with no chunk → assign the outcome to ≥1 chunk; if no chunk fits, the chunks are incomplete (return to CHUNK).
 - Qualitative failure (mapping bookkeeping but chunk doesn't name outcome) → edit the chunk's problem statement to name the outcome verbatim, or split the chunk if it's serving an outcome implicitly that deserves explicit scope.
 
-## Gate 6: Parked-shapes resolution gate (NEW)
-
-For every entry in the upstream discovery artifact's `## Parked shapes` ledger at `docs/socrates/discover/<slug>.md` (and, if the discovery WIP `docs/socrates/discover/.wip/<slug>.wip.md` still exists, also any unresolved entries from its `## Parked shapes` ledger), verify:
-
-- The parked shape appears as a row in the solution artifact's `## Parked shapes resolution` table.
-- The row's `Resolution` column is exactly one of: `Resolved: <how>`, `Dropped`, or `Carried forward as open shape`.
-- The row's `Where` column points to a specific line of the solution artifact (or, for `Dropped`, names a specific reason).
-
-This is the cross-artifact contract that no parked shape from `/discover` silently disappears in `/solution`. Every shape `/discover` parked has an explicit resolution path here — none drift out of consideration without an operator-visible record.
-
-**Mechanical check.** Enumerate discovery.md (and WIP) parked-shape entries, then verify each appears in the resolution table:
-
-```
-# 1. Extract parked-shape verbatim text (each bullet under
-#    ## Parked shapes in discovery.md and, if present, in WIP).
-awk '/^## Parked shapes/,/^## /{if (/^- /) print}' \
-  docs/socrates/discover/<slug>.md > /tmp/parked-shapes.txt
-if [ -f docs/socrates/discover/.wip/<slug>.wip.md ]; then
-  awk '/^## Parked shapes/,/^## /{if (/^- /) print}' \
-    docs/socrates/discover/.wip/<slug>.wip.md >> /tmp/parked-shapes.txt
-fi
-
-# 2. Extract resolution-table parked-shape column.
-awk '/^## Parked shapes resolution/,/^## /{
-  if (/^\|/ && !/^\|---/ && !/^\| Parked shape/) print
-}' docs/socrates/solution/<slug>.md > /tmp/resolution-rows.txt
-
-# 3. For each parked shape, verify presence in resolution-rows.txt
-#    (substring or quoted-phrase match — entries are usually
-#    quoted shape-phrases like `"real-time updates"`).
-# 4. For each resolution row, verify the Resolution column matches
-#    one of the three allowed values and the Where column is non-empty.
-```
-
-**Qualitative check.** Per LIMITATIONS §9: a resolution row that says `Dropped` but the reason is `not needed` qualitatively fails — "not needed" is a placeholder. Each `Dropped` row must name a specific reason (which V1 outcome it doesn't serve, which constraint conflict, which research finding ruled it out). Each `Resolved` row's `Where` column must point to a real line in the artifact (not a phantom reference). Each `Carried forward as open shape` row must point to a specific `[Open shape]` line under `## Shape decisions`.
-
-**Fails if:** any discovery parked shape lacks a row, any row's `Resolution` is not one of the three allowed values, any row's `Where` is empty / a placeholder, or any `Dropped` row lacks a specific reason.
-
-**Failure handling.** Common fixups:
-- Missing row → the shape was forgotten during SHAPE-DISCOVER. Return to Phase 0, classify the shape with Tech-D, and add the resulting row to the resolution table.
-- Invalid `Resolution` value → coerce to one of the three allowed values; if the shape's actual state doesn't fit any of the three, the classification is wrong — return to SHAPE-DISCOVER.
-- Placeholder `Where` or `Dropped` reason → fill in the specific line reference or specific dropping reason. "Not needed" is never a sufficient reason; specify which outcome doesn't require it, which research candidate covers the same ground, or which constraint conflicts.
-
 ## Failure handling (cross-gate)
 
 When any gate fails, the agent does NOT write the artifact. Instead:
@@ -203,20 +160,16 @@ When any gate fails, the agent does NOT write the artifact. Instead:
    Outcome coverage gate (G5) — 1 failure:
      - Discovery outcome "users can export their workspace as JSON" — no row in mapping table
 
-   Parked-shapes resolution gate (G6) — 1 failure:
-     - Discovery parked shape "shadcn/ui" — no row in resolution table
-
    Cannot write solution artifact until these are addressed.
    ```
 
 2. **Surface a fixup loop:** for each failure, return to the relevant phase or extend the per-phase ledger to record the missing information. Common loops:
    - G1/G2/G3/G4 failures usually return to **SHAPE-DISCOVER** (Phase 0). The fix is to re-classify the shape, obtain a citation, enumerate alternatives, or articulate a deferral reason — all SHAPE-DISCOVER work.
    - G5 failures may return to **SHAPE-DISCOVER** (a shape was missed), **CHUNK** (a chunk was missed or scoped too narrowly), or trigger **sub-skill /discover** invocation (the outcome itself should be retracted upstream).
-   - G6 failures usually return to **SHAPE-DISCOVER** (a parked shape was forgotten). If the parked shape genuinely has no role, the resolution is `Dropped` with a specific reason — but it must appear in the table.
 
-3. **Re-run all six gates after each fixup.** A single missed item is rarely the only one; re-running catches cascade failures (e.g., a fix to G1 that re-classifies a `[Constraint]` to `[Tested-shape]` will then need to pass G2's alternative-required check).
+3. **Re-run all five gates after each fixup.** A single missed item is rarely the only one; re-running catches cascade failures (e.g., a fix to G1 that re-classifies a `[Constraint]` to `[Tested-shape]` will then need to pass G2's alternative-required check).
 
-4. **Only after all six gates pass:** proceed to write the artifact to `docs/socrates/solution/<slug>.md`.
+4. **Only after all five gates pass:** proceed to write the artifact to `docs/socrates/solution/<slug>.md`.
 
 ## Anti-patterns
 
@@ -224,6 +177,6 @@ When any gate fails, the agent does NOT write the artifact. Instead:
 - ❌ **Treating a gate failure as advisory.** Gates block the write. If the operator wants to override, the override is recorded in the artifact (e.g., a "Gate overrides" section noting which gate was bypassed and why), and the gate is re-run after recording the override.
 - ❌ **Lumping all failures into one generic complaint.** Group by gate name; cite the specific line that failed. The operator needs to know what to fix.
 - ❌ **Passing the mechanical check and skipping the qualitative check.** The mechanical check catches missing tokens; the qualitative check catches satisficing (token present, content hollow). Both fire per gate. Per LIMITATIONS §9: the satisficing failure mode is exactly what the qualitative check exists to catch.
-- ❌ **Stopping at G1 and skipping the rest.** Run all six gates every iteration. A fix to G1 can break G2; a fix to G6 can reveal a missing G5 row.
-- ❌ **Treating G5 and G6 as soft / informational.** They are hard gates with mechanical and qualitative checks. The whole point of the /discover → /solution split is that the contract between the two artifacts is enforced — G5 and G6 are the enforcement.
-- ❌ **Editing discovery.md to make G5 / G6 pass.** Discovery is upstream and frozen by the time /solution runs. If discovery genuinely needs updating, invoke sub-skill /discover (per Phase 0 / Phase 2) — do not silently edit the upstream artifact to make a downstream gate pass.
+- ❌ **Stopping at G1 and skipping the rest.** Run all five gates every iteration. A fix to G1 can break G2; a fix to G5 can reveal a missing row.
+- ❌ **Treating G5 as soft / informational.** G5 is a hard gate with mechanical and qualitative checks. The whole point of the /discover → /solution split is that the cross-artifact contract is enforced — G5 is the enforcement.
+- ❌ **Editing discovery.md to make G5 pass.** Discovery is upstream and frozen by the time /solution runs. If discovery genuinely needs updating, invoke sub-skill /discover (per Phase 0 / Phase 2) — do not silently edit the upstream artifact to make a downstream gate pass.
