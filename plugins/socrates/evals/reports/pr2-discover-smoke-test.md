@@ -1,5 +1,18 @@
 # PR 2 Smoke Test — /discover post-trim
 
+## Socratic rework supersession (2026-05-19)
+
+This smoke-test report reflects `/discover` behavior under the prior multi-phase protocol (PREMISE CHECK / DISCOVER / RED-TEAM with Tech-B 4-framings, Tech-D classification, shape-language audit, parked-shapes ledger, structured red-team). That protocol was replaced on 2026-05-19 with a single Socratic-dialogue phase (see `docs/superpowers/specs/2026-05-19-discover-pure-socratic-design.md` and plan `docs/superpowers/plans/2026-05-19-discover-pure-socratic.md`).
+
+**Status of findings below:**
+
+- Structural findings (artifact has X section, ledger has Y entry, gate Z fires) are **no longer applicable** — the relevant structures don't exist in the new artifact.
+- Dialogue-quality findings (premise check enumerates concrete paths, Tech-B's 4 framings are equal-weight, etc.) are **superseded** — the protocol they exercise no longer runs.
+
+Retained as a historical record of pre-rework behavior. A fresh smoke test under the Socratic rework will be added when the new evals run end-to-end.
+
+---
+
 **Date:** 2026-05-15
 **Test type:** Single-turn simulation against synthetic over-specified prompt
 **Skill loaded:** post-PR2 `/discover` (trimmed to 3 phases)
